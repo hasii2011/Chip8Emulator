@@ -10,8 +10,11 @@ from pygame import Surface
 from albow.themes.ThemeLoader import ThemeLoader
 from albow.themes.Theme import Theme
 
+from org.hasii.chip8.Chip8UIShell import Chip8UIShell
+
 JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
 MADE_UP_PRETTY_MAIN_NAME     = "Chip8Main"
+
 
 def main():
 
@@ -33,8 +36,11 @@ def main():
     pygame.display.set_caption("Python Chip 8 Emulator")
 
     surface: Surface = pygame.display.set_mode((64, 32))
+    shell:   Chip8UIShell = Chip8UIShell(theSurface=surface)
 
-    logger.info(f"Starting {MADE_UP_PRETTY_MAIN_NAME}"  )
+    logger.info(f"Starting {MADE_UP_PRETTY_MAIN_NAME}")
+
+    shell.run()
 
 
 if __name__ == "__main__":
