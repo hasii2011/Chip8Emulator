@@ -1,0 +1,41 @@
+{
+    "version": 1,
+    "disable_existing_loggers": "False",
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        },
+        "chip8Simple": {
+            "format": "%(asctime)s.%(msecs)06d - %(levelname)s: %(module)s: %(message)s",
+            "datefmt" : "%H:%M:%S"
+        }
+    },
+    "handlers": {
+        "consoleHandler": {
+            "class":     "logging.StreamHandler",
+            "formatter": "chip8Simple",
+            "stream":     "ext://sys.stdout"
+        },
+        "fileHandler": {
+            "class":     "logging.FileHandler",
+            "formatter": "chip8Simple",
+            "filename":  "chip8.log"
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "ERROR",
+            "propagate": "False"
+        },
+        "Chip8Main": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
+        },
+        "org.hasii.chip8": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
+        }
+    }
+}
