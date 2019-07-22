@@ -8,7 +8,7 @@ from albow.core.ui.Shell import Shell
 
 from org.hasii.chip8.Chip8UIScreen import Chip8UIScreen
 
-FRAME_TIME = 60  # ms
+FRAME_TIME = 1000  # ms
 
 
 class Chip8UIShell(Shell):
@@ -30,9 +30,9 @@ class Chip8UIShell(Shell):
         self.logger: Logger = getLogger(__name__)
 
         self.chip8UiScreen = Chip8UIScreen(theShell=self, theSurface=theSurface)
-        # self.menu_screen = GridDebugScreen(self)  # Do this last
+
         self.set_timer(FRAME_TIME)
-        # self.show_menu()
+        self.show_screen(self.chip8UiScreen)
 
     def show_main_screen(self):
 

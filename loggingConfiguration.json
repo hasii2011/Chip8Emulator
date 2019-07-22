@@ -27,6 +27,11 @@
             "level": "ERROR",
             "propagate": "False"
         },
+        "org.hasii.chip8": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
+        },
         "Chip8Main": {
             "level":     "INFO",
             "handlers":  ["consoleHandler"],
@@ -34,7 +39,6 @@
         },
         "org.hasii.chip8.Chip8": {
             "level":     "INFO",
-            "handlers":  ["consoleHandler"],
             "propagate": "False"
         }
     }

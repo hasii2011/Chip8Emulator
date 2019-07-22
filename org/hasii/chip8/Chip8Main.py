@@ -35,7 +35,7 @@ def main():
     pygame.init()
     pygame.display.set_caption("Python Chip 8 Emulator")
 
-    surface: Surface = pygame.display.set_mode((64, 32))
+    surface: Surface = pygame.display.set_mode((128, 64))
     shell:   Chip8UIShell = Chip8UIShell(theSurface=surface)
 
     logger.info(f"Starting {MADE_UP_PRETTY_MAIN_NAME}")

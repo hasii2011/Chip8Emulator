@@ -1,8 +1,12 @@
 
+from typing import List
+
 from logging import Logger
 from logging import getLogger
 
 from pkg_resources import resource_filename
+
+from org.hasii.chip8.Chip8Stack import Chip8Stack
 
 
 class Chip8:
@@ -14,9 +18,13 @@ class Chip8:
 
         self.logger: Logger = getLogger(__name__)
 
-        self.memory = [0] * 4096
+        self.memory: List[int]  = [0] * 4096
+        self.pc:     int        = 0x200
+        self.opcode: int        = 0x0000
+        self.stack:  Chip8Stack = Chip8Stack()
 
-        self.logger.info(f"{self.memory}")
+        self.initializeChip()
+        self.logger.debug(f"{self.memory}")
 
     def initializeChip(self):
         self.logger.info(f"Initializing")
@@ -24,29 +32,38 @@ class Chip8:
     def loadROM(self, theFilename: str):
 
         self.logger.info(f"loading ROM: {theFilename}")
-        fullFileName: str = self.findTheROM(theFilename)
+        fullFileName: str = self._findTheROM(theFilename)
 
         fd = open(fullFileName, 'rb')
         rom: bytes = fd.read()
         fd.close()
 
         for byte in range(len(rom)):
-            self.memory[byte] = rom[byte]
+            self.memory[self.pc + byte] = rom[byte]
 
-        self.logger.info(f"{self.memory}")
-        self._debugPrintROM(rom)
+        self.logger.debug(f"{self.memory}")
+        self._debugPrintMemory()
 
-    def findTheROM(self, theFileName: str):
+    def emulateASingleCpuCycle(self):
+        self.fetchOpCode()
+
+    def fetchOpCode(self):
+        self.opcode = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
+        self.logger.info(f"pc: {hex(self.pc)} opcode: {hex(self.opcode)}")
+
+    def _findTheROM(self, theFileName: str):
 
         fileName = resource_filename(Chip8.ROM_PKG, theFileName)
 
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
 
-    def _debugPrintROM(self, rom: bytes):
-        hexROM: str = rom.hex()
-        romLength: int = len(hexROM)
+    def _debugPrintMemory(self):
+
+        romLength: int = len(self.memory)
         for x in range(0, romLength, 32):
             endByteIndex: int = x + 32
-            subStr: str = hexROM[x:endByteIndex]
-            self.logger.info(f"{subStr}")
+            subMemory = self.memory[x:endByteIndex]
+            subMemoryBytes: bytes = bytes(subMemory)
+            subStr: str = subMemoryBytes.hex()
+            self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
