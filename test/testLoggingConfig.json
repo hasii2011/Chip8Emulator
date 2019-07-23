@@ -31,6 +31,11 @@
             ],
             "propagate": "False"
         },
+        "TestChip8Registers": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
+        },
         "org.hasii.chip8.Chip8": {
             "level":     "INFO",
             "handlers":  ["consoleHandler"],

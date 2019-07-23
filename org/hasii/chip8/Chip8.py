@@ -8,6 +8,8 @@ from pkg_resources import resource_filename
 
 from org.hasii.chip8.Chip8Stack import Chip8Stack
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
+from org.hasii.chip8.Chip8Registers import Chip8Registers
+from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
 
 class Chip8:
@@ -26,8 +28,9 @@ class Chip8:
         self.indexRegister: int = 0
         self.instruction:   int = 0x0000
 
-        self.memory:     List[int]  = [0] * 4096
-        self.stack:      Chip8Stack = Chip8Stack()
+        self.memory:     List[int]       = [0] * 4096
+        self.stack:      Chip8Stack     = Chip8Stack()
+        self.registers:  Chip8Registers = Chip8Registers()
 
         self._delayTimer: int = 0
         self._soundTimer: int = 0
