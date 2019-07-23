@@ -59,5 +59,5 @@ class Chip8UIScreen(Screen):
         # milliseconds   = clock.tick(1000)         # milliseconds passed since last frame; needs to agree witH Chip8UIShell value
         # self.logger.info(f"milliseconds: {milliseconds}")
         milliseconds: float = theEvent.dict['time']
-        self.logger.info(f"milliseconds: {milliseconds}")
+        self.logger.debug(f"milliseconds: {milliseconds}")
         return True

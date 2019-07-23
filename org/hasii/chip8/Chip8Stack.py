@@ -7,7 +7,11 @@ from logging import getLogger
 
 class Chip8Stack:
 
-    STACK_LIMIT: int = 16
+    STACK_LIMIT: int = 32
+    """
+    From https://en.wikipedia.org/wiki/CHIP-8#Notes  See the pdf that
+    references CHIP-8.com
+    """
 
     def __init__(self):
 

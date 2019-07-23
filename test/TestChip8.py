@@ -22,6 +22,14 @@ class TestChip8(BaseTest):
         self.chip8:  Chip8  = Chip8()
         self.logger: Logger = TestChip8.clsLogger
 
+    def testJumpToAddress(self):
+
+        instruction = 0x1219
+        self.chip8.emulateSingleCpuCycle(instruction)
+        newPc = self.chip8.pc
+
+        self.assertEqual(newPc, 0x219, "Did not do jump")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
@@ -32,6 +40,16 @@ class TestChip8(BaseTest):
         self.logger.info(f"Sound timer correctly initialized")
         self.assertEqual(self.chip8.stack.size(), 0, "Stack has stuff on it")
         self.logger.info(f"Stack correctly initialized")
+
+    def testChipDelayTimer(self):
+
+        self.chip8.delayTimer += 1
+        self.assertEqual(self.chip8.delayTimer, 0, "Should not become negative")
+
+    def testChipSoundTimer(self):
+
+        self.chip8.soundTimer += 1
+        self.assertEqual(self.chip8.soundTimer, 0, "Should not become negative")
 
     def testLoadROM(self):
 

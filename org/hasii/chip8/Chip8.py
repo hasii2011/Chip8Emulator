@@ -22,8 +22,9 @@ class Chip8:
 
         self.logger: Logger = getLogger(__name__)
 
-        self.pc:         int = 0x200
-        self.opcode:     int = 0x0000
+        self.pc:            int = Chip8.PROGRAM_START_ADDRESS
+        self.indexRegister: int = 0
+        self.instruction:   int = 0x0000
 
         self.memory:     List[int]  = [0] * 4096
         self.stack:      Chip8Stack = Chip8Stack()
@@ -31,36 +32,62 @@ class Chip8:
         self._delayTimer: int = 0
         self._soundTimer: int = 0
 
+        self.opCodeMethods = {
+
+            Chip8Mnemonics.JP.value: self.jumpToAddress
+        }
         self.logger.debug(f"{self.memory}")
 
-    def getDelayTimer(self):
+    def getDelayTimer(self) -> int:
         return self._delayTimer
 
-    def setDelayTimer(self, theNewValue):
+    def setDelayTimer(self, theNewValue: int):
         if self._delayTimer > 0:
             self._delayTimer = theNewValue
 
-    def getSoundTimer(self):
+    def getSoundTimer(self) -> int:
         return self._soundTimer
 
-    def setSoundTimer(self, theNewValue):
+    def setSoundTimer(self, theNewValue: int):
         if self._soundTimer > 0:
             self._soundTimer = theNewValue
 
-    delayTimer = property(getDelayTimer, setDelayTimer)
-    soundTimer = property(getSoundTimer, setSoundTimer)
+    def getIndexRegister(self) -> int:
+        return self._indexRegister
 
-    def emulateASingleCpuCycle(self):
+    def setIndexRegister(self, theNewValue: int):
+        self._indexRegister = theNewValue
 
-        self.fetchOpCode()
-        if (self.opcode & Chip8.OPCODE_MASK) == Chip8Mnemonics.JP:
-            addr = self.opcode & 0x0FFF
-            self.pc = addr
-            self.logger.info(f"new pc: {self.pc}")
+    delayTimer    = property(getDelayTimer, setDelayTimer)
+    soundTimer    = property(getSoundTimer, setSoundTimer)
+    indexRegister = property(getIndexRegister, setIndexRegister)
 
-    def fetchOpCode(self):
-        self.opcode = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
-        self.logger.info(f"pc: {hex(self.pc)} opcode: {hex(self.opcode)}")
+    def emulateSingleCpuCycle(self, instruction: int = None):
+        """
+
+        Args:
+            instruction: Set to real instruction in
+            order to allow testing
+
+        """
+
+        if instruction is None:
+            self.fetchInstruction()
+        else:
+            self.instruction = instruction
+
+        op = self.instruction & Chip8.OPCODE_MASK
+        instruction = self.opCodeMethods[op]
+        instruction()
+
+    def fetchInstruction(self):
+        self.instruction = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
+        self.logger.info(f"pc: {hex(self.pc)} instruction: {hex(self.instruction)}")
+
+    def jumpToAddress(self):
+        addr = self.instruction & 0x0FFF
+        self.pc = addr
+        self.logger.info(f"new pc: {hex(self.pc)}")
 
     def loadROM(self, theFilename: str):
 
@@ -92,4 +119,5 @@ class Chip8:
             subMemory = self.memory[x:endByteIndex]
             subMemoryBytes: bytes = bytes(subMemory)
             subStr: str = subMemoryBytes.hex()
+
             self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
