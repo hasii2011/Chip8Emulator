@@ -2,15 +2,20 @@
 from logging import Logger
 from logging import getLogger
 
-from pygame.time import Clock
+
 from pygame import Surface
 from pygame.event import Event
 
 from albow.core.ui.Screen import Screen
+
 from albow.core.ui.Shell import Shell
+from albow.core.ui.AlbowEventLoop import AlbowEventLoop
 
 
 class Chip8UIScreen(Screen):
+
+    CPU_CYCLE_EVENT = AlbowEventLoop.MUSIC_END_EVENT + 1
+    SIXTY_HERTZ       = 1000 // 60
 
     def __init__(self, theShell: Shell, theSurface: Surface):
         """
@@ -38,22 +43,21 @@ class Chip8UIScreen(Screen):
         # self.logger = saveLogger
         #
         self.surface:  Surface = theSurface
-        self.playTime: float   = 0.0
 
     def timer_event(self, theEvent: Event):
         """
-        Called from the timer_event() method of the Shell when this screen is the current screen. The default
-        implementation returns true so that a display update is performed.
+        The shell set this up to be called at the CHIP8 60Hz rate;
+        So here we will
+         * emulate a CPU cycle
+         * decrement both the CHIP 8 delay timer and the sound timer
 
         Args:
             theEvent:
 
         """
-        clock          = Clock()
-        milliseconds   = clock.tick(1000)         # milliseconds passed since last frame; needs to agree witH Chip8UIShell value
+        # clock          = Clock()
+        # milliseconds   = clock.tick(1000)         # milliseconds passed since last frame; needs to agree witH Chip8UIShell value
+        # self.logger.info(f"milliseconds: {milliseconds}")
+        milliseconds: float = theEvent.dict['time']
         self.logger.info(f"milliseconds: {milliseconds}")
-        quarterSeconds = milliseconds / 250.0   # quarter-seconds passed since last frame (float)
-        self.playTime  += quarterSeconds
-
-        self.logger.info(f"playtime: {self.playTime}")
         return True
