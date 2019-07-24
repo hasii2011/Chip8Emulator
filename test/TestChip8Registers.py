@@ -7,17 +7,22 @@ from test.BaseTest import BaseTest
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
-KNOWN_VALUE:          int = 0x0023
-VALUE_WITH_KNOWN_MSB: int = 0xF000
-VALUE_WITH_KNOWN_LSB: int = 0x000F
+KNOWN_VALUE:          int = 0x23
+KNOWN_LARGE_VALUE:    int = 0xFF
+VALUE_WITH_KNOWN_MSB: int = 0xF0
+VALUE_WITH_KNOWN_LSB: int = 0x0F
 
-LOGICAL_OP_MASK:    int = 0x00F0
+LOGICAL_OP_MASK:    int = 0xF0
 BITS_TO_SHIFT:      int = 1
-EXPECTED_AND_VALUE: int = 0x0020
-EXPECTED_OR_VALUE:  int = 0x00F3
-EXPECTED_XOR_VALUE: int = 0x00D3
-EXPECTED_SHL_VALUE: int = 0x0046
-EXPECTED_SHR_VALUE: int = 0x0011
+VALUE_TO_ADD:       int = 1
+
+EXPECTED_AND_VALUE: int = 0x20
+EXPECTED_OR_VALUE:  int = 0xF3
+EXPECTED_XOR_VALUE: int = 0xD3
+EXPECTED_SHL_VALUE: int = 0x46
+EXPECTED_SHR_VALUE: int = 0x11
+
+EXPECTED_OVERFLOW_ADD_VALUE: int = 0x01
 
 
 class TestChipRegisters(BaseTest):
@@ -78,9 +83,10 @@ class TestChipRegisters(BaseTest):
 
         self.registers.setValue(v=Chip8RegisterName.V5, newValue=VALUE_WITH_KNOWN_MSB)
         self.logger.info(f"Binary value to shift left: {self.registers.getValue(Chip8RegisterName.V5):b}")
-        self.registers.shiftLeft(v=Chip8RegisterName.V5, numBitsToShift=BITS_TO_SHIFT)
-        self.logger.info(f"Shifted binary value: {self.registers.getValue(Chip8RegisterName.V5):b}")
 
+        self.registers.shiftLeft(v=Chip8RegisterName.V5, numBitsToShift=BITS_TO_SHIFT)
+
+        self.logger.info(f"Shifted binary value: {self.registers.getValue(Chip8RegisterName.V5):b}")
         self.logger.info(f"Flag Register: {self.registers.getValue(Chip8RegisterName.VF):b}")
 
         self.assertEqual(0x0001, self.registers.getValue(Chip8RegisterName.VF), "Flag register not set")
@@ -95,3 +101,29 @@ class TestChipRegisters(BaseTest):
 
         self.assertEqual(0x0001, self.registers.getValue(Chip8RegisterName.VF), "Flag register not set")
 
+    def testBasicRegisterToRegisterAdd(self):
+
+        self.registers.setValue(Chip8RegisterName.V7, KNOWN_VALUE)
+        self.registers.setValue(Chip8RegisterName.V8, VALUE_TO_ADD)
+        #
+        # Clear the flag register
+        self.registers.setValue(Chip8RegisterName.VF, 0)
+
+        self.registers.addRegisterToRegister(vx=Chip8RegisterName.V7, vy=Chip8RegisterName.V8)
+
+        expectedValue: int = KNOWN_VALUE + VALUE_TO_ADD
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V7)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register add did not work")
+        self.assertEqual(Chip8Registers.NO_CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register should not overflow")
+
+    def testOverflowRegisterToRegisterAdd(self):
+
+        self.registers.setValue(Chip8RegisterName.V7, KNOWN_LARGE_VALUE)
+        self.registers.setValue(Chip8RegisterName.V8, VALUE_TO_ADD)
+
+        self.registers.addRegisterToRegister(vx=Chip8RegisterName.V7, vy=Chip8RegisterName.V8)
+        actualValue: int = self.registers.getValue(Chip8RegisterName.V7)
+
+        self.assertEqual(EXPECTED_OVERFLOW_ADD_VALUE, actualValue, "Register to register overflow add did not work")
+        self.assertEqual(Chip8Registers.CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register overflow")

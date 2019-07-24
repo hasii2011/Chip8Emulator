@@ -7,8 +7,11 @@ from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
 class Chip8Registers:
 
-    MSB_MASK: int = 0x8000
-    LSB_MASK: int = 0x0001
+    MSB_MASK:  int = 0x80
+    LSB_MASK:  int = 0x01
+
+    CARRY_BIT:    int = 0x01
+    NO_CARRY_BIT: int = 0x00
 
     def __init__(self):
 
@@ -60,7 +63,7 @@ class Chip8Registers:
             v:
             numBitsToShift:
         """
-        self.registers[Chip8RegisterName.VF] = (self.registers[v] & Chip8Registers.MSB_MASK) >> 15
+        self.registers[Chip8RegisterName.VF] = (self.registers[v] & Chip8Registers.MSB_MASK) >> 7
         self.registers[v] = self.registers[v] << numBitsToShift
 
     def shiftRight(self, v: Chip8RegisterName, numBitsToShift: int):
@@ -72,6 +75,27 @@ class Chip8Registers:
         """
         self.registers[Chip8RegisterName.VF] = (self.registers[v] & Chip8Registers.LSB_MASK)
         self.registers[v] = self.registers[v] >> numBitsToShift
+
+    def addRegisterToRegister(self, vx: Chip8RegisterName, vy: Chip8RegisterName):
+        """
+        8xy4; ADD Vx, Vy;     Set Vx = Vx + Vy
+        VF is set to 1 when there is a carry, and to 0 when there is not
+
+        Args:
+            vx:  Source register
+            vy:  Register with value to add
+
+        """
+        src: int = self.registers[vx]
+        val: int = self.registers[vy]
+        tempReg: int = src + val
+
+        if tempReg > 255:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.CARRY_BIT
+            self.registers[vx] = tempReg - 255
+        else:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_CARRY_BIT
+            self.registers[vx] = tempReg
 
     def __repr__(self):
 
