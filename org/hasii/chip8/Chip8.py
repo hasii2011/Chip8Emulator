@@ -1,5 +1,7 @@
 
 from typing import List
+from typing import Dict
+from typing import Callable
 
 from logging import Logger
 from logging import getLogger
@@ -10,6 +12,7 @@ from org.hasii.chip8.Chip8Stack import Chip8Stack
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
+from org.hasii.chip8.UnknownInstructionError import UnknownInstructionError
 
 
 class Chip8:
@@ -17,6 +20,7 @@ class Chip8:
     ROM_PKG               = "org.hasii.chip8.roms"
     PROGRAM_START_ADDRESS = 0x200
     OPCODE_MASK           = 0xF000
+    INSTRUCTION_SIZE      = 2       # in bytes
 
     CPU_CYCLE: int = 1000 // 60
 
@@ -28,16 +32,18 @@ class Chip8:
         self.indexRegister: int = 0
         self.instruction:   int = 0x0000
 
-        self.memory:     List[int]       = [0] * 4096
+        self.memory:     List[int]      = [0] * 4096
         self.stack:      Chip8Stack     = Chip8Stack()
         self.registers:  Chip8Registers = Chip8Registers()
 
         self._delayTimer: int = 0
         self._soundTimer: int = 0
 
-        self.opCodeMethods = {
+        self.opCodeMethods: Dict[int, Callable] = {
 
-            Chip8Mnemonics.JP.value: self.jumpToAddress
+            Chip8Mnemonics.JP.value:   self.jumpToAddress,
+            Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
+            Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral
         }
         self.logger.debug(f"{self.memory}")
 
@@ -79,8 +85,16 @@ class Chip8:
         else:
             self.instruction = instruction
 
-        op = self.instruction & Chip8.OPCODE_MASK
-        instruction = self.opCodeMethods[op]
+        instStr: str = hex(self.instruction)
+        self.logger.debug(f"currentInstruction {instStr}")
+
+        op: int = self.instruction & Chip8.OPCODE_MASK
+
+        try:
+            instruction = self.opCodeMethods[op]
+        except KeyError:
+            raise UnknownInstructionError(badInstruction=op)
+
         instruction()
 
     def fetchInstruction(self):
@@ -91,6 +105,30 @@ class Chip8:
         addr = self.instruction & 0x0FFF
         self.pc = addr
         self.logger.info(f"new pc: {hex(self.pc)}")
+
+    def skipIfRegisterEqualToLiteral(self):
+        """
+        3xkk; SEL Vx, kk; Skip next instruction if Vx = kk;  Skip based on literal
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+
+        lit:    int = self._decodeLiteral()
+        regVal: int = self.registers.getValue(v=register)
+
+        if regVal == lit:
+            self.pc += Chip8.INSTRUCTION_SIZE
+
+    def skipIfRegisterNotEqualToLiteral(self):
+        """
+        4xkk; SNEL Vx, kk;    Skip next instruction if Vx != kk   Skip based on literal
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+
+        lit:    int = self._decodeLiteral()
+        regVal: int = self.registers.getValue(v=register)
+
+        if regVal != lit:
+            self.pc += Chip8.INSTRUCTION_SIZE
 
     def loadROM(self, theFilename: str):
 
@@ -113,6 +151,16 @@ class Chip8:
 
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
+
+    def _decodeRegister(self) -> Chip8RegisterName:
+
+        vx = (self.instruction & 0x0F00) >> 8
+        register: Chip8RegisterName = Chip8RegisterName(vx)
+
+        return register
+
+    def _decodeLiteral(self) -> int:
+        return self.instruction & 0x00FF
 
     def _debugPrintMemory(self):
 

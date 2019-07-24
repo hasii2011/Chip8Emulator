@@ -5,6 +5,7 @@ from logging import getLogger
 from test.BaseTest import BaseTest
 
 from org.hasii.chip8.Chip8 import Chip8
+from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
 
 class TestChip8(BaseTest):
@@ -29,6 +30,63 @@ class TestChip8(BaseTest):
         newPc = self.chip8.pc
 
         self.assertEqual(newPc, 0x219, "Did not do jump")
+
+    def testSkipBasedOnRegisterEqualToLiteral(self):
+        """
+        3xkk SE V0, #40;
+
+        """
+        instruction = 0x3C0c
+        lit = 0x0c
+
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Did not correctly skip next instruction")
+
+    def testSkipBasedOnRegisterEqualToLiteralFail(self):
+
+        instruction = 0x3C0c
+        lit = 0x0c
+
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit+1)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+
+        self.assertEqual(expectedPC, self.chip8.pc, "incorrectly skipped next instruction")
+
+    def testSkipBasedOnRegisterNotEqualToLiteral(self):
+
+        instruction = 0x4C0c
+        lit = 0x0f
+
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit+1)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Did not skip next instruction")
+
+    def testSkipBasedOnRegisterNotEqualToLiteralFail(self):
+        """
+        The register and literal are equal;  Should not skip
+        """
+        instruction = 0x4C0c
+        lit = 0x0c
+
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
     def testChipInitialization(self):
 
