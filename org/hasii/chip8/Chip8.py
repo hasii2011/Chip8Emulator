@@ -44,7 +44,8 @@ class Chip8:
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
-            Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister
+            Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
+            Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral
         }
         self.logger.debug(f"{self.memory}")
 
@@ -144,6 +145,15 @@ class Chip8:
         rightRegVal: int = self.registers.getValue(rightRegister)
         if leftRegVal == rightRegVal:
             self.pc += Chip8.INSTRUCTION_SIZE
+
+    def loadRegisterWithLiteral(self):
+        """
+        6xkk; LDL Vx, kk;     Set Vx = kk     Load literal
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+        lit:      int               = self._decodeLiteral()
+
+        self.registers.setValue(v=register, newValue=lit)
 
     def loadROM(self, theFilename: str):
 

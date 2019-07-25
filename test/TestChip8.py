@@ -114,6 +114,18 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
+    def testLoadRegisterWithLiteral(self):
+        """
+        6xkk; LDL Vx, kk
+        """
+        instruction: int = 0x6ABB
+        self.chip8.registers.setValue(v=Chip8RegisterName.V6, newValue=0x04)
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0xBB
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VA)
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VA.value:X} not set")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
