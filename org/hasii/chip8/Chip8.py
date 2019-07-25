@@ -43,7 +43,8 @@ class Chip8:
 
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
-            Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral
+            Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
+            Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister
         }
         self.logger.debug(f"{self.memory}")
 
@@ -130,6 +131,20 @@ class Chip8:
         if regVal != lit:
             self.pc += Chip8.INSTRUCTION_SIZE
 
+    def skipIfRegisterEqualToRegister(self):
+        """
+        5xy0; SER Vx, Vy;     Skip next instruction if Vx = Vy    Skip based on register compares
+
+        """
+        leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
+        rightRegister: Chip8RegisterName = self._decodeRightRegister()
+        self.logger.info(f"leftRegister: V{leftRegister.value:X}  rightRegister: V{rightRegister.value:X}")
+
+        leftRegVal:  int = self.registers.getValue(leftRegister)
+        rightRegVal: int = self.registers.getValue(rightRegister)
+        if leftRegVal == rightRegVal:
+            self.pc += Chip8.INSTRUCTION_SIZE
+
     def loadROM(self, theFilename: str):
 
         self.logger.info(f"loading ROM: {theFilename}")
@@ -151,6 +166,15 @@ class Chip8:
 
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
+
+    def _decodeLeftRegister(self) -> Chip8RegisterName:
+        return self._decodeRegister()
+
+    def _decodeRightRegister(self) -> Chip8RegisterName:
+        vx = (self.instruction & 0x00F0) >> 4
+        register: Chip8RegisterName = Chip8RegisterName(vx)
+
+        return register
 
     def _decodeRegister(self) -> Chip8RegisterName:
 

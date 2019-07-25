@@ -88,6 +88,32 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
+    def testSkipBasedOnRegisterToRegisterEqual(self):
+
+        instruction = 0x55C0
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.V5, newValue=0x04)
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0x04)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Should skip next instruction")
+
+    def testSkipBasedOnRegisterToRegisterEqualFail(self):
+        """
+            V5 != VC
+        """
+        instruction = 0x55C0
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.V5, newValue=0x04)
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0x0F)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
