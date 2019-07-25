@@ -126,6 +126,40 @@ class TestChip8(BaseTest):
         actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VA)
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VA.value:X} not set")
 
+    def testAddToRegisterNoOverflow(self):
+        """
+        7xkk; ADD Vx, kk;     Adds the value kk to the value of register Vx, then stores the result in Vx
+
+        """
+        instruction: int = 0x78BB
+        self.chip8.registers.setValue(v=Chip8RegisterName.VF, newValue=0x01)    # Clear carry flag
+        self.chip8.registers.setValue(v=Chip8RegisterName.V8, newValue=0x01)    # Init value in register
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue:   int = 0xBC
+        actualValue:     int = self.chip8.registers.getValue(Chip8RegisterName.V8)
+        carryFlagActual: int = self.chip8.registers.getValue(Chip8RegisterName.VF)
+
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.V8.value:X} not added to")
+        self.assertEqual(0x01, carryFlagActual, f"Carry flag incorrectly cleared")
+
+    def testAddToRegisterWithOverflow(self):
+
+        instruction: int = 0x7801
+
+        self.chip8.registers.setValue(v=Chip8RegisterName.VF, newValue=0x00)    # Clear carry flag
+        self.chip8.registers.setValue(v=Chip8RegisterName.V8, newValue=0xFF)    # Init value in register
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue:   int = 0x01
+        actualValue:     int = self.chip8.registers.getValue(Chip8RegisterName.V8)
+        carryFlagActual: int = self.chip8.registers.getValue(Chip8RegisterName.VF)
+
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.V8.value:X} not added to")
+        self.assertEqual(0x00, carryFlagActual, f"Carry flag incorrectly cleared")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")

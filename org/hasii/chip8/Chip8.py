@@ -45,7 +45,8 @@ class Chip8:
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
-            Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral
+            Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
+            Chip8Mnemonics.ADD.value:  self.addLiteralToRegister
         }
         self.logger.debug(f"{self.memory}")
 
@@ -154,6 +155,15 @@ class Chip8:
         lit:      int               = self._decodeLiteral()
 
         self.registers.setValue(v=register, newValue=lit)
+
+    def addLiteralToRegister(self):
+        """
+        7xkk; ADD Vx, kk;     Adds the value kk to the value of register Vx, then stores the result in Vx
+        (Carry flag is not changed)
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+        lit:      int               = self._decodeLiteral()
+        self.registers.addToRegister(vx=register, val=lit)
 
     def loadROM(self, theFilename: str):
 

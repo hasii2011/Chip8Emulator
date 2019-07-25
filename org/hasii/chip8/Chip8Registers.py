@@ -97,6 +97,21 @@ class Chip8Registers:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_CARRY_BIT
             self.registers[vx] = tempReg
 
+    def addToRegister(self, vx: Chip8RegisterName, val: int):
+        """
+        Carry flag is not set
+
+        Args:
+            vx: Source register
+
+            val: value to add to the register
+        """
+        tempReg: int = self.registers[vx] + val
+        if tempReg > 255:
+            self.registers[vx] = tempReg - 255
+        else:
+            self.registers[vx] = tempReg
+
     def __repr__(self):
 
         strMe: str = ""
