@@ -309,6 +309,21 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
+    def testLoadIndexRegister(self):
+        """
+        # Annn; LDI I, addr;    Set I = nnn; The value of register I is set to nnn
+        """
+        instruction: int = 0xA046
+        self.chip8.indexRegister = 0x0FFF
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedIndexRegisterValue: int = 0x0046
+        actualValue:                int = self.chip8.indexRegister
+
+        self.assertEqual(expectedIndexRegisterValue, actualValue, "Index register not correctly set")
+
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")

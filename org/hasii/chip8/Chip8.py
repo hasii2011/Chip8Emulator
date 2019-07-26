@@ -20,6 +20,8 @@ class Chip8:
     ROM_PKG               = "org.hasii.chip8.roms"
     PROGRAM_START_ADDRESS = 0x200
     OPCODE_MASK           = 0xF000
+    IDX_REG_MASK          = 0x0FFF
+    MAX_IDX_REG_VAL       = 0x0FFF
     INSTRUCTION_SIZE      = 2       # in bytes
 
     CPU_CYCLE: int = 1000 // 60
@@ -56,7 +58,8 @@ class Chip8:
             Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister
+            Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
+            Chip8Mnemonics.LDI.value:  self.loadIndexRegister
         }
 
         self.logger.debug(f"{self.memory}")
@@ -220,6 +223,14 @@ class Chip8:
             self.registers.subRegisterVyFromRegisterVx(vx=leftRegister, vy=rightRegister)
         elif subOpCode == 0xE:   # 8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1
             self.registers.shiftLeft(v=leftRegister, numBitsToShift=1)
+
+    def loadIndexRegister(self):
+        """
+        # Annn; LDI I, addr;    Set I = nnn; The value of register I is set to nnn
+        """
+        valToLoad: int = self.instruction & Chip8.IDX_REG_MASK
+
+        self.indexRegister = valToLoad
 
     def loadROM(self, theFilename: str):
 
