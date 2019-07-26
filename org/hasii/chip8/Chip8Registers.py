@@ -119,6 +119,27 @@ class Chip8Registers:
 
         self.registers[vx] = tempReg
 
+    def subRegisterVyFromRegisterVx(self, vx: Chip8RegisterName, vy: Chip8RegisterName):
+        """
+        8xy7; SUBN Vx, Vy;    Set Vx = Vy - Vx        VF is set to 0 when there's a borrow, and 1 when there isn't
+
+        Args:
+            vx:  Register with value to subtract
+            vy:  Source register
+        """
+        vxVal: int = self.registers[vx]
+        vyVal: int = self.registers[vy]
+
+        if vyVal < vxVal:       # flipped, I think this is correct
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
+        else:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
+
+        tempReg: int = vyVal - vxVal    # flipped :-)
+        tempReg = tempReg & 0xFF
+
+        self.registers[vx] = tempReg
+
     def addToRegister(self, vx: Chip8RegisterName, val: int):
         """
         Carry flag is not set

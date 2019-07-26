@@ -160,3 +160,35 @@ class TestChipRegisters(BaseTest):
         self.assertEqual(expectedValue, actualValue, "Register to register borrow subtract did not work")
 
         self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
+
+    def testSubRegisterVyFromRegisterVx(self):
+
+        self.registers.setValue(Chip8RegisterName.V7, VALUE_TO_SUBTRACT)
+        self.registers.setValue(Chip8RegisterName.V8, KNOWN_VALUE)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterVyFromRegisterVx(vx=Chip8RegisterName.V7, vy=Chip8RegisterName.V8)
+
+        expectedValue: int = KNOWN_VALUE - VALUE_TO_SUBTRACT
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V7)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register subtract did not work")
+        self.assertEqual(Chip8Registers.NO_BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
+
+    def testBorrowSubRegisterVyFromRegisterVx(self):
+
+        self.registers.setValue(Chip8RegisterName.V2, VALUE_TO_SUBTRACT)
+        self.registers.setValue(Chip8RegisterName.V3, KNOWN_SMALL_VALUE)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterVyFromRegisterVx(vx=Chip8RegisterName.V2, vy=Chip8RegisterName.V3)
+
+        expectedValue: int = 0xFD
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V2)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register borrow subtract did not work")
+
+        self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
+

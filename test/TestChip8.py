@@ -249,6 +249,18 @@ class TestChip8(BaseTest):
         """
         pass
 
+    def testSubRegisterVyFromRegisterVx(self):
+        """
+        Already tested by TestChip8Registers.testSubRegisterVyFromRegisterVx
+        """
+        pass
+
+    def testBorrowSubRegisterVyFromRegisterVx(self):
+        """
+        Already tested by TestChip8Registers.testBorrowSubRegisterVyFromRegisterVx
+        """
+        pass
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")

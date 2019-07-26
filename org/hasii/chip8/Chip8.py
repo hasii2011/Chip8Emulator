@@ -200,6 +200,10 @@ class Chip8:
             self.registers.addRegisterToRegister(leftRegister, rightRegister)
         elif subOpCode == 0x5:   # 8xy5; SUB Vx, Vy;     Set Vx = Vx - Vy
             self.registers.subRegisterToRegister(leftRegister, rightRegister)
+        elif subOpCode == 0x6:   # 8xy6; SHR Vx, Vy;     Set Vx = Vx SHR 1
+            self.registers.shiftRight(v=leftRegister, numBitsToShift=rightRegVal)
+        elif subOpCode == 0x7:   # SUBN Vx, Vy;    Set Vx = Vy - Vx
+            self.registers.subRegisterVyFromRegisterVx(vx=leftRegister, vy=rightRegister)
 
     def loadROM(self, theFilename: str):
 
