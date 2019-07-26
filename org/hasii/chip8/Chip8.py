@@ -58,10 +58,6 @@ class Chip8:
             Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions
         }
 
-        self.registerToRegisterSubOpCodeMethods: Dict[int, Callable] = {
-            0x00: self.registerLDR,
-            0x01: self.registerOR
-        }
         self.logger.debug(f"{self.memory}")
 
     def getDelayTimer(self) -> int:
@@ -186,33 +182,18 @@ class Chip8:
 
         subOpCode: int = self._decodeRegisterToRegisterOpCode()
         self.logger.info(f"Reg to Reg subOpCode: {subOpCode:X}")
-        try:
-            subInstruction: Callable = self.registerToRegisterSubOpCodeMethods[subOpCode]
-        except KeyError:
-            self.logger.error(f"Bad register to register subOpCode: {subOpCode:X}")
-            raise UnknownInstructionError(badInstruction=subOpCode)
 
-        subInstruction()
-
-    def registerLDR(self):
-        """
-        8xy0; LDR Vx, Vy;     Set Vx = Vy.
-
-        """
         leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
         rightRegister: Chip8RegisterName = self._decodeRightRegister()
 
         rightRegVal: int = self.registers.getValue(rightRegister)
 
-        self.registers.setValue(v=leftRegister, newValue=rightRegVal)
-
-    def registerOR(self):
-        leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
-        rightRegister: Chip8RegisterName = self._decodeRightRegister()
-
-        rightRegVal: int = self.registers.getValue(rightRegister)
-
-        self.registers.orOp(v=leftRegister, mask=rightRegVal)
+        if subOpCode == 0x0:    # 8xy0; LDR Vx, Vy;     Set Vx = Vy.
+            self.registers.setValue(v=leftRegister, newValue=rightRegVal)
+        elif subOpCode == 0x1:  # 8xy1; OR Vx, Vy;      Set Vx = Vx OR Vy
+            self.registers.orOp(v=leftRegister, mask=rightRegVal)
+        elif subOpCode == 0x2:  # 8xy2; AND Vx, Vy;     Set Vx = Vx AND Vy
+            self.registers.andOp(v=leftRegister, mask=rightRegVal)
 
     def loadROM(self, theFilename: str):
 

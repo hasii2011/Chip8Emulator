@@ -193,6 +193,22 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VC.value:X} not correctly OR'ed")
 
+    def testRegisterToRegisterAnd(self):
+        """
+        8xy2; AND Vx, Vy;     Set Vx = Vx AND Vy
+        """
+        instruction: int = 0x8C42
+
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0xAA)    # 1010 1010
+        self.chip8.registers.setValue(v=Chip8RegisterName.V4, newValue=0x23)    # 0010 0011
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0x22                                               # 0010 0010
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VC)
+
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VC.value:X} not correctly AND'ed")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
