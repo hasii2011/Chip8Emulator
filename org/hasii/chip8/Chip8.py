@@ -12,7 +12,7 @@ from org.hasii.chip8.Chip8Stack import Chip8Stack
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
-from org.hasii.chip8.UnknownInstructionError import UnknownInstructionError
+from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 
 
 class Chip8:
