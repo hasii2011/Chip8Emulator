@@ -160,6 +160,39 @@ class TestChip8(BaseTest):
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.V8.value:X} not added to")
         self.assertEqual(0x00, carryFlagActual, f"Carry flag incorrectly cleared")
 
+    def testLoadFromRegister(self):
+        """
+        8xy0; LDR Vx, Vy;     Set Vx = Vy.
+        """
+        instruction: int = 0x8EA0
+
+        self.chip8.registers.setValue(v=Chip8RegisterName.VE, newValue=0x00)
+        self.chip8.registers.setValue(v=Chip8RegisterName.VA, newValue=0xFF)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0xFF
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VE)
+
+        self.assertEqual(expectedValue, actualValue,
+                         f"Register V{Chip8RegisterName.VE.value:X} not set to value from V{Chip8RegisterName.VA.value:X}")
+
+    def testRegisterToRegisterOR(self):
+        """
+        8xy1; OR Vx, Vy;      Set Vx = Vx OR Vy
+        """
+        instruction: int = 0x8C41
+
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0xAA)    # 10101010
+        self.chip8.registers.setValue(v=Chip8RegisterName.V4, newValue=0x23)    # 00100011
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0xAB                                               # 10101011
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VC)
+
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VC.value:X} not correctly OR'ed")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")

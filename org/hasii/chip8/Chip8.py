@@ -46,7 +46,21 @@ class Chip8:
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
             Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
-            Chip8Mnemonics.ADD.value:  self.addLiteralToRegister
+            Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
+            Chip8Mnemonics.LDR.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.OR.value:   self.registerToRegisterInstructions,
+            Chip8Mnemonics.AND.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.XOR.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.ADDR.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions
+        }
+
+        self.registerToRegisterSubOpCodeMethods: Dict[int, Callable] = {
+            0x00: self.registerLDR,
+            0x01: self.registerOR
         }
         self.logger.debug(f"{self.memory}")
 
@@ -165,6 +179,41 @@ class Chip8:
         lit:      int               = self._decodeLiteral()
         self.registers.addToRegister(vx=register, val=lit)
 
+    def registerToRegisterInstructions(self):
+        """
+        Handles 0x8000 through 0x8007 and 0x800E
+        """
+
+        subOpCode: int = self._decodeRegisterToRegisterOpCode()
+        self.logger.info(f"Reg to Reg subOpCode: {subOpCode:X}")
+        try:
+            subInstruction: Callable = self.registerToRegisterSubOpCodeMethods[subOpCode]
+        except KeyError:
+            self.logger.error(f"Bad register to register subOpCode: {subOpCode:X}")
+            raise UnknownInstructionError(badInstruction=subOpCode)
+
+        subInstruction()
+
+    def registerLDR(self):
+        """
+        8xy0; LDR Vx, Vy;     Set Vx = Vy.
+
+        """
+        leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
+        rightRegister: Chip8RegisterName = self._decodeRightRegister()
+
+        rightRegVal: int = self.registers.getValue(rightRegister)
+
+        self.registers.setValue(v=leftRegister, newValue=rightRegVal)
+
+    def registerOR(self):
+        leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
+        rightRegister: Chip8RegisterName = self._decodeRightRegister()
+
+        rightRegVal: int = self.registers.getValue(rightRegister)
+
+        self.registers.orOp(v=leftRegister, mask=rightRegVal)
+
     def loadROM(self, theFilename: str):
 
         self.logger.info(f"loading ROM: {theFilename}")
@@ -205,6 +254,9 @@ class Chip8:
 
     def _decodeLiteral(self) -> int:
         return self.instruction & 0x00FF
+
+    def _decodeRegisterToRegisterOpCode(self):
+        return self.instruction & 0x000f
 
     def _debugPrintMemory(self):
 
