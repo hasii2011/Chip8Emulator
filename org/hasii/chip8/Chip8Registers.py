@@ -10,8 +10,10 @@ class Chip8Registers:
     MSB_MASK:  int = 0x80
     LSB_MASK:  int = 0x01
 
-    CARRY_BIT:    int = 0x01
-    NO_CARRY_BIT: int = 0x00
+    CARRY_BIT:     int = 0x01
+    NO_CARRY_BIT:  int = 0x00
+    BORROW_BIT:    int = 0x00
+    NO_BORROW_BIT: int = 0x01
 
     def __init__(self):
 
@@ -84,11 +86,10 @@ class Chip8Registers:
         Args:
             vx:  Source register
             vy:  Register with value to add
-
         """
-        src: int = self.registers[vx]
-        val: int = self.registers[vy]
-        tempReg: int = src + val
+        vxVal: int = self.registers[vx]
+        vyVal: int = self.registers[vy]
+        tempReg: int = vxVal + vyVal
 
         if tempReg > 255:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.CARRY_BIT
@@ -96,6 +97,27 @@ class Chip8Registers:
         else:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_CARRY_BIT
             self.registers[vx] = tempReg
+
+    def subRegisterToRegister(self, vx: Chip8RegisterName, vy: Chip8RegisterName):
+        """
+        8xy5; SUB Vx, Vy;     Set Vx = Vx - Vy
+        VF is set to 0 when there's a borrow, and 1 when there isn't
+
+        Args:
+            vx:  Source register
+            vy:  Register with value to subtract
+        """
+        vxVal: int = self.registers[vx]
+        vyVal: int = self.registers[vy]
+        if vxVal < vyVal:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
+        else:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
+
+        tempReg: int = vxVal - vyVal
+        tempReg = tempReg & 0xFF
+
+        self.registers[vx] = tempReg
 
     def addToRegister(self, vx: Chip8RegisterName, val: int):
         """

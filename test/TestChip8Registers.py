@@ -9,12 +9,14 @@ from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
 KNOWN_VALUE:          int = 0x23
 KNOWN_LARGE_VALUE:    int = 0xFF
+KNOWN_SMALL_VALUE:    int = 0x00
 VALUE_WITH_KNOWN_MSB: int = 0xF0
 VALUE_WITH_KNOWN_LSB: int = 0x0F
 
 LOGICAL_OP_MASK:    int = 0xF0
 BITS_TO_SHIFT:      int = 1
 VALUE_TO_ADD:       int = 1
+VALUE_TO_SUBTRACT:  int = 3
 
 EXPECTED_AND_VALUE: int = 0x20
 EXPECTED_OR_VALUE:  int = 0xF3
@@ -127,3 +129,34 @@ class TestChipRegisters(BaseTest):
 
         self.assertEqual(EXPECTED_OVERFLOW_ADD_VALUE, actualValue, "Register to register overflow add did not work")
         self.assertEqual(Chip8Registers.CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register overflow")
+
+    def testBasicRegisterToRegisterSubtract(self):
+
+        self.registers.setValue(Chip8RegisterName.V7, KNOWN_VALUE)
+        self.registers.setValue(Chip8RegisterName.V8, VALUE_TO_SUBTRACT)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterToRegister(vx=Chip8RegisterName.V7, vy=Chip8RegisterName.V8)
+
+        expectedValue: int = KNOWN_VALUE - VALUE_TO_SUBTRACT
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V7)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register subtract did not work")
+        self.assertEqual(Chip8Registers.NO_BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
+
+    def testBorrowRegisterToRegisterSubtract(self):
+
+        self.registers.setValue(Chip8RegisterName.VA, KNOWN_SMALL_VALUE)
+        self.registers.setValue(Chip8RegisterName.VB, VALUE_TO_SUBTRACT)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterToRegister(vx=Chip8RegisterName.VA, vy=Chip8RegisterName.VB)
+
+        expectedValue: int = 0xFD
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.VA)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register borrow subtract did not work")
+
+        self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")

@@ -209,6 +209,46 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VC.value:X} not correctly AND'ed")
 
+    def testRegisterToRegisterXor(self):
+        """
+        8xy3; XOR Vx, Vy;     Set Vx = Vx XOR Vy
+        """
+        instruction: int = 0x8C43
+
+        self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0xAA)    # 1010 1010
+        self.chip8.registers.setValue(v=Chip8RegisterName.V4, newValue=0x23)    # 0010 0011
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0x89                                               # 1000 1000
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VC)
+
+        self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VC.value:X} not correctly XOR'ed")
+
+    def testBasicRegisterToRegisterAdd(self):
+        """
+        Already tested by TestChip8Registers.testBasicRegisterToRegisterAdd
+        """
+        pass
+
+    def testOverflowRegisterToRegisterAdd(self):
+        """
+        Already tested by TestChip8Registers.testOverflowRegisterToRegisterAdd
+        """
+        pass
+
+    def testBasicRegisterToRegisterSubtract(self):
+        """
+        Already tested by TestChip8Registers.testBasicRegisterToRegisterSubtract
+        """
+        pass
+
+    def testBorrowRegisterToRegisterSubtract(self):
+        """
+        Already tested by TestChip8Registers.testBorrowRegisterToRegisterSubtract
+        """
+        pass
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
