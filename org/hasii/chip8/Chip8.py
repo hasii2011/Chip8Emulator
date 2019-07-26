@@ -55,7 +55,8 @@ class Chip8:
             Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
-            Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions
+            Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister
         }
 
         self.logger.debug(f"{self.memory}")
@@ -157,6 +158,19 @@ class Chip8:
         if leftRegVal == rightRegVal:
             self.pc += Chip8.INSTRUCTION_SIZE
 
+    def skipIfRegisterNotEqualToRegister(self):
+        """
+        SNER Vx, Vy;    Skip next instruction if Vx != Vy
+        """
+        leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
+        rightRegister: Chip8RegisterName = self._decodeRightRegister()
+
+        leftRegVal:  int = self.registers.getValue(leftRegister)
+        rightRegVal: int = self.registers.getValue(rightRegister)
+
+        if leftRegVal != rightRegVal:
+            self.pc += Chip8.INSTRUCTION_SIZE
+
     def loadRegisterWithLiteral(self):
         """
         6xkk; LDL Vx, kk;     Set Vx = kk     Load literal
@@ -201,9 +215,11 @@ class Chip8:
         elif subOpCode == 0x5:   # 8xy5; SUB Vx, Vy;     Set Vx = Vx - Vy
             self.registers.subRegisterToRegister(leftRegister, rightRegister)
         elif subOpCode == 0x6:   # 8xy6; SHR Vx, Vy;     Set Vx = Vx SHR 1
-            self.registers.shiftRight(v=leftRegister, numBitsToShift=rightRegVal)
+            self.registers.shiftRight(v=leftRegister, numBitsToShift=1)
         elif subOpCode == 0x7:   # SUBN Vx, Vy;    Set Vx = Vy - Vx
             self.registers.subRegisterVyFromRegisterVx(vx=leftRegister, vy=rightRegister)
+        elif subOpCode == 0xE:   # 8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1
+            self.registers.shiftLeft(v=leftRegister, numBitsToShift=1)
 
     def loadROM(self, theFilename: str):
 

@@ -261,6 +261,54 @@ class TestChip8(BaseTest):
         """
         pass
 
+    def testRegisterShiftRight(self):
+        """
+        Already tested by TestChip8Registers.testShiftRightOp
+        """
+        pass
+
+    def testRegisterShiftLeft(self):
+        """
+        Already test by TestChip8Registers.testShiftLeftOp
+        """
+        pass
+
+    def testSkipIfRegisterNotEqualToRegister(self):
+        """
+        9xy0; SNER Vx, Vy;    Skip next instruction if Vx != Vy
+        """
+        instruction: int = 0x9670
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS + 0xFE
+
+        self.logger.info(f"pc Before: {self.chip8.pc:X}")
+        self.chip8.registers.setValue(v=Chip8RegisterName.V6, newValue=0xCC)
+        self.chip8.registers.setValue(v=Chip8RegisterName.V7, newValue=0x42)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + 0xFE + Chip8.INSTRUCTION_SIZE
+
+        self.logger.info(f"pc After: {self.chip8.pc:X}")
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Should skip next instruction")
+
+    def testSkipIfRegisterNotEqualToRegisterFailSkip(self):
+        instruction: int = 0x9670
+        nonIncrementedAddress: int = Chip8.PROGRAM_START_ADDRESS + 0xFE
+        self.chip8.pc = nonIncrementedAddress
+
+        self.logger.info(f"pc Before: {self.chip8.pc:X}")
+        self.chip8.registers.setValue(v=Chip8RegisterName.V6, newValue=0x42)    # They are
+        self.chip8.registers.setValue(v=Chip8RegisterName.V7, newValue=0x42)    # the same
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedPC: int = nonIncrementedAddress
+
+        self.logger.info(f"pc After: {self.chip8.pc:X}")
+
+        self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
