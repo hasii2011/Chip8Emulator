@@ -12,7 +12,9 @@ from org.hasii.chip8.Chip8Stack import Chip8Stack
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
+
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
+from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 
 
 class Chip8:
@@ -31,15 +33,15 @@ class Chip8:
         self.logger: Logger = getLogger(__name__)
 
         self.pc:            int = Chip8.PROGRAM_START_ADDRESS
-        self.indexRegister: int = 0
         self.instruction:   int = 0x0000
 
         self.memory:     List[int]      = [0] * 4096
         self.stack:      Chip8Stack     = Chip8Stack()
         self.registers:  Chip8Registers = Chip8Registers()
 
-        self._delayTimer: int = 0
-        self._soundTimer: int = 0
+        self._indexRegister: int = 0
+        self._delayTimer:    int = 0
+        self._soundTimer:    int = 0
 
         self.opCodeMethods: Dict[int, Callable] = {
 
@@ -82,6 +84,10 @@ class Chip8:
         return self._indexRegister
 
     def setIndexRegister(self, theNewValue: int):
+
+        if theNewValue < 0 or theNewValue > Chip8.MAX_IDX_REG_VAL:
+            raise InvalidIndexRegisterValue(theNewValue)
+
         self._indexRegister = theNewValue
 
     delayTimer    = property(getDelayTimer, setDelayTimer)

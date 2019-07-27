@@ -7,6 +7,8 @@ from test.BaseTest import BaseTest
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
+from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
+
 
 class TestChip8(BaseTest):
 
@@ -323,6 +325,10 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedIndexRegisterValue, actualValue, "Index register not correctly set")
 
+    def testBadLoadIndexRegister(self):
+
+        with self.assertRaises(InvalidIndexRegisterValue):
+            self.chip8.setIndexRegister(theNewValue=0xFFFF)
 
     def testChipInitialization(self):
 
