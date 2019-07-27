@@ -394,6 +394,44 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedValue, actualValue, f"Load from delay timer failed; Register: V{Chip8RegisterName.VA.value:X}")
 
+    def testSetDelayTimerToVx(self):
+        """
+        Fx15; SDT DT, Vx;     Set delay timer = Vx
+        """
+        self._runDelayTimerEqualsVxTest(0xF115, Chip8RegisterName.V1, 0x23)
+        self._runDelayTimerEqualsVxTest(0xF515, Chip8RegisterName.V5, 0x33)
+        self._runDelayTimerEqualsVxTest(0xFA15, Chip8RegisterName.VA, 0x66)
+
+    def testSetSoundTimerToVx(self):
+        """
+        # Fx18; SST ST, Vx;         Set sound timer = Vx
+        """
+        self._runSoundTimerEqualsVxTest(0xF918, Chip8RegisterName.V9, 0x32)
+        self._runSoundTimerEqualsVxTest(0xF418, Chip8RegisterName.V4, 0x01)
+        self._runSoundTimerEqualsVxTest(0xF718, Chip8RegisterName.V7, 0x10)
+
+    def _runSoundTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
+
+        self.chip8.registers.setValue(vx, expectedValue)
+        self.chip8.soundTimer = 0x22
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualValue: int = self.chip8.soundTimer
+
+        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
+
+    def _runDelayTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
+
+        self.chip8.registers.setValue(vx, expectedValue)
+        self.chip8.delayTimer = 0x44
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualValue: int = self.chip8.delayTimer
+
+        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
@@ -407,12 +445,12 @@ class TestChip8(BaseTest):
 
     def testChipDelayTimer(self):
 
-        self.chip8.delayTimer += 1
+        self.chip8.delayTimer -= 1
         self.assertEqual(self.chip8.delayTimer, 0, "Should not become negative")
 
     def testChipSoundTimer(self):
 
-        self.chip8.soundTimer += 1
+        self.chip8.soundTimer -= 1
         self.assertEqual(self.chip8.soundTimer, 0, "Should not become negative")
 
     def testLoadROM(self):

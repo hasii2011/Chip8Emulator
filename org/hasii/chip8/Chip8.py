@@ -100,7 +100,7 @@ class Chip8:
         return self._soundTimer
 
     def setSoundTimer(self, theNewValue: int):
-        if self._soundTimer > 0:
+        if theNewValue > 0:
             self._soundTimer = theNewValue
 
     def getIndexRegister(self) -> int:
@@ -329,16 +329,16 @@ class Chip8:
         subOpCode: int = self._decodeSpecialRegistersSubOpCode()
         self.logger.info(f"Special Registers subOpCode: {subOpCode:X}")
 
+        regName: Chip8RegisterName = self._decodeLeftRegister()
+
         if subOpCode == 0x07:
-            vx: int = self._decodeLeftRegister()
-            regName: Chip8RegisterName = Chip8RegisterName(vx)
             self.registers.setValue(v=regName, newValue=self.delayTimer)
         elif subOpCode == 0x0A:
             pass
         elif subOpCode == 0x15:
-            pass
+            self.delayTimer = self.registers.getValue(regName)
         elif subOpCode == 0x18:
-            pass
+            self.soundTimer = self.registers.getValue(regName)
         elif subOpCode == 0x1E:
             pass
         elif subOpCode == 0x29:
