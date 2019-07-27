@@ -330,6 +330,25 @@ class TestChip8(BaseTest):
         with self.assertRaises(InvalidIndexRegisterValue):
             self.chip8.setIndexRegister(theNewValue=0xFFFF)
 
+    def testJumpToLocationPlusVZero(self):
+        """
+        Bnnn; JP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
+        """
+        instruction: int = 0xB123
+
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.V0, newValue=0x123)
+
+        self.logger.info(f"pc Before: {self.chip8.pc:X}")
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        self.logger.info(f"pc After: {self.chip8.pc:X}")
+        expectedValue: int = Chip8.PROGRAM_START_ADDRESS + 0x123 + 0x123
+        actualValue:   int = self.chip8.pc
+
+        self.assertEqual(expectedValue, actualValue, "Program count did not properly increment")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")

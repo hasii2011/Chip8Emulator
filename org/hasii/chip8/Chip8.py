@@ -23,6 +23,7 @@ class Chip8:
     PROGRAM_START_ADDRESS = 0x200
     OPCODE_MASK           = 0xF000
     IDX_REG_MASK          = 0x0FFF
+    LOC_JMP_MASK          = 0x0FFF
     MAX_IDX_REG_VAL       = 0x0FFF
     INSTRUCTION_SIZE      = 2       # in bytes
 
@@ -61,7 +62,8 @@ class Chip8:
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
-            Chip8Mnemonics.LDI.value:  self.loadIndexRegister
+            Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
+            Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero
         }
 
         self.logger.debug(f"{self.memory}")
@@ -237,6 +239,15 @@ class Chip8:
         valToLoad: int = self.instruction & Chip8.IDX_REG_MASK
 
         self.indexRegister = valToLoad
+
+    def jumpToLocationPlusVZero(self):
+        """
+        Bnnn; JP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
+        """
+        v0Val:    int = self.registers.getValue(Chip8RegisterName.V0)
+        instrVal: int = self.instruction & 0x0FFF
+
+        self.pc = self.pc + v0Val + instrVal
 
     def loadROM(self, theFilename: str):
 
