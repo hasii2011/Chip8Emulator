@@ -12,6 +12,8 @@ from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegiste
 
 class TestChip8(BaseTest):
 
+    MAX_GEN_RAND_LOOP_COUNT: int = 256
+
     clsLogger: Logger = None
 
     @classmethod
@@ -375,3 +377,10 @@ class TestChip8(BaseTest):
         self.logger.info(f"Start load ROM test")
 
         self.chip8.loadROM("Missile")
+
+    def testGenerateRandomByte(self):
+
+        for x in range(TestChip8.MAX_GEN_RAND_LOOP_COUNT):
+            randByte: int = Chip8.generateRandomByte()
+            self.logger.debug(f"x: {x} randByte: {randByte}")
+            self.assertTrue(randByte <= 255, "Too big of a random byte")

@@ -6,6 +6,8 @@ from typing import Callable
 from logging import Logger
 from logging import getLogger
 
+from random import randint
+
 from pkg_resources import resource_filename
 
 from org.hasii.chip8.Chip8Stack import Chip8Stack
@@ -303,3 +305,7 @@ class Chip8:
             subStr: str = subMemoryBytes.hex()
 
             self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
+
+    @classmethod
+    def generateRandomByte(cls) -> int:
+        return randint(0, 255)
