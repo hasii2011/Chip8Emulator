@@ -18,6 +18,7 @@ from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
+from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
 
 
 class Chip8:
@@ -25,10 +26,14 @@ class Chip8:
     ROM_PKG               = "org.hasii.chip8.roms"
     PROGRAM_START_ADDRESS = 0x200
     OPCODE_MASK           = 0xF000
+    ENHANCED_OP_CODE_MASK = 0xF0FF
     IDX_REG_MASK          = 0x0FFF
     LOC_JMP_MASK          = 0x0FFF
     MAX_IDX_REG_VAL       = 0x0FFF
+
     INSTRUCTION_SIZE      = 2       # in bytes
+
+    SPECIAL_REGISTERS_BASE_OP_CODE = 0xF000
 
     CPU_CYCLE: int = 1000 // 60
 
@@ -47,6 +52,7 @@ class Chip8:
         self._delayTimer:    int = 0
         self._soundTimer:    int = 0
 
+        seed()
         self.opCodeMethods: Dict[int, Callable] = {
 
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
@@ -67,16 +73,27 @@ class Chip8:
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
             Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
             Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
-            Chip8Mnemonics.RND.value:  self.rndByte
+            Chip8Mnemonics.RND.value:  self.rndByte,
+            Chip8Mnemonics.DRW.value:  self.displaySprite,
+            Chip8Mnemonics.SKP.value:  self.skipNextVxDependingOnKeyPressed,
+            Chip8Mnemonics.SKNP.value: self.skipNextVxDependingOnKeyPressed,
+            Chip8Mnemonics.LDRT.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.LDK.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.SDT.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.SST.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.ADDI.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.LDIS.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.LDB.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.STR.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.RDR.value:  self.specialRegistersInstructions,
         }
-        seed()
         self.logger.debug(f"{self.memory}")
 
     def getDelayTimer(self) -> int:
         return self._delayTimer
 
     def setDelayTimer(self, theNewValue: int):
-        if self._delayTimer > 0:
+        if theNewValue > 0:
             self._delayTimer = theNewValue
 
     def getSoundTimer(self) -> int:
@@ -115,12 +132,17 @@ class Chip8:
             self.instruction = instruction
 
         instStr: str = hex(self.instruction)
-        self.logger.debug(f"currentInstruction {instStr}")
+        self.logger.debug(f"currentInstruction: {instStr}")
 
         op: int = self.instruction & Chip8.OPCODE_MASK
 
+        if op == Chip8.SPECIAL_REGISTERS_BASE_OP_CODE:
+            op = self.instruction & Chip8.ENHANCED_OP_CODE_MASK
+
+        opStr: str = hex(op)
+        self.logger.debug(f"opStr: {opStr}")
         try:
-            instruction = self.opCodeMethods[op]
+            instruction: Callable = self.opCodeMethods[op]
         except KeyError:
             raise UnknownInstructionError(badInstruction=op)
 
@@ -268,6 +290,68 @@ class Chip8:
         tempReg: int = randByte & lit
         self.registers.setValue(v=targetRegister, newValue=tempReg)
 
+    def displaySprite(self):
+        """
+        Dxyn; DRW Vx, Vy, nibble;
+
+        Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+
+        TODO:
+        """
+        pass
+
+    def skipNextVxDependingOnKeyPressed(self):
+        """
+        Ex9E; SKP Vx;
+
+        Skip next instruction if key with the value of Vx is pressed
+
+        ExA1; SKNP Vx;
+
+        Skip next instruction if key with the value of Vx is not pressed
+
+        TODO:
+        """
+        pass
+
+    def specialRegistersInstructions(self):
+        """
+        LDRT = 0xF007   # Fx07; LDT Vx, DT;     Set Vx = delay timer value
+        LDK  = 0xF00A   # Fx0A; LDK Vx, K;      Wait for a key press, store the value of the key in Vx.
+        SDT  = 0xF015   # Fx15; SDT DT, Vx;     Set delay timer = Vx
+        SST  = 0xF018   # Fx18; SST ST, Vx;     Set sound timer = Vx
+        ADDI = 0xF01E   # Fx1E; ADDI I, Vx;     Set I = I + Vx
+        LDIS = 0xF029   # Fx29; LDIS F, Vx;     I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
+        LDB  = 0xF033   # Fx33; LDB B, Vx;      Store BCD representation of Vx in memory locations I, I+1, and I+2
+        STR  = 0xF055   # Fx55; STR [I], Vx;    Store registers V0-Vx in memory starting at location I.
+        RDR  = 0xF065   # Fx65; RDR Vx, [I];    Read registers V0 through Vx from memory starting at location I.
+        """
+        subOpCode: int = self._decodeSpecialRegistersSubOpCode()
+        self.logger.info(f"Special Registers subOpCode: {subOpCode:X}")
+
+        if subOpCode == 0x07:
+            vx: int = self._decodeLeftRegister()
+            regName: Chip8RegisterName = Chip8RegisterName(vx)
+            self.registers.setValue(v=regName, newValue=self.delayTimer)
+        elif subOpCode == 0x0A:
+            pass
+        elif subOpCode == 0x15:
+            pass
+        elif subOpCode == 0x18:
+            pass
+        elif subOpCode == 0x1E:
+            pass
+        elif subOpCode == 0x29:
+            pass
+        elif subOpCode == 0x33:
+            pass
+        elif subOpCode == 0x55:
+            pass
+        elif subOpCode == 0x65:
+            pass
+        else:
+            raise UnKnownSpecialRegistersSubOpCode(invalidSubOpCode=subOpCode)
+
     def loadROM(self, theFilename: str):
 
         self.logger.info(f"loading ROM: {theFilename}")
@@ -309,8 +393,11 @@ class Chip8:
     def _decodeLiteral(self) -> int:
         return self.instruction & 0x00FF
 
+    def _decodeSpecialRegistersSubOpCode(self):
+        return self.instruction & 0x00FF
+
     def _decodeRegisterToRegisterOpCode(self):
-        return self.instruction & 0x000f
+        return self.instruction & 0x000F
 
     def _debugPrintMemory(self):
 

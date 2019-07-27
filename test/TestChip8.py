@@ -366,6 +366,34 @@ class TestChip8(BaseTest):
             self.logger.info(f"registerVal: {x:X} andedRandomVal: {andedRandomVal}")
             self.assertTrue((andedRandomVal >= 0) and (andedRandomVal <= 255), "rand val not in ragen" )
 
+    def testSetVxToDelayTimer(self):
+        """
+        # Fx07; LDT Vx, DT;     Set Vx = delay timer value
+        """
+        instruction: int = 0xF107
+        self.chip8.registers.setValue(Chip8RegisterName.V1, 0xFF)
+        self.chip8.delayTimer = 0x44
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = 0x44
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.V1)
+
+        self.assertEqual(expectedValue, actualValue, f"Load from delay timer failed; Register: V{Chip8RegisterName.V1.value:X}")
+        #
+        # Test a different register
+        #
+        newInstruction: int = 0xFA07
+        self.chip8.registers.setValue(Chip8RegisterName.VA, 0xCC)
+        self.chip8.delayTimer = 0x55
+
+        self.chip8.emulateSingleCpuCycle(newInstruction)
+
+        expectedValue: int = 0x55
+        actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VA)
+
+        self.assertEqual(expectedValue, actualValue, f"Load from delay timer failed; Register: V{Chip8RegisterName.VA.value:X}")
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
