@@ -7,6 +7,7 @@ from logging import Logger
 from logging import getLogger
 
 from random import randint
+from random import seed
 
 from pkg_resources import resource_filename
 
@@ -65,9 +66,10 @@ class Chip8:
             Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
             Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
-            Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero
+            Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
+            Chip8Mnemonics.RND.value:  self.rndByte
         }
-
+        seed()
         self.logger.debug(f"{self.memory}")
 
     def getDelayTimer(self) -> int:
@@ -250,6 +252,21 @@ class Chip8:
         instrVal: int = self.instruction & 0x0FFF
 
         self.pc = self.pc + v0Val + instrVal
+
+    def rndByte(self):
+        """
+        Cxkk; RND Vx, byte;   Set Vx = random byte AND kk
+
+        Interpreter generates a random number from 0 to 255
+
+        """
+        targetRegister: Chip8RegisterName = self._decodeLeftRegister()
+        lit:        int = self._decodeLiteral()
+        randByte:   int = self.generateRandomByte()
+        self.logger.info(f"randByte: {randByte:X}")
+
+        tempReg: int = randByte & lit
+        self.registers.setValue(v=targetRegister, newValue=tempReg)
 
     def loadROM(self, theFilename: str):
 

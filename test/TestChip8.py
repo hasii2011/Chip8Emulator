@@ -351,6 +351,21 @@ class TestChip8(BaseTest):
 
         self.assertEqual(expectedValue, actualValue, "Program count did not properly increment")
 
+    def testRndByte(self):
+        """
+        Cxkk; RND Vx, byte;   Set Vx = random byte AND kk
+
+        The Interpreter generates a random number from 0 to 255
+        """
+        instruction: int = 0xC922
+
+        for x in range(10):
+            self.chip8.registers.setValue(Chip8RegisterName.V9, x + 0xF)
+            self.chip8.emulateSingleCpuCycle(instruction)
+            andedRandomVal: int = self.chip8.registers.getValue(Chip8RegisterName.V9)
+            self.logger.info(f"registerVal: {x:X} andedRandomVal: {andedRandomVal}")
+            self.assertTrue((andedRandomVal >= 0) and (andedRandomVal <= 255), "rand val not in ragen" )
+
     def testChipInitialization(self):
 
         self.assertEqual(self.chip8.pc, Chip8.PROGRAM_START_ADDRESS, "Initial Program Counter is bad")
