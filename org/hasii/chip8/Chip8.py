@@ -324,7 +324,7 @@ class Chip8:
         LDIS = 0xF029   # Fx29; LDIS F, Vx;     I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
         LDB  = 0xF033   # Fx33; LDB B, Vx;      Store BCD representation of Vx in memory locations I, I+1, and I+2
         STR  = 0xF055   # Fx55; STR [I], Vx;    Store registers V0-Vx in memory starting at location I.
-        RDR  = 0xF065   # Fx65; RDR Vx, [I];    Read registers V0 through Vx from memory starting at location I.
+        RDR  = 0xF065   # Fx65; RDR Vx, [I];    Read registers V0-Vx from memory starting at location I.
         """
         subOpCode: int = self._decodeSpecialRegistersSubOpCode()
         self.logger.info(f"Special Registers subOpCode: {subOpCode:X}")
@@ -340,7 +340,7 @@ class Chip8:
         elif subOpCode == 0x18:
             self.soundTimer = self.registers.getValue(regName)
         elif subOpCode == 0x1E:
-            pass
+            self.indexRegister += self.registers.getValue(regName)
         elif subOpCode == 0x29:
             pass
         elif subOpCode == 0x33:

@@ -13,6 +13,7 @@ from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegiste
 class TestChip8(BaseTest):
 
     MAX_GEN_RAND_LOOP_COUNT: int = 256
+    REGISTER_STORE_VALUE:    int = 0xFE
 
     clsLogger: Logger = None
 
@@ -409,6 +410,43 @@ class TestChip8(BaseTest):
         self._runSoundTimerEqualsVxTest(0xF918, Chip8RegisterName.V9, 0x32)
         self._runSoundTimerEqualsVxTest(0xF418, Chip8RegisterName.V4, 0x01)
         self._runSoundTimerEqualsVxTest(0xF718, Chip8RegisterName.V7, 0x10)
+
+    def testIncrementIndexRegisterFromVx(self):
+        """
+        Fx1E; ADDI I, Vx;     Set I = I + Vx
+        """
+        regName:  Chip8RegisterName = Chip8RegisterName.V0
+        incValue:      int = 0x0123
+        initIdxRegVal: int = 0x0323
+        instruction: int = 0xF01E
+
+        self.chip8.registers.setValue(v=regName, newValue=incValue)
+        self.chip8.indexRegister = initIdxRegVal
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = initIdxRegVal + incValue
+        actualValue:   int = self.chip8.indexRegister
+
+        self.assertEqual(expectedValue, actualValue, "Index register not correctly incremented")
+
+    def testStoreRegisters(self):
+        """
+        Fx55; STR [I], Vx;
+        Store registers V0-Vx in memory starting at location I.
+        """
+        self.chip8.indexRegister = 0x0400
+        self.chip8.registers.setValue(Chip8RegisterName.V0, TestChip8.REGISTER_STORE_VALUE)
+        self.chip8.registers.setValue(Chip8RegisterName.V1, TestChip8.REGISTER_STORE_VALUE)
+        self.chip8.registers.setValue(Chip8RegisterName.V2, TestChip8.REGISTER_STORE_VALUE)
+        self.chip8.registers.setValue(Chip8RegisterName.V3, TestChip8.REGISTER_STORE_VALUE)
+
+    def testReadRegisters(self):
+        """
+        RDR Vx, [I];
+        Read registers V0-Vx from memory starting at location I.
+        """
+        pass
 
     def _runSoundTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
 
