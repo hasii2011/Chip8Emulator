@@ -14,6 +14,7 @@ class TestChip8(BaseTest):
 
     MAX_GEN_RAND_LOOP_COUNT: int = 256
     REGISTER_STORE_VALUE:    int = 0xFE
+    RANDOM_VALUE:            int = 0xBB
 
     clsLogger: Logger = None
 
@@ -440,6 +441,19 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(Chip8RegisterName.V1, TestChip8.REGISTER_STORE_VALUE)
         self.chip8.registers.setValue(Chip8RegisterName.V2, TestChip8.REGISTER_STORE_VALUE)
         self.chip8.registers.setValue(Chip8RegisterName.V3, TestChip8.REGISTER_STORE_VALUE)
+        #
+        # Set memory we are about to save registers into to some random value
+        #
+        for x in range(0, Chip8RegisterName.V3.value + 1):
+            self.chip8.memory[self.chip8.indexRegister + x] =  TestChip8.RANDOM_VALUE
+
+        instruction: int = 0xF355
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue: int = TestChip8.REGISTER_STORE_VALUE
+        for y in range(0, Chip8RegisterName.V3.value + 1):
+            actualValue: int = self.chip8.memory[self.chip8.indexRegister + y]
+            self.assertEqual(expectedValue, actualValue, f"Register V{y:X} not correctly stored")
 
     def testReadRegisters(self):
         """

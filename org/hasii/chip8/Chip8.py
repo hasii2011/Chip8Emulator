@@ -346,7 +346,8 @@ class Chip8:
         elif subOpCode == 0x33:
             pass
         elif subOpCode == 0x55:
-            pass
+            for x in range(0, regName.value + 1):
+                self.memory[self.indexRegister + x] = self.registers.getValue(regName)
         elif subOpCode == 0x65:
             pass
         else:
