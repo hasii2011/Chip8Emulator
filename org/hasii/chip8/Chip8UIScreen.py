@@ -10,14 +10,36 @@ from albow.core.ui.Screen import Screen
 from albow.core.ui.Shell import Shell
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
 
+from albow.menu.Menu import Menu
+from albow.menu.MenuBar import MenuBar
+from albow.menu.MenuItem import MenuItem
+
+from albow.layout.Column import Column
+from albow.layout.Frame import Frame
+
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.Chip8Screen import Chip8Screen
 
 
 class Chip8UIScreen(Screen):
 
     CPU_CYCLE_EVENT = AlbowEventLoop.MUSIC_END_EVENT + 1
     SIXTY_HERTZ       = 1000 // 60
+
+    fileItems = [
+
+        MenuItem(text="Load", command="processLoad"),
+        MenuItem(text="Exit", command="processExit"),
+    ]
+
+    helpItems = [
+        MenuItem(text="About", command="processAbout"),
+        MenuItem(text="Help",  command="processHelp"),
+    ]
+
+    fileMenu: Menu = Menu(title="File", items=fileItems)
+    helpMenu: Menu = Menu(title="Help", items=helpItems)
 
     def __init__(self, theShell: Shell, theSurface: Surface):
         """
@@ -34,11 +56,26 @@ class Chip8UIScreen(Screen):
         """
         super().__init__(theShell)
 
-        self.logger: Logger = getLogger(__name__)
+        self.surface: Surface = theSurface
+        self.logger:  Logger = getLogger(__name__)
+        self.chip8:   Chip8 = Chip8()
 
-        self.chip8: Chip8 = Chip8()
+        menus = [
+            Chip8UIScreen.fileMenu, Chip8UIScreen.helpMenu
+        ]
 
-        self.surface:  Surface = theSurface
+        menuBar = MenuBar(menus=menus, width=self.shell.width)
+
+        framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
+        chip8Screen:   Chip8Screen = Chip8Screen(self.shell)
+        columnAttrs = {
+            "align": "l",
+            'expand': 0
+        }
+        contents = Column([framedMenuBar, chip8Screen], **columnAttrs)
+
+        self.logger.info(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
+        self.add(contents)
 
     def timer_event(self, theEvent: Event):
         """
@@ -74,3 +111,16 @@ class Chip8UIScreen(Screen):
         self.logger.debug(f"key up: {releasedKey.value:X}")
         self.chip8.keypad.keyUp(releasedKey)
         self.logger.debug(f"keypad: {self.chip8.keypad}")
+
+    def processLoad_cmd(self):
+        self.logger.info("Executed load item command")
+
+    def processExit_cmd(self):
+        self.logger.info("Executed exit item command")
+        self.shell.quit()
+
+    def processAbout_cmd(self):
+        self.logger.info("Executed about item command")
+
+    def processHelp_cmd(self):
+        self.logger.info("Executed help item command")
