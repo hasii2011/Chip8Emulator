@@ -2,7 +2,6 @@
 from logging import Logger
 from logging import getLogger
 
-
 from pygame import Surface
 from pygame.event import Event
 
@@ -10,6 +9,9 @@ from albow.core.ui.Screen import Screen
 
 from albow.core.ui.Shell import Shell
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
+
+from org.hasii.chip8.Chip8 import Chip8
+from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 
 
 class Chip8UIScreen(Screen):
@@ -33,15 +35,9 @@ class Chip8UIScreen(Screen):
         super().__init__(theShell)
 
         self.logger: Logger = getLogger(__name__)
-        #
-        # Debug logger
-        #
-        # saveLogger = self.logger
-        # while self.logger is not None:
-        #     print(f"level: '{self.logger.level}'', name: '{self.logger.name}'', handlers: '{self.logger.handlers}"'')
-        #     self.logger = self.logger.parent
-        # self.logger = saveLogger
-        #
+
+        self.chip8: Chip8 = Chip8()
+
         self.surface:  Surface = theSurface
 
     def timer_event(self, theEvent: Event):
@@ -60,4 +56,21 @@ class Chip8UIScreen(Screen):
         # self.logger.info(f"milliseconds: {milliseconds}")
         milliseconds: float = theEvent.dict['time']
         self.logger.debug(f"milliseconds: {milliseconds}")
+        self.chip8.decrementDelayTimer()
+        self.chip8.decrementSoundTimer()
+
         return True
+
+    def key_down(self, theKeyEvent: Event):
+
+        pressedKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(theKeyEvent.key)
+        self.logger.debug(f"key down: {pressedKey.value:X}")
+        self.chip8.keypad.keyDown(pressedKey)
+        self.logger.debug(f"keypad: {self.chip8.keypad}")
+
+    def key_up(self, theKeyEvent: Event):
+
+        releasedKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(theKeyEvent.key)
+        self.logger.debug(f"key up: {releasedKey.value:X}")
+        self.chip8.keypad.keyUp(releasedKey)
+        self.logger.debug(f"keypad: {self.chip8.keypad}")

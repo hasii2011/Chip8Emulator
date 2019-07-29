@@ -13,6 +13,7 @@ from random import seed
 from pkg_resources import resource_filename
 
 from org.hasii.chip8.Chip8Stack import Chip8Stack
+from org.hasii.chip8.Chip8KeyPad import Chip8KeyPad
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
@@ -48,6 +49,7 @@ class Chip8:
         self.memory:     List[int]      = [0] * 4096
         self.stack:      Chip8Stack     = Chip8Stack()
         self.registers:  Chip8Registers = Chip8Registers()
+        self.keypad:     Chip8KeyPad    = Chip8KeyPad()
 
         self._indexRegister: int = 0
         self._delayTimer:    int = 0
@@ -97,12 +99,20 @@ class Chip8:
         if theNewValue > 0:
             self._delayTimer = theNewValue
 
+    def decrementDelayTimer(self):
+        if self._delayTimer > 0:
+            self._delayTimer -= 1
+
     def getSoundTimer(self) -> int:
         return self._soundTimer
 
     def setSoundTimer(self, theNewValue: int):
         if theNewValue > 0:
             self._soundTimer = theNewValue
+
+    def decrementSoundTimer(self):
+        if self._soundTimer > 0:
+            self._soundTimer -= 1
 
     def getIndexRegister(self) -> int:
         return self._indexRegister
