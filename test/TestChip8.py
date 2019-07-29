@@ -14,6 +14,7 @@ class TestChip8(BaseTest):
 
     MAX_GEN_RAND_LOOP_COUNT: int = 256
     REGISTER_STORE_VALUE:    int = 0xFE
+    REGISTER_READ_VALUE:     int = 0xCC
     RANDOM_VALUE:            int = 0xBB
 
     clsLogger: Logger = None
@@ -366,7 +367,7 @@ class TestChip8(BaseTest):
             self.chip8.emulateSingleCpuCycle(instruction)
             andedRandomVal: int = self.chip8.registers.getValue(Chip8RegisterName.V9)
             self.logger.info(f"registerVal: {x:X} andedRandomVal: {andedRandomVal}")
-            self.assertTrue((andedRandomVal >= 0) and (andedRandomVal <= 255), "rand val not in ragen" )
+            self.assertTrue((andedRandomVal >= 0) and (andedRandomVal <= 255), "rand val not in range")
 
     def testSetVxToDelayTimer(self):
         """
@@ -436,16 +437,11 @@ class TestChip8(BaseTest):
         Fx55; STR [I], Vx;
         Store registers V0-Vx in memory starting at location I.
         """
-        self.chip8.indexRegister = 0x0400
-        self.chip8.registers.setValue(Chip8RegisterName.V0, TestChip8.REGISTER_STORE_VALUE)
-        self.chip8.registers.setValue(Chip8RegisterName.V1, TestChip8.REGISTER_STORE_VALUE)
-        self.chip8.registers.setValue(Chip8RegisterName.V2, TestChip8.REGISTER_STORE_VALUE)
-        self.chip8.registers.setValue(Chip8RegisterName.V3, TestChip8.REGISTER_STORE_VALUE)
+        self._setupRegisters(TestChip8.REGISTER_STORE_VALUE)
         #
         # Set memory we are about to save registers into to some random value
         #
-        for x in range(0, Chip8RegisterName.V3.value + 1):
-            self.chip8.memory[self.chip8.indexRegister + x] =  TestChip8.RANDOM_VALUE
+        self._setupMemory(TestChip8.RANDOM_VALUE)
 
         instruction: int = 0xF355
         self.chip8.emulateSingleCpuCycle(instruction)
@@ -457,32 +453,23 @@ class TestChip8(BaseTest):
 
     def testReadRegisters(self):
         """
-        RDR Vx, [I];
+        Fx65 RDR Vx, [I];
         Read registers V0-Vx from memory starting at location I.
         """
-        pass
+        self._setupRegisters(TestChip8.RANDOM_VALUE)
+        self._setupMemory(TestChip8.REGISTER_READ_VALUE)
 
-    def _runSoundTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
-
-        self.chip8.registers.setValue(vx, expectedValue)
-        self.chip8.soundTimer = 0x22
+        instruction: int = 0xF365
 
         self.chip8.emulateSingleCpuCycle(instruction)
 
-        actualValue: int = self.chip8.soundTimer
-
-        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
-
-    def _runDelayTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
-
-        self.chip8.registers.setValue(vx, expectedValue)
-        self.chip8.delayTimer = 0x44
-
-        self.chip8.emulateSingleCpuCycle(instruction)
-
-        actualValue: int = self.chip8.delayTimer
-
-        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
+        expectedValue: int = TestChip8.REGISTER_READ_VALUE
+        for regName in Chip8RegisterName:
+            if regName.value >= Chip8RegisterName.V4.value:
+                break
+            else:
+                actualValue: int = self.chip8.registers.getValue(regName)
+                self.assertEqual(expectedValue, actualValue, f"Register V{regName.value:X} did not get set correctly")
 
     def testChipInitialization(self):
 
@@ -517,3 +504,45 @@ class TestChip8(BaseTest):
             randByte: int = Chip8.generateRandomByte()
             self.logger.debug(f"x: {x} randByte: {randByte}")
             self.assertTrue(randByte <= 255, "Too big of a random byte")
+
+    def _setupRegisters(self, registerValue: int):
+        """
+        Initializes registers V0-V3
+        Args:
+            registerValue: Load into registers
+
+        Returns:
+
+        """
+
+        self.chip8.indexRegister = 0x0400
+        self.chip8.registers.setValue(Chip8RegisterName.V0, registerValue)
+        self.chip8.registers.setValue(Chip8RegisterName.V1, registerValue)
+        self.chip8.registers.setValue(Chip8RegisterName.V2, registerValue)
+        self.chip8.registers.setValue(Chip8RegisterName.V3, registerValue)
+
+    def _setupMemory(self, memoryValue: int):
+        for x in range(0, Chip8RegisterName.V3.value + 1):
+            self.chip8.memory[self.chip8.indexRegister + x] = memoryValue
+
+    def _runSoundTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
+
+        self.chip8.registers.setValue(vx, expectedValue)
+        self.chip8.soundTimer = 0x22
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualValue: int = self.chip8.soundTimer
+
+        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
+
+    def _runDelayTimerEqualsVxTest(self, instruction: int, vx: Chip8RegisterName, expectedValue: int):
+
+        self.chip8.registers.setValue(vx, expectedValue)
+        self.chip8.delayTimer = 0x44
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualValue: int = self.chip8.delayTimer
+
+        self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")

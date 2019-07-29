@@ -2,6 +2,7 @@
 from typing import List
 from typing import Dict
 from typing import Callable
+from typing import cast
 
 from logging import Logger
 from logging import getLogger
@@ -346,10 +347,18 @@ class Chip8:
         elif subOpCode == 0x33:
             pass
         elif subOpCode == 0x55:
-            for x in range(0, regName.value + 1):
+            lastRegValue: int = cast(int, regName.value)
+            for x in range(0, lastRegValue + 1):
                 self.memory[self.indexRegister + x] = self.registers.getValue(regName)
         elif subOpCode == 0x65:
-            pass
+            lastRegValue: int = cast(int, regName.value)
+            self._debugPrintMemory(startByteNbr=self.indexRegister, nBytes=lastRegValue, bytesPerRow=8)
+
+            for x in range(0, lastRegValue + 1):
+                currentRegName = Chip8RegisterName(x)
+                self.logger.debug(f"regName: {currentRegName} memory value: {self.memory[self.indexRegister + x]}")
+                self.registers.setValue(currentRegName, self.memory[self.indexRegister + x])
+                self.logger.debug(f"Register dump: {self.registers}")
         else:
             raise UnKnownSpecialRegistersSubOpCode(invalidSubOpCode=subOpCode)
 
@@ -366,7 +375,7 @@ class Chip8:
             self.memory[self.pc + byte] = rom[byte]
 
         self.logger.debug(f"{self.memory}")
-        self._debugPrintMemory()
+        self._debugPrintMemory(startByteNbr=0, nBytes=len(self.memory))
 
     def _findTheROM(self, theFileName: str):
 
@@ -400,16 +409,38 @@ class Chip8:
     def _decodeRegisterToRegisterOpCode(self):
         return self.instruction & 0x000F
 
-    def _debugPrintMemory(self):
+    def _debugPrintMemory(self, startByteNbr: int, nBytes: int, bytesPerRow: int = 32):
+        """
+        I know this is not Pythonic;  But for x in range(startByteNbr, nBytes, bytesPerRow):
+        does not work
 
-        romLength: int = len(self.memory)
-        for x in range(0, romLength, 32):
-            endByteIndex: int = x + 32
-            subMemory = self.memory[x:endByteIndex]
+        Args:
+            startByteNbr:
+            nBytes:
+            bytesPerRow:
+
+        Returns:
+
+        """
+        # for x in range(startByteNbr, nBytes, bytesPerRow):
+        #     endByteIndex: int = x + bytesPerRow
+        #     subMemory = self.memory[x:endByteIndex]
+        #     subMemoryBytes: bytes = bytes(subMemory)
+        #     subStr:         str   = subMemoryBytes.hex()
+        #
+        #     self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
+
+        z: int = startByteNbr
+        while z < (startByteNbr + nBytes):
+
+            endByteIndex: int = z + bytesPerRow
+            subMemory = self.memory[z:endByteIndex]
             subMemoryBytes: bytes = bytes(subMemory)
-            subStr: str = subMemoryBytes.hex()
+            subStr:         str   = subMemoryBytes.hex()
 
-            self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
+            self.logger.info(f"{z:05X} {endByteIndex-2:05X}  {subStr.upper()}")
+
+            z += bytesPerRow
 
     @classmethod
     def generateRandomByte(cls) -> int:
