@@ -61,7 +61,7 @@ class Chip8ScreenTestUIScreen(Screen):
         self.chip8:   Chip8 = Chip8()
 
         menus = [
-            Chip8ScreentTestUIScreen.fileMenu, Chip8ScreentTestUIScreen.helpMenu
+            Chip8ScreenTestUIScreen.fileMenu, Chip8ScreenTestUIScreen.helpMenu
         ]
 
         menuBar = MenuBar(menus=menus, width=self.shell.width)

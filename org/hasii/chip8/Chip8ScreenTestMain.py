@@ -10,12 +10,12 @@ from pygame import Surface
 from albow.themes.ThemeLoader import ThemeLoader
 from albow.themes.Theme import Theme
 
-from org.hasii.chip8.Chip8UIShell import Chip8UIShell
+from org.hasii.chip8.Chip8ScreenTestUIShell import Chip8ScreenTestUIShell
 
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 
 JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
-MADE_UP_PRETTY_MAIN_NAME     = "Chip8Main"
+MADE_UP_PRETTY_MAIN_NAME     = "Chip8ScreenTestMain"
 
 MENU_BAR_HEIGHT_ADJUSTMENT: int = 24
 
@@ -42,7 +42,7 @@ def main():
     surface: Surface = pygame.display.set_mode(
         (Chip8Screen.WIDTH * Chip8Screen.SCALE_FACTOR, (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT)
     )
-    shell:   Chip8UIShell = Chip8UIShell(theSurface=surface)
+    shell:   Chip8ScreenTestUIShell = Chip8ScreenTestUIShell(theSurface=surface)
 
     logger.info(f"Starting {MADE_UP_PRETTY_MAIN_NAME}")
 

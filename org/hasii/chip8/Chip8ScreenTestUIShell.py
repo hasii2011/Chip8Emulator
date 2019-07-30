@@ -8,10 +8,10 @@ from albow.core.ui.Shell import Shell
 
 from org.hasii.chip8.Chip8 import Chip8
 
-from org.hasii.chip8.Chip8UIScreen import Chip8UIScreen
+from org.hasii.chip8.Chip8ScreenTestUIScreen import Chip8ScreenTestUIScreen
 
 
-class Chip8UIShell(Shell):
+class Chip8ScreenTestUIShell(Shell):
 
     """
     Shell
@@ -29,7 +29,7 @@ class Chip8UIShell(Shell):
 
         self.logger: Logger = getLogger(__name__)
 
-        self.chip8UiScreen = Chip8UIScreen(theShell=self, theSurface=theSurface)
+        self.chip8UiScreen = Chip8ScreenTestUIScreen(theShell=self, theSurface=theSurface)
 
         self.set_timer(Chip8.CPU_CYCLE)
         self.show_screen(self.chip8UiScreen)
