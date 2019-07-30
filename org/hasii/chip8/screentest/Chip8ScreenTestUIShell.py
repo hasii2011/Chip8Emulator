@@ -8,7 +8,7 @@ from albow.core.ui.Shell import Shell
 
 from org.hasii.chip8.Chip8 import Chip8
 
-from org.hasii.chip8.Chip8ScreenTestUIScreen import Chip8ScreenTestUIScreen
+from org.hasii.chip8.screentest.Chip8ScreenTestUIScreen import Chip8ScreenTestUIScreen
 
 
 class Chip8ScreenTestUIShell(Shell):
