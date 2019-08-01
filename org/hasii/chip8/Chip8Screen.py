@@ -5,7 +5,7 @@ import random
 
 from albow.core.ui.Widget import Widget
 
-from org.hasii.chip8.Chip8SpriteName import Chip8SpriteName
+from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 
 POLYGON_BORDER_WIDTH: int = 2
 
@@ -60,23 +60,23 @@ class Chip8Screen(Widget):
     SPRITE_E: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0xF0]   # E
     SPRITE_F: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0x80]   # F
 
-    SPRITES: Dict[Chip8SpriteName, CHIP8_SPRITE] = {
-        Chip8SpriteName.SPRITE_0: SPRITE_0,
-        Chip8SpriteName.SPRITE_1: SPRITE_1,
-        Chip8SpriteName.SPRITE_2: SPRITE_2,
-        Chip8SpriteName.SPRITE_3: SPRITE_3,
-        Chip8SpriteName.SPRITE_4: SPRITE_4,
-        Chip8SpriteName.SPRITE_5: SPRITE_5,
-        Chip8SpriteName.SPRITE_6: SPRITE_6,
-        Chip8SpriteName.SPRITE_7: SPRITE_7,
-        Chip8SpriteName.SPRITE_8: SPRITE_8,
-        Chip8SpriteName.SPRITE_9: SPRITE_9,
-        Chip8SpriteName.SPRITE_A: SPRITE_A,
-        Chip8SpriteName.SPRITE_B: SPRITE_B,
-        Chip8SpriteName.SPRITE_C: SPRITE_C,
-        Chip8SpriteName.SPRITE_D: SPRITE_D,
-        Chip8SpriteName.SPRITE_E: SPRITE_E,
-        Chip8SpriteName.SPRITE_F: SPRITE_F,
+    SPRITES: Dict[Chip8SpriteType, CHIP8_SPRITE] = {
+        Chip8SpriteType.SPRITE_0: SPRITE_0,
+        Chip8SpriteType.SPRITE_1: SPRITE_1,
+        Chip8SpriteType.SPRITE_2: SPRITE_2,
+        Chip8SpriteType.SPRITE_3: SPRITE_3,
+        Chip8SpriteType.SPRITE_4: SPRITE_4,
+        Chip8SpriteType.SPRITE_5: SPRITE_5,
+        Chip8SpriteType.SPRITE_6: SPRITE_6,
+        Chip8SpriteType.SPRITE_7: SPRITE_7,
+        Chip8SpriteType.SPRITE_8: SPRITE_8,
+        Chip8SpriteType.SPRITE_9: SPRITE_9,
+        Chip8SpriteType.SPRITE_A: SPRITE_A,
+        Chip8SpriteType.SPRITE_B: SPRITE_B,
+        Chip8SpriteType.SPRITE_C: SPRITE_C,
+        Chip8SpriteType.SPRITE_D: SPRITE_D,
+        Chip8SpriteType.SPRITE_E: SPRITE_E,
+        Chip8SpriteType.SPRITE_F: SPRITE_F,
     }
     SCALE_FACTOR: int = 10
     WIDTH:        int = 64
@@ -98,8 +98,8 @@ class Chip8Screen(Widget):
             [randomValue(), randomValue()] for i in range(len(self.points))
         ]
 
-    def getSprite(self, spriteName: Chip8SpriteName) -> CHIP8_SPRITE:
-        return self.SPRITES[spriteName]
+    def getSprite(self, spriteType: Chip8SpriteType) -> CHIP8_SPRITE:
+        return self.SPRITES[spriteType]
 
     def draw(self, surface):
         from pygame.draw import polygon

@@ -28,7 +28,7 @@ from albow.dialog.DialogUtilities import alert
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Screen import Chip8Screen
-from org.hasii.chip8.Chip8SpriteName import Chip8SpriteName
+from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 
 
 class Chip8ScreenTestUIScreen(Screen):
@@ -51,7 +51,7 @@ class Chip8ScreenTestUIScreen(Screen):
         """
         self.surface: Surface = theSurface
         self.logger:  Logger = getLogger(__name__)
-        self.selectedSprite: Chip8SpriteName = cast(Chip8SpriteName, None)
+        self.selectedSprite: Chip8SpriteType = cast(Chip8SpriteType, None)
 
         super().__init__(theShell)
 
@@ -64,14 +64,14 @@ class Chip8ScreenTestUIScreen(Screen):
         vYField: TextField = TextField(width=100)
 
         spriteSelector: ListBox = ListBox(nrows=2,
-                                          theClient=self, theItems=Chip8SpriteName.toStrList(), selectAction=self.selectAction)
+                                          theClient=self, theItems=Chip8SpriteType.toStrList(), selectAction=self.selectAction)
         self.logger.info(f"list box width: {spriteSelector.width}")
         drawButton:    Button       = Button("Draw", action=self.drawAction)
         widgetList:    List[Widget] = [drawButton, vXLabel, vXField, vYLabel, vYField, spriteSelector]
 
         rowAttrs = {'margin': 3}
-        inputRow:      Row          = Row(items=widgetList, **rowAttrs)
-        framedInputRow: Frame       = Frame(client=inputRow)
+        inputRow:      Row    = Row(items=widgetList, **rowAttrs)
+        framedInputRow: Frame = Frame(client=inputRow)
 
         chip8Screen:   Chip8Screen = Chip8Screen(self.shell)
 

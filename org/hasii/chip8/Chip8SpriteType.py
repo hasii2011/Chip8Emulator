@@ -3,7 +3,7 @@ from typing import List
 from enum import Enum
 
 
-class Chip8SpriteName(Enum):
+class Chip8SpriteType(Enum):
 
     SPRITE_0 = 0x0
     SPRITE_1 = 0x1
@@ -27,6 +27,6 @@ class Chip8SpriteName(Enum):
 
         retList: List[str] = []
 
-        for spriteName in Chip8SpriteName:
-            retList.append(spriteName.name)
+        for spriteType in Chip8SpriteType:
+            retList.append(spriteType.name)
         return retList
