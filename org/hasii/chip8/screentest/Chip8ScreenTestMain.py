@@ -1,3 +1,5 @@
+
+from typing import Tuple
 import json
 
 import logging
@@ -17,7 +19,8 @@ from org.hasii.chip8.Chip8Screen import Chip8Screen
 JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
 MADE_UP_PRETTY_MAIN_NAME     = "Chip8ScreenTestMain"
 
-MENU_BAR_HEIGHT_ADJUSTMENT: int = 24
+MENU_BAR_HEIGHT_ADJUSTMENT: int = 56
+MENU_BAR_WIDTH_ADJUSTMENT:  int = 0
 
 
 def main():
@@ -39,9 +42,11 @@ def main():
     pygame.init()
     pygame.display.set_caption("Python Chip 8 Emulator")
 
-    surface: Surface = pygame.display.set_mode(
-        (Chip8Screen.WIDTH * Chip8Screen.SCALE_FACTOR, (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT)
-    )
+    windowWidthHeight: Tuple[int,int] = (
+                (Chip8Screen.WIDTH  * Chip8Screen.SCALE_FACTOR) + MENU_BAR_WIDTH_ADJUSTMENT,
+                (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT
+            )
+    surface: Surface = pygame.display.set_mode(windowWidthHeight)
     shell:   Chip8ScreenTestUIShell = Chip8ScreenTestUIShell(theSurface=surface)
 
     logger.info(f"Starting {MADE_UP_PRETTY_MAIN_NAME}")

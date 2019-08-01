@@ -1,45 +1,40 @@
 
+from typing import List
+from typing import cast
+
 from logging import Logger
 from logging import getLogger
 
 from pygame import Surface
 from pygame.event import Event
 
+from albow.core.ui.Widget import Widget
 from albow.core.ui.Screen import Screen
-
 from albow.core.ui.Shell import Shell
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
 
-from albow.menu.Menu import Menu
-from albow.menu.MenuBar import MenuBar
-from albow.menu.MenuItem import MenuItem
+from albow.widgets.Label import Label
+from albow.widgets.Button import Button
+from albow.widgets.ListBox import ListBox
+
+from albow.input.TextField import TextField
 
 from albow.layout.Column import Column
+from albow.layout.Row import Row
 from albow.layout.Frame import Frame
+
+from albow.dialog.DialogUtilities import alert
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Screen import Chip8Screen
+from org.hasii.chip8.Chip8SpriteName import Chip8SpriteName
 
 
 class Chip8ScreenTestUIScreen(Screen):
 
     CPU_CYCLE_EVENT = AlbowEventLoop.MUSIC_END_EVENT + 1
     SIXTY_HERTZ       = 1000 // 60
-
-    fileItems = [
-
-        MenuItem(text="Load", command="processLoad"),
-        MenuItem(text="Exit", command="processExit"),
-    ]
-
-    helpItems = [
-        MenuItem(text="About", command="processAbout"),
-        MenuItem(text="Help",  command="processHelp"),
-    ]
-
-    fileMenu: Menu = Menu(title="File", items=fileItems)
-    helpMenu: Menu = Menu(title="Help", items=helpItems)
 
     def __init__(self, theShell: Shell, theSurface: Surface):
         """
@@ -54,28 +49,49 @@ class Chip8ScreenTestUIScreen(Screen):
         Returns:  An instance of itself
 
         """
-        super().__init__(theShell)
-
         self.surface: Surface = theSurface
         self.logger:  Logger = getLogger(__name__)
+        self.selectedSprite: Chip8SpriteName = cast(Chip8SpriteName, None)
+
+        super().__init__(theShell)
+
         self.chip8:   Chip8 = Chip8()
 
-        menus = [
-            Chip8ScreenTestUIScreen.fileMenu, Chip8ScreenTestUIScreen.helpMenu
-        ]
+        vXLabel: Label = Label("Vx: ")
+        vYLabel: Label = Label("VY: ")
 
-        menuBar = MenuBar(menus=menus, width=self.shell.width)
+        vXField: TextField = TextField(width=100)
+        vYField: TextField = TextField(width=100)
 
-        framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
+        spriteSelector: ListBox = ListBox(nrows=2,
+                                          theClient=self, theItems=Chip8SpriteName.toStrList(), selectAction=self.selectAction)
+        self.logger.info(f"list box width: {spriteSelector.width}")
+        drawButton:    Button       = Button("Draw", action=self.drawAction)
+        widgetList:    List[Widget] = [drawButton, vXLabel, vXField, vYLabel, vYField, spriteSelector]
+
+        rowAttrs = {'margin': 3}
+        inputRow:      Row          = Row(items=widgetList, **rowAttrs)
+        framedInputRow: Frame       = Frame(client=inputRow)
+
         chip8Screen:   Chip8Screen = Chip8Screen(self.shell)
+
         columnAttrs = {
             "align": "l",
-            'expand': 0
+            'expand': 0,
+            'margin': 3
         }
-        contents = Column([framedMenuBar, chip8Screen], **columnAttrs)
+        contents = Column([framedInputRow, chip8Screen], **columnAttrs)
 
-        self.logger.info(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
+        self.logger.info(f"framedInputRow size: {framedInputRow.size}, shell width: {self.shell.width}")
         self.add(contents)
+
+    def selectAction(self, theSelectedItem: str):
+        self.logger.info(f"theSelectedItem: {theSelectedItem}")
+
+    def drawAction(self):
+        self.logger.info(f"Button pressed")
+        if self.selectedSprite is None:
+            alert("Please select a sprite type")
 
     def timer_event(self, theEvent: Event):
         """
@@ -111,16 +127,3 @@ class Chip8ScreenTestUIScreen(Screen):
         self.logger.debug(f"key up: {releasedKey.value:X}")
         self.chip8.keypad.keyUp(releasedKey)
         self.logger.debug(f"keypad: {self.chip8.keypad}")
-
-    def processLoad_cmd(self):
-        self.logger.info("Executed load item command")
-
-    def processExit_cmd(self):
-        self.logger.info("Executed exit item command")
-        self.shell.quit()
-
-    def processAbout_cmd(self):
-        self.logger.info("Executed about item command")
-
-    def processHelp_cmd(self):
-        self.logger.info("Executed help item command")
