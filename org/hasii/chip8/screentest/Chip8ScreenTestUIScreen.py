@@ -17,13 +17,15 @@ from albow.widgets.Label import Label
 from albow.widgets.Button import Button
 from albow.widgets.ListBox import ListBox
 
-from albow.input.TextField import TextField
+from albow.input.IntField import IntField
 
 from albow.layout.Column import Column
 from albow.layout.Row import Row
 from albow.layout.Frame import Frame
 
 from albow.dialog.DialogUtilities import alert
+
+from albow.References import AttrRef
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
@@ -50,18 +52,21 @@ class Chip8ScreenTestUIScreen(Screen):
 
         """
         self.surface: Surface = theSurface
-        self.logger:  Logger = getLogger(__name__)
-        self.selectedSprite: Chip8SpriteType = cast(Chip8SpriteType, None)
-
         super().__init__(theShell)
 
+        self.logger:  Logger = getLogger(__name__)
         self.chip8:   Chip8 = Chip8()
+        self.selectedSprite: Chip8SpriteType = cast(Chip8SpriteType, None)
+        self.vXvalue: int = 0
+        self.vYvalue: int = 0
+        vxAttrRef: AttrRef = AttrRef(base=self, name="vXvalue")
+        vyAttrRef: AttrRef = AttrRef(base=self, name="vYvalue")
 
-        vXLabel: Label = Label("Vx: ")
-        vYLabel: Label = Label("VY: ")
+        vXLabel: Label = Label("Vx:")
+        vYLabel: Label = Label("Vy:")
 
-        vXField: TextField = TextField(width=100)
-        vYField: TextField = TextField(width=100)
+        vXField: IntField = IntField(width=100, ref=vxAttrRef)
+        vYField: IntField = IntField(width=100, ref=vyAttrRef)
 
         spriteSelector: ListBox = ListBox(nrows=2,
                                           theClient=self, theItems=Chip8SpriteType.toStrList(), selectAction=self.selectAction)
@@ -86,12 +91,15 @@ class Chip8ScreenTestUIScreen(Screen):
         self.add(contents)
 
     def selectAction(self, theSelectedItem: str):
-        self.logger.info(f"theSelectedItem: {theSelectedItem}")
+        self.selectedSprite = Chip8SpriteType.toEnum(theSelectedItem)
+        self.logger.info(f"selectedSprite: {self.selectedSprite.name}")
 
     def drawAction(self):
         self.logger.info(f"Button pressed")
         if self.selectedSprite is None:
             alert("Please select a sprite type")
+        else:
+            self.logger.info(f"vX: {self.vXvalue} vY: {self.vYvalue}")
 
     def timer_event(self, theEvent: Event):
         """

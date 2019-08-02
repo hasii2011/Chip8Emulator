@@ -1,4 +1,6 @@
 
+from pygame import draw
+
 from typing import List
 from typing import Dict
 import random
@@ -10,6 +12,11 @@ from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 POLYGON_BORDER_WIDTH: int = 2
 
 CHIP8_SPRITE = List[int]
+
+PIXEL_COLORS = {
+    0: (0, 0, 0),
+    1: (250, 250, 250)
+}
 
 
 class Chip8Screen(Widget):
@@ -42,6 +49,37 @@ class Chip8Screen(Widget):
     0x01, otherwise 0x00.
     * CHIP8 has a 4 x 5 pixels hexadecimal font to draw characters. These ones are 0-9 and A-F.
 
+    Dxyn - DRAW x, y, num_bytes
+
+        Draws the sprite pointed to in the index register at the specified
+        x and y coordinates. Drawing is done via an XOR routine, meaning that
+        if the target pixel is already turned on, and a pixel is set to be
+        turned on at that same location via the draw, then the pixel is turned
+        off. The routine will wrap the pixels if they are drawn off the edge
+        of the screen. Each sprite is 8 bits (1 byte) wide. The num_bytes
+        parameter sets how tall the sprite is. Consecutive bytes in the memory
+        pointed to by the index register make up the bytes of the sprite. Each
+        bit in the sprite byte determines whether a pixel is turned on (1) or
+        turned off (0). For example, assume that the index register pointed
+        to the following 7 bytes:
+
+                       bit 0 1 2 3 4 5 6 7
+
+           byte 0          0 1 1 1 1 1 0 0
+           byte 1          0 1 0 0 0 0 0 0
+           byte 2          0 1 0 0 0 0 0 0
+           byte 3          0 1 1 1 1 1 0 0
+           byte 4          0 1 0 0 0 0 0 0
+           byte 5          0 1 0 0 0 0 0 0
+           byte 6          0 1 1 1 1 1 0 0
+
+        This would draw a character on the screen that looks like an 'E'. The
+        x_source and y_source tell which registers contain the x and y
+        coordinates for the sprite. If writing a pixel to a location causes
+        that pixel to be turned off, then VF will be set to 1.
+
+           Bits:  15-12     11-8      7-4       3-0
+                  unused    x_source  y_source  num_bytes
     """
     SPRITE_0: CHIP8_SPRITE = [0xF0, 0x90, 0x90, 0x90, 0xF0]   # 0
     SPRITE_1: CHIP8_SPRITE = [0x20, 0x60, 0x20, 0x20, 0x70]   # 1
@@ -106,6 +144,61 @@ class Chip8Screen(Widget):
         polygon(surface, (128, 200, 255), self.points)
         polygon(surface, (255, 128, 0),   self.points, POLYGON_BORDER_WIDTH)
         self.animate()
+
+    def draw_normal(self, x_pos, y_pos, num_bytes):
+        """
+        Draws a sprite on the screen while in NORMAL mode.
+
+        Args:
+            x_pos:      the X position of the sprite
+            y_pos:      the Y position of the sprite
+            num_bytes:  the number of bytes to draw
+        """
+        for y_index in range(num_bytes):
+
+            color_byte = bin(self.memory[self.registers['index'] + y_index])
+            color_byte = color_byte[2:].zfill(8)
+            y_coord = y_pos + y_index
+            y_coord = y_coord % Chip8Screen.HEIGHT
+
+            for x_index in range(8):
+
+                x_coord = x_pos + x_index
+                x_coord = x_coord % Chip8Screen.WIDTH
+
+                color = int(color_byte[x_index])
+                current_color = self.screen.get_pixel(x_coord, y_coord)
+
+                if color == 1 and current_color == 1:
+                    self.registers['v'][0xF] = self.registers['v'][0xF] | 1
+                    color = 0
+
+                elif color == 0 and current_color == 1:
+                    color = 1
+
+                self.draw_pixel(x_coord, y_coord, color)
+
+        self.screen.update()
+
+    def draw_pixel(self, surface, x_pos, y_pos, pixel_color):
+        """
+        Turn a pixel on or off at the specified location on the screen. Note
+        that the pixel will not automatically be drawn on the screen, you
+        must call the update() function to flip the drawing buffer to the
+        display. The coordinate system starts with (0, 0) being in the top
+        left of the screen.
+
+        Args:
+            surface: The surface to drawn on
+            x_pos: the x coordinate to place the pixel
+            y_pos: the y coordinate to place the pixel
+            pixel_color: the color of the pixel to draw
+        """
+        x_base = x_pos * self.SCALE_FACTOR
+        y_base = y_pos * self.SCALE_FACTOR
+        draw.rect(surface,
+                  PIXEL_COLORS[pixel_color],
+                  (x_base, y_base, self.SCALE_FACTOR, self.SCALE_FACTOR))
 
     def animate(self):
         r = self.rect
