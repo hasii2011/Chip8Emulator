@@ -40,6 +40,12 @@
         "org.hasii.chip8.Chip8": {
             "level":     "INFO",
             "propagate": "False"
+        },
+        "org.hasii.chip8.Chip8Screen": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
         }
+
     }
 }

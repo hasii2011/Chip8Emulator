@@ -15,6 +15,9 @@ class Chip8Registers:
     BORROW_BIT:    int = 0x00
     NO_BORROW_BIT: int = 0x01
 
+    SPRITE_COLLISION_BIT:    int = 0x01
+    NO_SPRITE_COLLISION_BIT: int = 0x00
+
     def __init__(self):
 
         self.logger: Logger = getLogger(__name__)

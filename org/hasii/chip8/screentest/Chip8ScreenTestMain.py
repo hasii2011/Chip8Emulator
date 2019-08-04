@@ -42,10 +42,7 @@ def main():
     pygame.init()
     pygame.display.set_caption("Python Chip 8 Emulator")
 
-    windowWidthHeight: Tuple[int,int] = (
-                (Chip8Screen.WIDTH  * Chip8Screen.SCALE_FACTOR) + MENU_BAR_WIDTH_ADJUSTMENT,
-                (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT
-            )
+    windowWidthHeight: Tuple[int,int] = (720, 500)
     surface: Surface = pygame.display.set_mode(windowWidthHeight)
     shell:   Chip8ScreenTestUIShell = Chip8ScreenTestUIShell(theSurface=surface)
 

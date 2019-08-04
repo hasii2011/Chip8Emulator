@@ -22,8 +22,21 @@ from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionErr
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
 
+BIT0_MASK: int = 0x80
+BIT1_MASK: int = 0x40
+BIT2_MASK: int = 0x20
+BIT3_MASK: int = 0x10
+BIT4_MASK: int = 0x08
+BIT5_MASK: int = 0x04
+BIT6_MASK: int = 0x02
+BIT7_MASK: int = 0x01
+
+BIT_MASKS: List[int] = [BIT0_MASK, BIT1_MASK, BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK, BIT6_MASK, BIT7_MASK]
+
 
 class Chip8:
+
+    debugVirtualScreen: bool = True
 
     ROM_PKG               = "org.hasii.chip8.roms"
     PROGRAM_START_ADDRESS = 0x200
@@ -38,6 +51,12 @@ class Chip8:
     SPECIAL_REGISTERS_BASE_OP_CODE = 0xF000
 
     CPU_CYCLE: int = 1000 // 60
+
+    VIRTUAL_WIDTH:        int = 64
+    VIRTUAL_HEIGHT:       int = 32
+
+    VIRTUAL_SCREEN_ROW = List[int]
+    virtualScreen: List[VIRTUAL_SCREEN_ROW] = []
 
     def __init__(self):
 
@@ -91,6 +110,12 @@ class Chip8:
             Chip8Mnemonics.RDR.value:  self.specialRegistersInstructions,
         }
         self.logger.debug(f"{self.memory}")
+
+        for row in range(0, self.VIRTUAL_HEIGHT):
+            columns: List[int] = []
+            for col in range(0, self.VIRTUAL_WIDTH):
+                columns. append(0)
+            self.virtualScreen.append(columns)
 
     def getDelayTimer(self) -> int:
         return self._delayTimer
@@ -387,6 +412,37 @@ class Chip8:
         self.logger.debug(f"{self.memory}")
         self._debugPrintMemory(startByteNbr=0, nBytes=len(self.memory))
 
+    def loadSprite(self, theSprite: List[int], startMemoryAddress: int):
+
+        memAddress: int = startMemoryAddress
+        for sprite in theSprite:
+            self.memory[memAddress] = sprite
+            memAddress += 1
+
+    def drawOnVirtualScreen(self, xCoord: int, yCoord: int, nBytes: int):
+        """
+
+        Args:
+            xCoord: x-coordinate on virtual screen
+            yCoord: y-coordinate on virtual screen
+            nBytes: The number of bytes to copy from where the `indexRegister` points
+        """
+        self.registers.setValue(Chip8RegisterName.VF, Chip8Registers.NO_SPRITE_COLLISION_BIT)
+
+        startAddress: int = self.indexRegister
+
+        for byteNum in range(nBytes):
+            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
+
+            for bitNum in range(8):
+                spriteByte:       int = self.memory[startAddress + byteNum]
+                maskedSpriteBit:  int = spriteByte & BIT_MASKS[bitNum]
+                spriteBit = maskedSpriteBit >> (7 - bitNum)
+                self.logger.debug(f"spriteByte: {bin(spriteByte)} spriteBit: {spriteBit:X}")
+                currentVirtualScreenRow[xCoord + bitNum] = spriteBit
+            yCoord += 1
+        self._dumpVirtualScreen()
+
     def _findTheROM(self, theFileName: str):
 
         fileName = resource_filename(Chip8.ROM_PKG, theFileName)
@@ -451,6 +507,21 @@ class Chip8:
             self.logger.info(f"{z:05X} {endByteIndex-2:05X}  {subStr.upper()}")
 
             z += bytesPerRow
+
+    def _dumpVirtualScreen(self,
+                           startRow: int = 0, xCoord: int = 0, nRows: int = VIRTUAL_HEIGHT,
+                           startCol: int = 0, yCoord: int = 0, nCols: int = VIRTUAL_WIDTH):
+
+        if self.debugVirtualScreen is True:
+            self.logger.info("DUMPING VIRTUAL SCREEN")
+            self.logger.info("                             1                   2                   3                   4                   5                   6")
+            self.logger.info("         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3")
+            for rowNum in range(startRow, nRows):
+                bitRow: str = f'Row: {rowNum:2} |'
+                virtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[rowNum]
+                for colNum in range(startCol, nCols):
+                    bitRow = bitRow + f"{virtualScreenRow[colNum]:1}|"
+                self.logger.info(f"{bitRow}")
 
     @classmethod
     def generateRandomByte(cls) -> int:

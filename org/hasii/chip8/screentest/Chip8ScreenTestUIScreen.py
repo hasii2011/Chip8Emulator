@@ -78,7 +78,7 @@ class Chip8ScreenTestUIScreen(Screen):
         inputRow:      Row    = Row(items=widgetList, **rowAttrs)
         framedInputRow: Frame = Frame(client=inputRow)
 
-        chip8Screen:   Chip8Screen = Chip8Screen(self.shell)
+        chip8Screen:   Chip8Screen = Chip8Screen()
 
         columnAttrs = {
             "align": "l",
@@ -87,7 +87,7 @@ class Chip8ScreenTestUIScreen(Screen):
         }
         contents = Column([framedInputRow, chip8Screen], **columnAttrs)
 
-        self.logger.info(f"framedInputRow size: {framedInputRow.size}, shell width: {self.shell.width}")
+        self.logger.info(f"framedInputRow size: {framedInputRow.size}, shell width: {self.shell.width} shell.height: {self.shell.height}")
         self.add(contents)
 
     def selectAction(self, theSelectedItem: str):

@@ -1,11 +1,17 @@
 
+from typing import List
+from typing import Dict
+
 from logging import Logger
 from logging import getLogger
 
 from test.BaseTest import BaseTest
 
 from org.hasii.chip8.Chip8 import Chip8
+from org.hasii.chip8.Chip8 import BIT_MASKS
+
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
+from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 
@@ -16,6 +22,47 @@ class TestChip8(BaseTest):
     REGISTER_STORE_VALUE:    int = 0xFE
     REGISTER_READ_VALUE:     int = 0xCC
     RANDOM_VALUE:            int = 0xBB
+    SPRITE_START_ADDRESS:    int = 0x400
+
+    NUM_SPRITES:      int = 16
+    BYTES_PER_SPRITE: int = 5
+
+    CHIP8_SPRITE = List[int]
+    SPRITE_0: CHIP8_SPRITE = [0xF0, 0x90, 0x90, 0x90, 0xF0]   # 0
+    SPRITE_1: CHIP8_SPRITE = [0x20, 0x60, 0x20, 0x20, 0x70]   # 1
+    SPRITE_2: CHIP8_SPRITE = [0xF0, 0x10, 0xF0, 0x80, 0xF0]   # 2
+    SPRITE_3: CHIP8_SPRITE = [0xF0, 0x10, 0xF0, 0x10, 0xF0]   # 3
+    SPRITE_4: CHIP8_SPRITE = [0x90, 0x90, 0xF0, 0x10, 0x10]   # 4
+    SPRITE_5: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x10, 0xF0]   # 5
+    SPRITE_6: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x90, 0xF0]   # 6
+    SPRITE_7: CHIP8_SPRITE = [0xF0, 0x10, 0x20, 0x40, 0x50]   # 7
+    SPRITE_8: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x90, 0xF0]   # 8
+    SPRITE_9: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x10, 0xF0]   # 9
+    SPRITE_A: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x90, 0x90]   # A
+    SPRITE_B: CHIP8_SPRITE = [0xE0, 0x90, 0xE0, 0x90, 0xE0]   # B
+    SPRITE_C: CHIP8_SPRITE = [0xF0, 0x80, 0x80, 0x80, 0xF0]   # C
+    SPRITE_D: CHIP8_SPRITE = [0xE0, 0x90, 0x90, 0x90, 0xE0]   # D
+    SPRITE_E: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0xF0]   # E
+    SPRITE_F: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0x80]   # F
+
+    SPRITES: Dict[Chip8SpriteType, CHIP8_SPRITE] = {
+        Chip8SpriteType.SPRITE_0: SPRITE_0,
+        Chip8SpriteType.SPRITE_1: SPRITE_1,
+        Chip8SpriteType.SPRITE_2: SPRITE_2,
+        Chip8SpriteType.SPRITE_3: SPRITE_3,
+        Chip8SpriteType.SPRITE_4: SPRITE_4,
+        Chip8SpriteType.SPRITE_5: SPRITE_5,
+        Chip8SpriteType.SPRITE_6: SPRITE_6,
+        Chip8SpriteType.SPRITE_7: SPRITE_7,
+        Chip8SpriteType.SPRITE_8: SPRITE_8,
+        Chip8SpriteType.SPRITE_9: SPRITE_9,
+        Chip8SpriteType.SPRITE_A: SPRITE_A,
+        Chip8SpriteType.SPRITE_B: SPRITE_B,
+        Chip8SpriteType.SPRITE_C: SPRITE_C,
+        Chip8SpriteType.SPRITE_D: SPRITE_D,
+        Chip8SpriteType.SPRITE_E: SPRITE_E,
+        Chip8SpriteType.SPRITE_F: SPRITE_F,
+    }
 
     clsLogger: Logger = None
 
@@ -504,6 +551,70 @@ class TestChip8(BaseTest):
             randByte: int = Chip8.generateRandomByte()
             self.logger.debug(f"x: {x} randByte: {randByte}")
             self.assertTrue(randByte <= 255, "Too big of a random byte")
+
+    def testLoadSprites(self):
+
+        self._loadAllSpritesInMemory()
+
+        spriteLen: int = len(self.SPRITE_0)
+        startAddress: int = self.SPRITE_START_ADDRESS
+
+        self.chip8._debugPrintMemory(startByteNbr=startAddress, nBytes=(len(self.SPRITES) * spriteLen), bytesPerRow=spriteLen)
+
+        memAddress: int = startAddress
+        for spriteByte in self.SPRITE_0:
+            expectedValue: int = spriteByte
+            actualValue:   int = self.chip8.memory[memAddress]
+            self.assertEqual(expectedValue, actualValue, "Sprite not correctly copied")
+            memAddress += 1
+
+    def testDrawOnVirtualScreen(self):
+        """
+        Simplest test.  Load sprite (SPRITE_F) at screen address 0,0
+
+        """
+
+        self._loadAllSpritesInMemory()
+        self.chip8.indexRegister = self.SPRITE_START_ADDRESS + ((self.NUM_SPRITES - 1) * self.BYTES_PER_SPRITE)
+
+        xCoord: int = 0
+        yCoord: int = 0
+        nBytes: int = len(self.SPRITE_F)
+        startAddress: int = self.chip8.indexRegister
+
+        self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
+
+        for byteNum in range(nBytes):
+            cvRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[yCoord]
+            self.logger.info(f"cvRow: {cvRow}")
+            spriteByte: int = self.chip8.memory[startAddress + byteNum]
+            self.logger.info(f"spriteByte: {spriteByte:X}")
+            for bitNum in range(8):
+                maskedSpriteBit: int = spriteByte & BIT_MASKS[bitNum]
+                spriteBit = maskedSpriteBit >> (7 - bitNum)
+                bitFromScreen: int = cvRow[bitNum]
+                self.assertEqual(bitFromScreen, spriteBit, f"Virtual screen bit {byteNum + bitNum} not set sprite byteNum {byteNum}, ")
+            yCoord += 1
+
+    def testDrawOnVirtualScreenCrossColumns(self):
+        """
+        Slightly more complicated; Draw in middle of screen
+
+        """
+        self._loadAllSpritesInMemory()
+        self.chip8.indexRegister = self.SPRITE_START_ADDRESS
+
+        self.chip8.drawOnVirtualScreen(xCoord=Chip8.VIRTUAL_WIDTH//2, yCoord=Chip8.VIRTUAL_HEIGHT//2, nBytes=len(self.SPRITE_0))
+
+    def _loadAllSpritesInMemory(self):
+        startAddress: int = self.SPRITE_START_ADDRESS
+        spriteLen: int = len(self.SPRITE_0)
+
+        loadAddress: int = startAddress
+        for spriteType in self.SPRITES:
+            sprite: List[int] = self.SPRITES[spriteType]
+            self.chip8.loadSprite(sprite, loadAddress)
+            loadAddress += spriteLen
 
     def _setupRegisters(self, registerValue: int):
         """
