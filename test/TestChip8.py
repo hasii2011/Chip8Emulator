@@ -467,7 +467,7 @@ class TestChip8(BaseTest):
         regName:  Chip8RegisterName = Chip8RegisterName.V0
         incValue:      int = 0x0123
         initIdxRegVal: int = 0x0323
-        instruction: int = 0xF01E
+        instruction:   int = 0xF01E
 
         self.chip8.registers.setValue(v=regName, newValue=incValue)
         self.chip8.indexRegister = initIdxRegVal
@@ -478,6 +478,30 @@ class TestChip8(BaseTest):
         actualValue:   int = self.chip8.indexRegister
 
         self.assertEqual(expectedValue, actualValue, "Index register not correctly incremented")
+
+    def testStoreBCD(self):
+        """
+        # Fx33; LDB B, Vx;
+        Store BCD representation of Vx in memory locations I, I+1, and I+2
+        """
+        instruction: int = 0xF033
+        bcdVal:      int = 128
+        memLocation: int = 0x0400
+
+        self.chip8.registers.setValue(Chip8RegisterName.V0, bcdVal)
+        self.chip8.indexRegister = memLocation
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedValue1: int = 1
+        expectedValue2: int = 2
+        expectedValue3: int = 8
+        actualValue1:   int = self.chip8.memory[memLocation]
+        actualValue2:   int = self.chip8.memory[memLocation + 1]
+        actualValue3:   int = self.chip8.memory[memLocation + 2]
+
+        self.assertEqual(expectedValue1, actualValue1, f"bcdValue1 @ 0x{memLocation:X} not incorrectly encoded")
+        self.assertEqual(expectedValue2, actualValue2, f"bcdValue2 @ 0x{memLocation+1:X} not incorrectly encoded")
+        self.assertEqual(expectedValue3, actualValue3, f"bcdValue3 @ 0x{memLocation+2:X} not incorrectly encoded")
 
     def testStoreRegisters(self):
         """
@@ -584,17 +608,7 @@ class TestChip8(BaseTest):
 
         self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
 
-        for byteNum in range(nBytes):
-            cvRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[yCoord]
-            self.logger.info(f"cvRow: {cvRow}")
-            spriteByte: int = self.chip8.memory[startAddress + byteNum]
-            self.logger.info(f"spriteByte: {spriteByte:X}")
-            for bitNum in range(8):
-                maskedSpriteBit: int = spriteByte & BIT_MASKS[bitNum]
-                spriteBit = maskedSpriteBit >> (7 - bitNum)
-                bitFromScreen: int = cvRow[bitNum]
-                self.assertEqual(bitFromScreen, spriteBit, f"Virtual screen bit {byteNum + bitNum} not set sprite byteNum {byteNum}, ")
-            yCoord += 1
+        self._verifyVirtualDraw(xCoord=xCoord, yCoord=yCoord, startAddress=startAddress, nBytes=nBytes)
 
     def testDrawOnVirtualScreenCrossColumns(self):
         """
@@ -604,7 +618,29 @@ class TestChip8(BaseTest):
         self._loadAllSpritesInMemory()
         self.chip8.indexRegister = self.SPRITE_START_ADDRESS
 
-        self.chip8.drawOnVirtualScreen(xCoord=Chip8.VIRTUAL_WIDTH//2, yCoord=Chip8.VIRTUAL_HEIGHT//2, nBytes=len(self.SPRITE_0))
+        xCoord: int = Chip8.VIRTUAL_WIDTH//2
+        yCoord: int  = Chip8.VIRTUAL_HEIGHT // 2
+        nBytes: int = len(self.SPRITE_0)
+        startAddress: int = self.chip8.indexRegister
+
+        self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
+
+        self._verifyVirtualDraw(xCoord=xCoord, yCoord=yCoord, startAddress=startAddress, nBytes=nBytes)
+
+    def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
+
+        for byteNum in range(nBytes):
+            cvRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[yCoord]
+            self.logger.info(f"cvRow: {cvRow}")
+            spriteByte: int = self.chip8.memory[startAddress + byteNum]
+            self.logger.info(f"spriteByte: {spriteByte:X}")
+
+            for bitNum in range(8):
+                maskedSpriteBit: int = spriteByte & BIT_MASKS[bitNum]
+                spriteBit = maskedSpriteBit >> (7 - bitNum)
+                bitFromScreen: int = cvRow[xCoord + bitNum]
+                self.assertEqual(bitFromScreen, spriteBit, f"Virtual screen bit {byteNum + bitNum} not set sprite byteNum {byteNum}, ")
+            yCoord += 1
 
     def _loadAllSpritesInMemory(self):
         startAddress: int = self.SPRITE_START_ADDRESS

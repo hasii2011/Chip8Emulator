@@ -380,7 +380,14 @@ class Chip8:
         elif subOpCode == 0x29:
             pass
         elif subOpCode == 0x33:
-            pass
+            regVal:  int  = self.registers.getValue(regName)
+            memLoc:  int = self.indexRegister
+
+            self.memory[memLoc]     = regVal // 100
+            self.memory[memLoc + 1] = (regVal // 10) % 10
+            self.memory[memLoc + 2] = (regVal % 100) % 10
+            self.logger.info(f"memLoc: '{self.memory[memLoc]}' memLoc+1: '{self.memory[memLoc+1]}' memLoc+2: '{self.memory[memLoc+2]}'")
+
         elif subOpCode == 0x55:
             lastRegValue: int = cast(int, regName.value)
             for x in range(0, lastRegValue + 1):
