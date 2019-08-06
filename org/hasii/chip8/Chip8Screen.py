@@ -82,6 +82,8 @@ class Chip8Screen(Widget):
 
            Bits:  15-12     11-8      7-4       3-0
                   unused    x_source  y_source  num_bytes
+
+    The sprite data should be stored in the interpreter area of Chip-8 memory (0x000 to 0x1FF)
     """
 
     SCALE_FACTOR: int = 10
