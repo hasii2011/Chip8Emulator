@@ -623,7 +623,18 @@ class TestChip8(BaseTest):
         pass
 
     def testDrawOnVirtualScreenWrapOnSouthAxis(self):
-        pass
+        """
+        Draw on the lower left-hand corner
+        """
+        xCoord: int = 0
+        yCoord: int = Chip8.VIRTUAL_HEIGHT - 2
+        nBytes: int = len(Chip8.SPRITE_6)
+        spriteDigit:        int = Chip8SpriteType.SPRITE_6.value
+        spriteStartAddress: int = Chip8.SPRITE_START_ADDRESS + (spriteDigit * Chip8.BYTES_PER_SPRITE)
+
+        self.chip8.indexRegister = spriteStartAddress
+
+        self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
 
     def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
 

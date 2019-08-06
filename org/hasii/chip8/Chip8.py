@@ -481,6 +481,8 @@ class Chip8:
 
         drawY: int = yCoord
         for byteNum in range(nBytes):
+            if drawY > (Chip8.VIRTUAL_HEIGHT - 1):
+                drawY = 0
             currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[drawY]
 
             drawX: int = xCoord
