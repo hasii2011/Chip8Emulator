@@ -598,6 +598,18 @@ class TestChip8(BaseTest):
 
         self._verifyVirtualDraw(xCoord=xCoord, yCoord=yCoord, startAddress=startAddress, nBytes=nBytes)
 
+    def testDrawOnVirtualScreenWrapRightAxis(self):
+        pass
+
+    def testDrawOnVirtualScreenWrapLeftAxis(self):
+        pass
+
+    def testDrawOnVirtualScreenWrapOnNorthAxis(self):
+        pass
+
+    def testDrawOnVirtualScreenWrapOnSouthAxis(self):
+        pass
+    
     def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
 
         for byteNum in range(nBytes):
