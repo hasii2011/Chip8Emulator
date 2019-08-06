@@ -592,6 +592,7 @@ class TestChip8(BaseTest):
         xCoord: int = Chip8.VIRTUAL_WIDTH//2
         yCoord: int  = Chip8.VIRTUAL_HEIGHT // 2
         nBytes: int = len(Chip8.SPRITE_0)
+
         startAddress: int = self.chip8.indexRegister
 
         self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
@@ -599,7 +600,21 @@ class TestChip8(BaseTest):
         self._verifyVirtualDraw(xCoord=xCoord, yCoord=yCoord, startAddress=startAddress, nBytes=nBytes)
 
     def testDrawOnVirtualScreenWrapRightAxis(self):
-        pass
+        """
+        Draw on upper right-hand corner
+        """
+        xCoord: int = Chip8.VIRTUAL_WIDTH - 2
+        yCoord: int = 0
+        nBytes: int = len(Chip8.SPRITE_6)
+
+        spriteDigit:        int = Chip8SpriteType.SPRITE_6.value
+        spriteStartAddress: int = Chip8.SPRITE_START_ADDRESS + (spriteDigit * Chip8.BYTES_PER_SPRITE)
+
+        self.chip8.indexRegister = spriteStartAddress
+
+        self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
+
+        self._verifyVirtualDraw(xCoord=xCoord, yCoord=yCoord, startAddress=spriteStartAddress, nBytes=nBytes)
 
     def testDrawOnVirtualScreenWrapLeftAxis(self):
         pass
@@ -609,32 +624,33 @@ class TestChip8(BaseTest):
 
     def testDrawOnVirtualScreenWrapOnSouthAxis(self):
         pass
-    
+
     def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
 
+        readY: int = yCoord
         for byteNum in range(nBytes):
-            cvRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[yCoord]
+            cvRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[readY]
             self.logger.info(f"cvRow: {cvRow}")
             spriteByte: int = self.chip8.memory[startAddress + byteNum]
             self.logger.info(f"spriteByte: {spriteByte:X}")
 
+            readX: int = xCoord
             for bitNum in range(8):
                 maskedSpriteBit: int = spriteByte & BIT_MASKS[bitNum]
                 spriteBit = maskedSpriteBit >> (7 - bitNum)
-                bitFromScreen: int = cvRow[xCoord + bitNum]
+                if readX > (Chip8.VIRTUAL_WIDTH - 1):
+                    readX = 0
+                bitFromScreen: int = cvRow[readX]
+                readX += 1
                 self.assertEqual(bitFromScreen, spriteBit, f"Virtual screen bit {byteNum + bitNum} not set sprite byteNum {byteNum}, ")
-            yCoord += 1
+            readY += 1
 
     def _setupRegisters(self, registerValue: int):
         """
         Initializes registers V0-V3
         Args:
             registerValue: Load into registers
-
-        Returns:
-
         """
-
         self.chip8.indexRegister = 0x0400
         self.chip8.registers.setValue(Chip8RegisterName.V0, registerValue)
         self.chip8.registers.setValue(Chip8RegisterName.V1, registerValue)

@@ -479,16 +479,25 @@ class Chip8:
 
         startAddress: int = self.indexRegister
 
+        drawY: int = yCoord
         for byteNum in range(nBytes):
-            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
+            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[drawY]
 
+            drawX: int = xCoord
             for bitNum in range(8):
                 spriteByte:       int = self.memory[startAddress + byteNum]
                 maskedSpriteBit:  int = spriteByte & BIT_MASKS[bitNum]
                 spriteBit = maskedSpriteBit >> (7 - bitNum)
                 self.logger.debug(f"spriteByte: {bin(spriteByte)} spriteBit: {spriteBit:X}")
-                currentVirtualScreenRow[xCoord + bitNum] = spriteBit
-            yCoord += 1
+                #
+                # Wrap on x if necessary
+                #
+                if drawX  > (Chip8.VIRTUAL_WIDTH - 1):
+                    drawX = 0
+                currentVirtualScreenRow[drawX] = spriteBit
+                drawX += 1
+            drawY += 1
+
         self._dumpVirtualScreen()
 
     def _findTheROM(self, theFileName: str):
