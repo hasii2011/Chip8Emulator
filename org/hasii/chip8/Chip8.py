@@ -17,6 +17,7 @@ from org.hasii.chip8.Chip8KeyPad import Chip8KeyPad
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
+from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
@@ -38,25 +39,68 @@ class Chip8:
 
     debugVirtualScreen: bool = True
 
-    ROM_PKG               = "org.hasii.chip8.roms"
-    PROGRAM_START_ADDRESS = 0x200
+    ROM_PKG: str            = "org.hasii.chip8.roms"
+
+    SPRITE_START_ADDRESS:  int = 0x000
+    PROGRAM_START_ADDRESS: int = 0x200
+    INSTRUCTION_SIZE:      int = 2       # in bytes
+
     OPCODE_MASK           = 0xF000
     ENHANCED_OP_CODE_MASK = 0xF0FF
-    IDX_REG_MASK          = 0x0FFF
-    LOC_JMP_MASK          = 0x0FFF
-    MAX_IDX_REG_VAL       = 0x0FFF
 
-    INSTRUCTION_SIZE      = 2       # in bytes
+    SPECIAL_REGISTERS_BASE_OP_CODE: int = 0xF000
 
-    SPECIAL_REGISTERS_BASE_OP_CODE = 0xF000
+    IDX_REG_MASK:    int = 0x0FFF
+    LOC_JMP_MASK:    int = 0x0FFF
+    MAX_IDX_REG_VAL: int = 0x0FFF
 
     CPU_CYCLE: int = 1000 // 60
 
-    VIRTUAL_WIDTH:        int = 64
-    VIRTUAL_HEIGHT:       int = 32
+    VIRTUAL_WIDTH:  int = 64
+    VIRTUAL_HEIGHT: int = 32
 
     VIRTUAL_SCREEN_ROW = List[int]
     virtualScreen: List[VIRTUAL_SCREEN_ROW] = []
+
+    NUM_SPRITES:      int = 16
+    BYTES_PER_SPRITE: int = 5
+
+    CHIP8_SPRITE = List[int]
+    SPRITE_0: CHIP8_SPRITE = [0xF0, 0x90, 0x90, 0x90, 0xF0]   # 0
+    SPRITE_1: CHIP8_SPRITE = [0x20, 0x60, 0x20, 0x20, 0x70]   # 1
+    SPRITE_2: CHIP8_SPRITE = [0xF0, 0x10, 0xF0, 0x80, 0xF0]   # 2
+    SPRITE_3: CHIP8_SPRITE = [0xF0, 0x10, 0xF0, 0x10, 0xF0]   # 3
+    SPRITE_4: CHIP8_SPRITE = [0x90, 0x90, 0xF0, 0x10, 0x10]   # 4
+    SPRITE_5: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x10, 0xF0]   # 5
+    SPRITE_6: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x90, 0xF0]   # 6
+    SPRITE_7: CHIP8_SPRITE = [0xF0, 0x10, 0x20, 0x40, 0x50]   # 7
+    SPRITE_8: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x90, 0xF0]   # 8
+    SPRITE_9: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x10, 0xF0]   # 9
+    SPRITE_A: CHIP8_SPRITE = [0xF0, 0x90, 0xF0, 0x90, 0x90]   # A
+    SPRITE_B: CHIP8_SPRITE = [0xE0, 0x90, 0xE0, 0x90, 0xE0]   # B
+    SPRITE_C: CHIP8_SPRITE = [0xF0, 0x80, 0x80, 0x80, 0xF0]   # C
+    SPRITE_D: CHIP8_SPRITE = [0xE0, 0x90, 0x90, 0x90, 0xE0]   # D
+    SPRITE_E: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0xF0]   # E
+    SPRITE_F: CHIP8_SPRITE = [0xF0, 0x80, 0xF0, 0x80, 0x80]   # F
+
+    SPRITES: Dict[Chip8SpriteType, CHIP8_SPRITE] = {
+        Chip8SpriteType.SPRITE_0: SPRITE_0,
+        Chip8SpriteType.SPRITE_1: SPRITE_1,
+        Chip8SpriteType.SPRITE_2: SPRITE_2,
+        Chip8SpriteType.SPRITE_3: SPRITE_3,
+        Chip8SpriteType.SPRITE_4: SPRITE_4,
+        Chip8SpriteType.SPRITE_5: SPRITE_5,
+        Chip8SpriteType.SPRITE_6: SPRITE_6,
+        Chip8SpriteType.SPRITE_7: SPRITE_7,
+        Chip8SpriteType.SPRITE_8: SPRITE_8,
+        Chip8SpriteType.SPRITE_9: SPRITE_9,
+        Chip8SpriteType.SPRITE_A: SPRITE_A,
+        Chip8SpriteType.SPRITE_B: SPRITE_B,
+        Chip8SpriteType.SPRITE_C: SPRITE_C,
+        Chip8SpriteType.SPRITE_D: SPRITE_D,
+        Chip8SpriteType.SPRITE_E: SPRITE_E,
+        Chip8SpriteType.SPRITE_F: SPRITE_F,
+    }
 
     def __init__(self):
 
@@ -116,6 +160,8 @@ class Chip8:
             for col in range(0, self.VIRTUAL_WIDTH):
                 columns. append(0)
             self.virtualScreen.append(columns)
+
+        self._loadAllSpritesInMemory()
 
     def getDelayTimer(self) -> int:
         return self._delayTimer
@@ -378,7 +424,10 @@ class Chip8:
         elif subOpCode == 0x1E:
             self.indexRegister += self.registers.getValue(regName)
         elif subOpCode == 0x29:
-            pass
+            spriteDigit: int = self.registers.getValue(v=regName)
+            memAddress:  int = Chip8.SPRITE_START_ADDRESS + (spriteDigit * Chip8.BYTES_PER_SPRITE)
+            self.logger.info(f"Sprite: 0x{spriteDigit} is at address: 0x{memAddress}")
+            self.indexRegister = memAddress
         elif subOpCode == 0x33:
             regVal:  int  = self.registers.getValue(regName)
             memLoc:  int = self.indexRegister
@@ -387,7 +436,6 @@ class Chip8:
             self.memory[memLoc + 1] = (regVal // 10) % 10
             self.memory[memLoc + 2] = (regVal % 100) % 10
             self.logger.info(f"memLoc: '{self.memory[memLoc]}' memLoc+1: '{self.memory[memLoc+1]}' memLoc+2: '{self.memory[memLoc+2]}'")
-
         elif subOpCode == 0x55:
             lastRegValue: int = cast(int, regName.value)
             for x in range(0, lastRegValue + 1):
@@ -418,13 +466,6 @@ class Chip8:
 
         self.logger.debug(f"{self.memory}")
         self._debugPrintMemory(startByteNbr=0, nBytes=len(self.memory))
-
-    def loadSprite(self, theSprite: List[int], startMemoryAddress: int):
-
-        memAddress: int = startMemoryAddress
-        for sprite in theSprite:
-            self.memory[memAddress] = sprite
-            memAddress += 1
 
     def drawOnVirtualScreen(self, xCoord: int, yCoord: int, nBytes: int):
         """
@@ -481,6 +522,23 @@ class Chip8:
 
     def _decodeRegisterToRegisterOpCode(self):
         return self.instruction & 0x000F
+
+    def _loadAllSpritesInMemory(self):
+        startAddress: int = Chip8.SPRITE_START_ADDRESS
+        spriteLen: int = len(Chip8.SPRITE_0)
+
+        loadAddress: int = startAddress
+        for spriteType in Chip8.SPRITES:
+            sprite: List[int] = Chip8.SPRITES[spriteType]
+            self._loadSprite(sprite, loadAddress)
+            loadAddress += spriteLen
+
+    def _loadSprite(self, theSprite: List[int], startMemoryAddress: int):
+
+        memAddress: int = startMemoryAddress
+        for sprite in theSprite:
+            self.memory[memAddress] = sprite
+            memAddress += 1
 
     def _debugPrintMemory(self, startByteNbr: int, nBytes: int, bytesPerRow: int = 32):
         """
