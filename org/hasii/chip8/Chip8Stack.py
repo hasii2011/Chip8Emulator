@@ -34,3 +34,17 @@ class Chip8Stack:
 
     def size(self) -> int:
         return len(self.items)
+
+    def __repr__(self):
+        stackDump: str = (
+            f'Stack Dump\n'
+            f'_____________________________'
+        )
+        stackDepth: int = len(self.items)
+        if stackDepth == 0:
+            stackDump += f'empty {{}}'
+        else:
+            for x in range(stackDepth):
+                stackDump += f'\nStack entry[{x}] - 0x{self.items[x]:04X}'
+
+        return stackDump

@@ -37,7 +37,8 @@ BIT_MASKS: List[int] = [BIT0_MASK, BIT1_MASK, BIT2_MASK, BIT3_MASK, BIT4_MASK, B
 
 class Chip8:
 
-    debugVirtualScreen: bool = True
+    debugVirtualScreen: bool = False
+    debugPrintMemory:   bool = False
 
     ROM_PKG: str            = "org.hasii.chip8.roms"
 
@@ -228,6 +229,7 @@ class Chip8:
         except KeyError:
             raise UnknownInstructionError(badInstruction=op)
 
+        self.pc += Chip8.INSTRUCTION_SIZE
         instruction()
 
     def fetchInstruction(self):
@@ -572,17 +574,18 @@ class Chip8:
         #
         #     self.logger.info(f"{hex(x):6} {hex(endByteIndex-2):6}  {subStr}")
 
-        z: int = startByteNbr
-        while z < (startByteNbr + nBytes):
+        if self.debugPrintMemory is True:
+            z: int = startByteNbr
+            while z < (startByteNbr + nBytes):
 
-            endByteIndex: int = z + bytesPerRow
-            subMemory = self.memory[z:endByteIndex]
-            subMemoryBytes: bytes = bytes(subMemory)
-            subStr:         str   = subMemoryBytes.hex()
+                endByteIndex: int = z + bytesPerRow
+                subMemory = self.memory[z:endByteIndex]
+                subMemoryBytes: bytes = bytes(subMemory)
+                subStr:         str   = subMemoryBytes.hex()
 
-            self.logger.info(f"{z:05X} {endByteIndex-2:05X}  {subStr.upper()}")
+                self.logger.info(f"{z:05X} {endByteIndex-2:05X}  {subStr.upper()}")
 
-            z += bytesPerRow
+                z += bytesPerRow
 
     def _dumpVirtualScreen(self,
                            startRow: int = 0, xCoord: int = 0, nRows: int = VIRTUAL_HEIGHT,
@@ -598,6 +601,22 @@ class Chip8:
                 for colNum in range(startCol, nCols):
                     bitRow = bitRow + f"{virtualScreenRow[colNum]:1}|"
                 self.logger.info(f"{bitRow}")
+
+    def __repr__(self):
+        cpuDump: str = (
+            f'Debug dump the CPU\n'
+            f'__________________________________________________\n'
+            f'pc: 0x{self.pc:04X}\n'
+            f'Index register: 0x{self.indexRegister:04X}\n'
+            f'Sound timer: 0x{self.soundTimer:04X}\n'
+            f'Delay timer: 0x{self.delayTimer:04X}\n'            
+            f'Current instruction: 0x{self.instruction:04X}\n'
+            f'Register Dump:\n{self.registers}'
+            f'{self.keypad}'
+            f'{self.stack}'
+        )
+
+        return cpuDump
 
     @classmethod
     def generateRandomByte(cls) -> int:

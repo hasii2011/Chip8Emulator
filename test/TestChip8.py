@@ -19,6 +19,7 @@ class TestChip8(BaseTest):
     REGISTER_STORE_VALUE:    int = 0xFE
     REGISTER_READ_VALUE:     int = 0xCC
     RANDOM_VALUE:            int = 0xBB
+    TEST_STACK_DEPTH:        int = 5
 
     clsLogger: Logger = None
 
@@ -32,6 +33,26 @@ class TestChip8(BaseTest):
         """"""
         self.chip8:  Chip8  = Chip8()
         self.logger: Logger = TestChip8.clsLogger
+
+    def testRepr(self):
+
+        self.chip8.loadROM("Missile")
+        self.chip8.registers.setValue(Chip8RegisterName.V1, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.V3, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.V5, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.V7, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.V9, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.VA, Chip8.generateRandomByte())
+        self.chip8.registers.setValue(Chip8RegisterName.VC, Chip8.generateRandomByte())
+
+        self.chip8.indexRegister = Chip8.PROGRAM_START_ADDRESS + 100
+        self.chip8.soundTimer    = 0x20
+        self.chip8.delayTimer    = 0x40
+        for x in range(TestChip8.TEST_STACK_DEPTH):
+            self.chip8.stack.push(Chip8.PROGRAM_START_ADDRESS + self.chip8.generateRandomByte())
+        self.chip8.fetchInstruction()
+
+        self.logger.info(f'{self.chip8.__repr__()}')
 
     def testJumpToAddress(self):
 
@@ -548,7 +569,7 @@ class TestChip8(BaseTest):
 
         for x in range(TestChip8.MAX_GEN_RAND_LOOP_COUNT):
             randByte: int = Chip8.generateRandomByte()
-            self.logger.debug(f"x: {x} randByte: {randByte}")
+            self.logger.info(f"x: {x} randByte: 0x{randByte:2X}")
             self.assertTrue(randByte <= 255, "Too big of a random byte")
 
     def testLoadSprites(self):

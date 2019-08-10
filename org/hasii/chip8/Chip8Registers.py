@@ -163,5 +163,8 @@ class Chip8Registers:
         strMe: str = ""
 
         for v in Chip8RegisterName:
-            strMe += f"{v.name}:0x{self.registers[v]:x} "
+            if v != Chip8RegisterName.VF:
+                strMe += f'{v.name}:0x{self.registers[v]:<2X} '
+            else:
+                strMe += f'\nFlag Register: 0x{self.registers[v]:02X}'
         return strMe
