@@ -78,7 +78,7 @@ class Chip8ScreenTestUIScreen(Screen):
         inputRow:      Row    = Row(items=widgetList, **rowAttrs)
         framedInputRow: Frame = Frame(client=inputRow)
 
-        chip8Screen:   Chip8Screen = Chip8Screen()
+        chip8Screen:   Chip8Screen = Chip8Screen(Chip8.virtualScreen)
 
         columnAttrs = {
             "align": "l",
@@ -100,6 +100,11 @@ class Chip8ScreenTestUIScreen(Screen):
             alert("Please select a sprite type")
         else:
             self.logger.info(f"vX: {self.vXvalue} vY: {self.vYvalue}")
+            spriteDigit: int = self.selectedSprite.value
+            spriteStartAddress: int = Chip8.SPRITE_START_ADDRESS + (spriteDigit * Chip8.BYTES_PER_SPRITE)
+
+            self.chip8.indexRegister = spriteStartAddress
+            self.chip8.drawOnVirtualScreen(xCoord=self.vXvalue, yCoord=self.vYvalue, nBytes=Chip8.BYTES_PER_SPRITE)
 
     def timer_event(self, theEvent: Event):
         """

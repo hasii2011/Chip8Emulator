@@ -7,10 +7,13 @@ from logging import getLogger
 import random
 
 from pygame import Rect
+from pygame import draw
+from pygame import Color
 
 from albow.core.ui.Widget import Widget
 from albow.themes.Theme import Theme
 
+from org.hasii.chip8.Chip8 import Chip8
 POLYGON_BORDER_WIDTH: int = 2
 
 CHIP8_SPRITE = List[int]
@@ -90,11 +93,12 @@ class Chip8Screen(Widget):
     WIDTH:        int = 64
     HEIGHT:       int = 32
 
-    def __init__(self, **attrs):
+    def __init__(self, virtualScreen: List[Chip8.VIRTUAL_SCREEN_ROW], **attrs):
 
         self.border_width = 1
         self.border_color = Theme.BLACK
 
+        self.virtualScreen: List[Chip8.VIRTUAL_SCREEN_ROW] = virtualScreen
         super().__init__(**attrs)
 
         self.logger: Logger = getLogger(__name__)
@@ -113,12 +117,38 @@ class Chip8Screen(Widget):
         ]
 
     def draw(self, surface):
-        from pygame.draw import polygon
+        # from pygame.draw import polygon
+        #
+        # surface.fill(Theme.BLUE)
+        # polygon(surface, (128, 200, 255), self.points)
+        # polygon(surface, (255, 128, 0),   self.points, POLYGON_BORDER_WIDTH)
+        # self.animate()
+        for yCoord in range(Chip8Screen.HEIGHT):
+            virtualRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
+            for xCoord in range(Chip8Screen.WIDTH):
+                if virtualRow[xCoord] == 1:
+                    self.draw_pixel(surface, x_pos=xCoord, y_pos=yCoord, pixel_color=1)
 
-        surface.fill(Theme.BLUE)
-        polygon(surface, (128, 200, 255), self.points)
-        polygon(surface, (255, 128, 0),   self.points, POLYGON_BORDER_WIDTH)
-        self.animate()
+    def draw_pixel(self, surface, x_pos, y_pos, pixel_color):
+        """
+        Turn a pixel on or off at the specified location on the screen. Note
+        that the pixel will not automatically be drawn on the screen, you
+        must call the update() function to flip the drawing buffer to the
+        display. The coordinate system starts with (0, 0) being in the top
+        left of the screen.
+
+        Args:
+            surface:
+            x_pos:  the x coordinate to place the pixel
+            y_pos:  the x coordinate to place the pixel
+            pixel_color:    the color of the pixel to draw
+        """
+
+        x_base = x_pos * self.SCALE_FACTOR
+        y_base = y_pos * self.SCALE_FACTOR
+        draw.rect(surface,
+                  PIXEL_COLORS[pixel_color],
+                  (x_base, y_base, self.SCALE_FACTOR, self.SCALE_FACTOR))
 
     def animate(self):
         r = self.rect
