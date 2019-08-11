@@ -47,5 +47,5 @@ class Chip8KeyPad:
 
         retStr: str = 'Chip8 Keypad state dump\n'
         for key in self.keyPressed:
-            retStr += f'{key.value:2X}->{self.keyPressed.get(key)},'
+            retStr += f'{key.value:X}->{self.keyPressed.get(key)} '
         return retStr
