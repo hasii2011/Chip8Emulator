@@ -611,9 +611,9 @@ class Chip8:
             f'Sound timer: 0x{self.soundTimer:04X}\n'
             f'Delay timer: 0x{self.delayTimer:04X}\n'            
             f'Current instruction: 0x{self.instruction:04X}\n'
-            f'Register Dump:\n{self.registers}'
+            f'{self.registers}\n'
+            f'{self.stack}\n'
             f'{self.keypad}'
-            f'{self.stack}'
         )
 
         return cpuDump

@@ -160,7 +160,7 @@ class Chip8Registers:
 
     def __repr__(self):
 
-        strMe: str = ""
+        strMe: str = "Register Dump:\n"
 
         for v in Chip8RegisterName:
             if v != Chip8RegisterName.VF:

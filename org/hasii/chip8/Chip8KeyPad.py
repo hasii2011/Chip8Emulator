@@ -46,6 +46,7 @@ class Chip8KeyPad:
     def __repr__(self):
 
         retStr: str = 'Chip8 Keypad state dump\n'
+        retStr += '__________________________\n'
         for key in self.keyPressed:
             retStr += f'{key.value:X}->{self.keyPressed.get(key)} '
         return retStr
