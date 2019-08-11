@@ -15,7 +15,7 @@ class Chip8KeyPad:
 
         self.logger: Logger = getLogger(__name__)
 
-        self.keyPressed: Dict[Chip8KeyPad, bool] = {
+        self.keyPressed: Dict[Chip8KeyPadKeys, bool] = {
             Chip8KeyPadKeys.Zero:   False,
             Chip8KeyPadKeys.One:    False,
             Chip8KeyPadKeys.Two:    False,
@@ -45,7 +45,7 @@ class Chip8KeyPad:
 
     def __repr__(self):
 
-        retStr: str = 'Chip8 Keypad state dump:\n'
+        retStr: str = 'Chip8 Keypad state dump\n'
         for key in self.keyPressed:
             key = cast(Chip8KeyPadKeys, key)
             retStr += f'{key.value:2X}->{self.keyPressed.get(key)},'
