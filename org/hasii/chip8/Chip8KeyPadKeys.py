@@ -41,6 +41,14 @@ class Chip8KeyPadKeys(Enum):
 
     @staticmethod
     def toEnum(key: int) -> 'Chip8KeyPadKeys':
+        """
+        Converts pygame keyboard keys to the Chip 8 equivalent
+        Args:
+            key:   The pygame keyboard value
+
+        Returns:  The Chip 8 enumeration value
+
+        """
 
         if key == K_0:
             return Chip8KeyPadKeys.Zero

@@ -29,8 +29,8 @@ class Chip8Mnemonics(Enum):
     LDI  = 0xA000   # Annn; LDI I, addr;    Set I = nnn; The value of register I is set to nnn
     JPV  = 0xB000   # Bnnn; JP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
     RND  = 0xC000   # Cxkk; RND Vx, byte;   Set Vx = random byte AND kk     interpreter generates a random number from 0 to 255
-    DRW  = 0xD000   # Dxyn; DRW Vx, Vy, nibble;  Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision (TBD)
-    SKP  = 0xE09E   # Ex9E; SKP Vx;             Skip next instruction if key with the value of Vx is pressed                         (TBD)
+    DRW  = 0xD000   # Dxyn; DRW Vx, Vy, nibble;  Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+    SKP  = 0xE09E   # Ex9E; SKP Vx;             Skip next instruction if key with the value of Vx is pressed
     SKNP = 0xE0A1   # ExA1; SKNP Vx;            Skip next instruction if key with the value of Vx is not pressed                     (TBD)
     LDRT = 0xF007   # Fx07; LDT Vx, DT;         Set Vx = delay timer value
     LDK  = 0xF00A   # Fx0A; LDK Vx, K;          Wait for a key press, store the value of the key in Vx.

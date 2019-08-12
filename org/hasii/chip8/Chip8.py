@@ -23,6 +23,7 @@ from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
+from org.hasii.chip8.errors.UnknownKeyPressedOpSubOpCode import UnknownKeyPressedOpSubOpCode
 
 
 class Chip8:
@@ -40,8 +41,10 @@ class Chip8:
 
     OPCODE_MASK           = 0xF000
     ENHANCED_OP_CODE_MASK = 0xF0FF
+    SKIP_OP_CODE_MASK     = 0xF0FF
 
     SPECIAL_REGISTERS_BASE_OP_CODE: int = 0xF000
+    SKIP_BASED_ON_KEYBOARD_OP_CODE: int = 0xE000
 
     IDX_REG_MASK:    int = 0x0FFF
     LOC_JMP_MASK:    int = 0x0FFF
@@ -145,8 +148,8 @@ class Chip8:
             Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
             Chip8Mnemonics.RND.value:  self.rndByte,
             Chip8Mnemonics.DRW.value:  self.displaySprite,
-            Chip8Mnemonics.SKP.value:  self.skipNextVxDependingOnKeyPressed,
-            Chip8Mnemonics.SKNP.value: self.skipNextVxDependingOnKeyNotPressed,
+            Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
+            Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
             Chip8Mnemonics.LDRT.value: self.specialRegistersInstructions,
             Chip8Mnemonics.LDK.value:  self.specialRegistersInstructions,
             Chip8Mnemonics.SDT.value:  self.specialRegistersInstructions,
@@ -227,6 +230,8 @@ class Chip8:
 
         if op == Chip8.SPECIAL_REGISTERS_BASE_OP_CODE:
             op = self.instruction & Chip8.ENHANCED_OP_CODE_MASK
+        elif op == Chip8.SKIP_BASED_ON_KEYBOARD_OP_CODE:
+            op = self.instruction & Chip8.SKIP_OP_CODE_MASK
 
         opStr: str = hex(op)
         self.logger.debug(f"opStr: {opStr}")
@@ -399,6 +404,16 @@ class Chip8:
         nibble:  int = self._decodeNibble()
         self.drawOnVirtualScreen(xCoord=vxValue, yCoord=vyValue, nBytes=nibble)
 
+    def skipNextKeyPressedInstructions(self):
+        self.logger.info(f'Key pressed instruction 0x{self.instruction:4X}')
+        subOpCode: int = self._decodeSkipKeyboardRegisterSubOpCode()
+        if subOpCode == 0x9E:
+            self.skipNextVxDependingOnKeyPressed()
+        elif subOpCode == 0xA1:
+            self.skipNextVxDependingOnKeyNotPressed()
+        else:
+            raise UnknownKeyPressedOpSubOpCode(invalidSubOpCode=subOpCode)
+
     def skipNextVxDependingOnKeyPressed(self):
         """
         Ex9E; SKP Vx;
@@ -407,7 +422,7 @@ class Chip8:
         """
         vxRegName: Chip8RegisterName = self._decodeLeftRegister()
         vxValue: int = self.registers.getValue(vxRegName)
-        keyPadKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(vxValue)
+        keyPadKey: Chip8KeyPadKeys = Chip8KeyPadKeys(vxValue)
         if self.keypad.isKeyPressed(keyPadKey) is True:
             self.pc += Chip8.INSTRUCTION_SIZE
 
@@ -557,10 +572,16 @@ class Chip8:
     def _decodeNibble(self) -> int:
         return self.instruction & 0x00F
 
-    def _decodeSpecialRegistersSubOpCode(self):
+    def _decodeSkipKeyboardRegisterSubOpCode(self) -> int:
+        """
+        Same mask but want code to self-document
+        """
+        return self._decodeSpecialRegistersSubOpCode()
+
+    def _decodeSpecialRegistersSubOpCode(self) -> int:
         return self.instruction & 0x00FF
 
-    def _decodeRegisterToRegisterOpCode(self):
+    def _decodeRegisterToRegisterOpCode(self) -> int:
         return self.instruction & 0x000F
 
     def _loadAllSpritesInMemory(self):

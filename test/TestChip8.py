@@ -8,6 +8,7 @@ from org.hasii.chip8.Chip8 import Chip8
 
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
+from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 
@@ -658,6 +659,23 @@ class TestChip8(BaseTest):
         self.chip8.indexRegister = spriteStartAddress
 
         self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)
+
+    def testSkipNextVxDependingOnKeyPressed(self):
+        """
+        Ex9E; SKP Vx;
+        Skip next instruction if key with the value of Vx is pressed
+        """
+        self.chip8.pc = self.chip8.PROGRAM_START_ADDRESS
+        instruction: int = 0xE99E
+        self.chip8.registers.setValue(v=Chip8RegisterName.V9, newValue=Chip8KeyPadKeys.C.value)
+        self.chip8.keypad.keyDown(Chip8KeyPadKeys.C)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedPC: int = self.chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
+        actualPC:   int = self.chip8.pc
+
+        self.assertEqual(expectedPC, actualPC, "CPU did not properly increment the PC")
 
     def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
 
