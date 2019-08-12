@@ -682,6 +682,33 @@ class TestChip8(BaseTest):
 
         self._setupAndExecuteKeyPressedTest(expectedPC, 'CPU should not increment PC past next instruction')
 
+    def testSkipNextVxDependingOnKeyNotPressed(self):
+        """
+        ExA1; SKNP Vx;
+        Skip next instruction if key with the value of Vx is not pressed
+        """
+        self.chip8.keypad.keyUp(Chip8KeyPadKeys.A)      # Key is NOT pressed
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
+
+        self._setupAndExecuteKeyNotPressedTest(expectedPC, 'PC should have skipped next instruction')
+
+    def testSkipNextVxDependingOnKeyNotPressedFail(self):
+        self.chip8.keypad.keyDown(Chip8KeyPadKeys.A)      # Key IS pressed
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+
+        self._setupAndExecuteKeyNotPressedTest(expectedPC, 'PC should NOT have skipped next instruction')
+
+    def _setupAndExecuteKeyNotPressedTest(self, expectedPC: int, failureMessage: str):
+        instruction: int = 0xEAA1
+        self.chip8.pc = self.chip8.PROGRAM_START_ADDRESS
+        self.chip8.registers.setValue(v=Chip8RegisterName.VA, newValue=Chip8KeyPadKeys.A.value)
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualPC:   int = self.chip8.pc
+
+        self.assertEqual(expectedPC, actualPC, failureMessage)
+
     def _setupAndExecuteKeyPressedTest(self, expectedPC: int, failureMessage: str):
 
         self.chip8.pc = self.chip8.PROGRAM_START_ADDRESS

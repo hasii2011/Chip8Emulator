@@ -405,33 +405,35 @@ class Chip8:
         self.drawOnVirtualScreen(xCoord=vxValue, yCoord=vyValue, nBytes=nibble)
 
     def skipNextKeyPressedInstructions(self):
-        self.logger.info(f'Key pressed instruction 0x{self.instruction:4X}')
+
         subOpCode: int = self._decodeSkipKeyboardRegisterSubOpCode()
+        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
+        vxValue:   int = self.registers.getValue(vxRegName)
+        keyPadKey: Chip8KeyPadKeys = Chip8KeyPadKeys(vxValue)
+
         if subOpCode == 0x9E:
-            self.skipNextVxDependingOnKeyPressed()
+            self.skipNextVxDependingOnKeyPressed(keyPadKey)
         elif subOpCode == 0xA1:
-            self.skipNextVxDependingOnKeyNotPressed()
+            self.skipNextVxDependingOnKeyNotPressed(keyPadKey)
         else:
             raise UnknownKeyPressedOpSubOpCode(invalidSubOpCode=subOpCode)
 
-    def skipNextVxDependingOnKeyPressed(self):
+    def skipNextVxDependingOnKeyPressed(self, keyPadKey: Chip8KeyPadKeys):
         """
         Ex9E; SKP Vx;
 
         Skip next instruction if key with the value of Vx is pressed
         """
-        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
-        vxValue: int = self.registers.getValue(vxRegName)
-        keyPadKey: Chip8KeyPadKeys = Chip8KeyPadKeys(vxValue)
         if self.keypad.isKeyPressed(keyPadKey) is True:
             self.pc += Chip8.INSTRUCTION_SIZE
 
-    def skipNextVxDependingOnKeyNotPressed(self):
+    def skipNextVxDependingOnKeyNotPressed(self, keyPadKey: Chip8KeyPadKeys):
         """
         ExA1; SKNP Vx;
         Skip next instruction if key with the value of Vx is not pressed
         """
-        pass
+        if self.keypad.isKeyPressed(keyPadKey) is False:
+            self.pc += Chip8.INSTRUCTION_SIZE
 
     def specialRegistersInstructions(self):
         """
