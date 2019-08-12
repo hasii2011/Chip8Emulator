@@ -110,6 +110,11 @@ class Chip8UIScreen(Screen):
         except (UnknownInstructionError, InvalidIndexRegisterValue, UnKnownSpecialRegistersSubOpCode) as e:
             self.logger.error(f"Chip 8 failure: {e}")
             self.logger.error(f"Chip Dump:\n {self.chip8}")
+            self.chip8.debugPrintMemory = True
+            self.logger.error(f'                        MEMORY DUMP')
+            self.logger.error(f'____________________________________________________________________')
+            self.chip8._debugPrintMemory(startByteNbr=0, nBytes=len(self.chip8.memory))
+
             self.shell.quit()
 
         return True

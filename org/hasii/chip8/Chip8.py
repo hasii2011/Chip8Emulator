@@ -23,17 +23,6 @@ from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionErr
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
 
-BIT0_MASK: int = 0x80
-BIT1_MASK: int = 0x40
-BIT2_MASK: int = 0x20
-BIT3_MASK: int = 0x10
-BIT4_MASK: int = 0x08
-BIT5_MASK: int = 0x04
-BIT6_MASK: int = 0x02
-BIT7_MASK: int = 0x01
-
-BIT_MASKS: List[int] = [BIT0_MASK, BIT1_MASK, BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK, BIT6_MASK, BIT7_MASK]
-
 
 class Chip8:
 
@@ -61,6 +50,17 @@ class Chip8:
 
     VIRTUAL_WIDTH:  int = 64
     VIRTUAL_HEIGHT: int = 32
+
+    BIT0_MASK: int = 0x80
+    BIT1_MASK: int = 0x40
+    BIT2_MASK: int = 0x20
+    BIT3_MASK: int = 0x10
+    BIT4_MASK: int = 0x08
+    BIT5_MASK: int = 0x04
+    BIT6_MASK: int = 0x02
+    BIT7_MASK: int = 0x01
+
+    BIT_MASKS: List[int] = [BIT0_MASK, BIT1_MASK, BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK, BIT6_MASK, BIT7_MASK]
 
     VIRTUAL_SCREEN_ROW = List[int]
     virtualScreen: List[VIRTUAL_SCREEN_ROW] = []
@@ -388,9 +388,14 @@ class Chip8:
 
         Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
 
-        TODO:
         """
-        pass
+        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
+        vyRegName: Chip8RegisterName = self._decodeRightRegister()
+
+        vxValue: int = self.registers.getValue(vxRegName)
+        vyValue: int = self.registers.getValue(vyRegName)
+        nibble:  int = self._decodeNibble()
+        self.drawOnVirtualScreen(xCoord=vxValue, yCoord=vyValue, nBytes=nibble)
 
     def skipNextVxDependingOnKeyPressed(self):
         """
@@ -501,7 +506,7 @@ class Chip8:
             drawX: int = xCoord
             for bitNum in range(8):
                 spriteByte:       int = self.memory[startAddress + byteNum]
-                maskedSpriteBit:  int = spriteByte & BIT_MASKS[bitNum]
+                maskedSpriteBit:  int = spriteByte & Chip8.BIT_MASKS[bitNum]
                 spriteBit = maskedSpriteBit >> (7 - bitNum)
                 self.logger.debug(f"spriteByte: {bin(spriteByte)} spriteBit: {spriteBit:X}")
                 #
@@ -509,6 +514,9 @@ class Chip8:
                 #
                 if drawX  > (Chip8.VIRTUAL_WIDTH - 1):
                     drawX = 0
+                #
+                # TODO: This should be an XOR and set of VF register if there was a collision
+                #
                 currentVirtualScreenRow[drawX] = spriteBit
                 drawX += 1
             drawY += 1
@@ -540,6 +548,9 @@ class Chip8:
 
     def _decodeLiteral(self) -> int:
         return self.instruction & 0x00FF
+
+    def _decodeNibble(self) -> int:
+        return self.instruction & 0x00F
 
     def _decodeSpecialRegistersSubOpCode(self):
         return self.instruction & 0x00FF
@@ -594,7 +605,7 @@ class Chip8:
                 subMemoryBytes: bytes = bytes(subMemory)
                 subStr:         str   = subMemoryBytes.hex()
 
-                self.logger.info(f"{z:05X} {endByteIndex-2:05X}  {subStr.upper()}")
+                self.logger.info(f"{z:04X}-{endByteIndex-2:04X}  {subStr.upper()}")
 
                 z += bytesPerRow
 

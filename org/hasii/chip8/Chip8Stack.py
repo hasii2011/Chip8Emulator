@@ -38,7 +38,7 @@ class Chip8Stack:
     def __repr__(self):
         stackDump: str = (
             f'Stack Dump\n'
-            f'_____________________________'
+            f'_____________________________\n'
         )
         stackDepth: int = len(self.items)
         if stackDepth == 0:
