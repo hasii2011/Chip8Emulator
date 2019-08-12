@@ -14,6 +14,7 @@ from pkg_resources import resource_filename
 
 from org.hasii.chip8.Chip8Stack import Chip8Stack
 from org.hasii.chip8.Chip8KeyPad import Chip8KeyPad
+from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
@@ -217,6 +218,7 @@ class Chip8:
             self.fetchInstruction()
         else:
             self.instruction = instruction
+        self.pc += Chip8.INSTRUCTION_SIZE
 
         instStr: str = hex(self.instruction)
         self.logger.debug(f"currentInstruction: {instStr}")
@@ -233,7 +235,6 @@ class Chip8:
         except KeyError:
             raise UnknownInstructionError(badInstruction=op)
 
-        self.pc += Chip8.INSTRUCTION_SIZE
         instruction()
         self.instructionCount += 1
         if self.instructionCount == 9:
@@ -360,12 +361,13 @@ class Chip8:
 
     def jumpToLocationPlusVZero(self):
         """
-        Bnnn; JP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
+        Bnnn; JP V0, addr;    Jump to location nnn + V0
+        The program counter is set to nnn plus the value of V0
         """
         v0Val:    int = self.registers.getValue(Chip8RegisterName.V0)
         instrVal: int = self.instruction & 0x0FFF
 
-        self.pc = self.pc + v0Val + instrVal
+        self.pc = instrVal + v0Val
 
     def rndByte(self):
         """
@@ -402,9 +404,12 @@ class Chip8:
         Ex9E; SKP Vx;
 
         Skip next instruction if key with the value of Vx is pressed
-        TODO:
         """
-        pass
+        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
+        vxValue: int = self.registers.getValue(vxRegName)
+        keyPadKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(vxValue)
+        if self.keypad.isKeyPressed(keyPadKey) is True:
+            self.pc += Chip8.INSTRUCTION_SIZE
 
     def skipNextVxDependingOnKeyNotPressed(self):
         """

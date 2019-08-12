@@ -5,7 +5,6 @@ from logging import getLogger
 from test.BaseTest import BaseTest
 
 from org.hasii.chip8.Chip8 import Chip8
-from org.hasii.chip8.Chip8 import BIT_MASKS
 
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
@@ -74,7 +73,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
 
         self.assertEqual(expectedPC, self.chip8.pc, "Did not correctly skip next instruction")
 
@@ -87,7 +86,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit+1)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
 
         self.assertEqual(expectedPC, self.chip8.pc, "incorrectly skipped next instruction")
 
@@ -100,7 +99,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit+1)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
 
         self.assertEqual(expectedPC, self.chip8.pc, "Did not skip next instruction")
 
@@ -115,7 +114,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=lit)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
@@ -127,7 +126,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0x04)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should skip next instruction")
 
@@ -141,7 +140,7 @@ class TestChip8(BaseTest):
         self.chip8.registers.setValue(v=Chip8RegisterName.VC, newValue=0x0F)
 
         self.chip8.emulateSingleCpuCycle(instruction)
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
 
         self.assertEqual(expectedPC, self.chip8.pc, "Should not skip next instruction")
 
@@ -317,7 +316,7 @@ class TestChip8(BaseTest):
 
         self.chip8.emulateSingleCpuCycle(instruction)
 
-        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + 0xFE + Chip8.INSTRUCTION_SIZE
+        expectedPC: int = Chip8.PROGRAM_START_ADDRESS + 0xFE + (Chip8.INSTRUCTION_SIZE * 2)
 
         self.logger.info(f"pc After: {self.chip8.pc:X}")
 
@@ -334,7 +333,10 @@ class TestChip8(BaseTest):
 
         self.chip8.emulateSingleCpuCycle(instruction)
 
-        expectedPC: int = nonIncrementedAddress
+        #
+        # The PC however does increment to the next instruction, not past it
+        #
+        expectedPC: int = nonIncrementedAddress + Chip8.INSTRUCTION_SIZE
 
         self.logger.info(f"pc After: {self.chip8.pc:X}")
 
@@ -373,7 +375,7 @@ class TestChip8(BaseTest):
         self.chip8.emulateSingleCpuCycle(instruction)
 
         self.logger.info(f"pc After: {self.chip8.pc:X}")
-        expectedValue: int = Chip8.PROGRAM_START_ADDRESS + 0x123 + 0x123
+        expectedValue: int =  0x123 + 0x123
         actualValue:   int = self.chip8.pc
 
         self.assertEqual(expectedValue, actualValue, "Program count did not properly increment")
@@ -668,7 +670,7 @@ class TestChip8(BaseTest):
 
             readX: int = xCoord
             for bitNum in range(8):
-                maskedSpriteBit: int = spriteByte & BIT_MASKS[bitNum]
+                maskedSpriteBit: int = spriteByte & Chip8.BIT_MASKS[bitNum]
                 spriteBit = maskedSpriteBit >> (7 - bitNum)
                 if readX > (Chip8.VIRTUAL_WIDTH - 1):
                     readX = 0
