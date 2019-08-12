@@ -31,7 +31,7 @@ class Chip8Mnemonics(Enum):
     RND  = 0xC000   # Cxkk; RND Vx, byte;   Set Vx = random byte AND kk     interpreter generates a random number from 0 to 255
     DRW  = 0xD000   # Dxyn; DRW Vx, Vy, nibble;  Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
     SKP  = 0xE09E   # Ex9E; SKP Vx;             Skip next instruction if key with the value of Vx is pressed
-    SKNP = 0xE0A1   # ExA1; SKNP Vx;            Skip next instruction if key with the value of Vx is not pressed                     (TBD)
+    SKNP = 0xE0A1   # ExA1; SKNP Vx;            Skip next instruction if key with the value of Vx is not pressed
     LDRT = 0xF007   # Fx07; LDT Vx, DT;         Set Vx = delay timer value
     LDK  = 0xF00A   # Fx0A; LDK Vx, K;          Wait for a key press, store the value of the key in Vx.
     SDT  = 0xF015   # Fx15; SDT DT, Vx;         Set delay timer = Vx

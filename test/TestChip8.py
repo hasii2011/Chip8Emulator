@@ -665,17 +665,32 @@ class TestChip8(BaseTest):
         Ex9E; SKP Vx;
         Skip next instruction if key with the value of Vx is pressed
         """
+        self.chip8.keypad.keyDown(Chip8KeyPadKeys.C)
+        expectedPC: int = self.chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
+
+        self._setupAndExecuteKeyPressedTest(expectedPC, 'CPU did not properly increment the PC')
+
+    def testSkipNextVxDependingOnKeyPressedFail(self):
+        """
+        Ex9E; SKP Vx;
+        Skip next instruction if key with the value of Vx is pressed
+
+        Key is not pressed
+        """
+        self.chip8.keypad.keyUp(Chip8KeyPadKeys.C)
+        expectedPC: int = self.chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
+
+        self._setupAndExecuteKeyPressedTest(expectedPC, 'CPU should not increment PC past next instruction')
+
+    def _setupAndExecuteKeyPressedTest(self, expectedPC: int, failureMessage: str):
+
         self.chip8.pc = self.chip8.PROGRAM_START_ADDRESS
         instruction: int = 0xE99E
         self.chip8.registers.setValue(v=Chip8RegisterName.V9, newValue=Chip8KeyPadKeys.C.value)
-        self.chip8.keypad.keyDown(Chip8KeyPadKeys.C)
-
         self.chip8.emulateSingleCpuCycle(instruction)
-
-        expectedPC: int = self.chip8.PROGRAM_START_ADDRESS + (Chip8.INSTRUCTION_SIZE * 2)
         actualPC:   int = self.chip8.pc
 
-        self.assertEqual(expectedPC, actualPC, "CPU did not properly increment the PC")
+        self.assertEqual(expectedPC, actualPC, failureMessage)
 
     def _verifyVirtualDraw(self, xCoord: int, yCoord: int, startAddress: int, nBytes: int):
 
