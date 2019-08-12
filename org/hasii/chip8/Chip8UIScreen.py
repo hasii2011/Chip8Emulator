@@ -21,6 +21,10 @@ from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 
+from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
+from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
+from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
+
 
 class Chip8UIScreen(Screen):
 
@@ -59,6 +63,10 @@ class Chip8UIScreen(Screen):
         self.surface: Surface = theSurface
         self.logger:  Logger = getLogger(__name__)
         self.chip8:   Chip8 = Chip8()
+        #
+        # TEMP TEMP TEMP; until I get File->Load working
+        #
+        self.chip8.loadROM("Missile")
 
         menus = [
             Chip8UIScreen.fileMenu, Chip8UIScreen.helpMenu
@@ -67,7 +75,7 @@ class Chip8UIScreen(Screen):
         menuBar = MenuBar(menus=menus, width=self.shell.width)
 
         framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
-        chip8Screen:   Chip8Screen = Chip8Screen(self.shell)
+        chip8Screen:   Chip8Screen = Chip8Screen(self.chip8.virtualScreen)
         columnAttrs = {
             "align": "l",
             'expand': 0
@@ -92,9 +100,17 @@ class Chip8UIScreen(Screen):
         # milliseconds   = clock.tick(1000)         # milliseconds passed since last frame; needs to agree witH Chip8UIShell value
         # self.logger.info(f"milliseconds: {milliseconds}")
         milliseconds: float = theEvent.dict['time']
-        self.logger.debug(f"milliseconds: {milliseconds}")
-        self.chip8.decrementDelayTimer()
-        self.chip8.decrementSoundTimer()
+        seconds:      float = milliseconds/1000
+        self.logger.debug(f"seconds: {seconds:5.3f}")
+        try:
+            if self.chip8.romLoaded is True:
+                self.chip8.emulateSingleCpuCycle()
+                self.chip8.decrementDelayTimer()
+                self.chip8.decrementSoundTimer()
+        except (UnknownInstructionError, InvalidIndexRegisterValue, UnKnownSpecialRegistersSubOpCode) as e:
+            self.logger.error(f"Chip 8 failure: {e}")
+            self.logger.error(f"Chip Dump:\n {self.chip8}")
+            self.shell.quit()
 
         return True
 

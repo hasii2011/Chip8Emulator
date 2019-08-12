@@ -41,8 +41,10 @@ class Chip8:
     debugPrintMemory:   bool = False
 
     ROM_PKG: str            = "org.hasii.chip8.roms"
-
-    SPRITE_START_ADDRESS:  int = 0x000
+    #
+    # from http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
+    #
+    SPRITE_START_ADDRESS:  int = 0x50
     PROGRAM_START_ADDRESS: int = 0x200
     INSTRUCTION_SIZE:      int = 2       # in bytes
 
@@ -143,7 +145,7 @@ class Chip8:
             Chip8Mnemonics.RND.value:  self.rndByte,
             Chip8Mnemonics.DRW.value:  self.displaySprite,
             Chip8Mnemonics.SKP.value:  self.skipNextVxDependingOnKeyPressed,
-            Chip8Mnemonics.SKNP.value: self.skipNextVxDependingOnKeyPressed,
+            Chip8Mnemonics.SKNP.value: self.skipNextVxDependingOnKeyNotPressed,
             Chip8Mnemonics.LDRT.value: self.specialRegistersInstructions,
             Chip8Mnemonics.LDK.value:  self.specialRegistersInstructions,
             Chip8Mnemonics.SDT.value:  self.specialRegistersInstructions,
@@ -163,6 +165,8 @@ class Chip8:
             self.virtualScreen.append(columns)
 
         self._loadAllSpritesInMemory()
+        self.romLoaded:        bool = False
+        self.instructionCount: int  = 0
 
     def getDelayTimer(self) -> int:
         return self._delayTimer
@@ -231,6 +235,10 @@ class Chip8:
 
         self.pc += Chip8.INSTRUCTION_SIZE
         instruction()
+        self.instructionCount += 1
+        if self.instructionCount == 9:
+            self.logger.info(f"CPU DUMP: \n {self.__repr__()}")
+            self.logger.info(f"--------------------------------")
 
     def fetchInstruction(self):
         self.instruction = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
@@ -389,12 +397,14 @@ class Chip8:
         Ex9E; SKP Vx;
 
         Skip next instruction if key with the value of Vx is pressed
-
-        ExA1; SKNP Vx;
-
-        Skip next instruction if key with the value of Vx is not pressed
-
         TODO:
+        """
+        pass
+
+    def skipNextVxDependingOnKeyNotPressed(self):
+        """
+        ExA1; SKNP Vx;
+        Skip next instruction if key with the value of Vx is not pressed
         """
         pass
 
@@ -466,6 +476,7 @@ class Chip8:
         for byte in range(len(rom)):
             self.memory[self.pc + byte] = rom[byte]
 
+        self.romLoaded = True
         self.logger.debug(f"{self.memory}")
         self._debugPrintMemory(startByteNbr=0, nBytes=len(self.memory))
 
@@ -611,6 +622,8 @@ class Chip8:
             f'Sound timer: 0x{self.soundTimer:04X}\n'
             f'Delay timer: 0x{self.delayTimer:04X}\n'            
             f'Current instruction: 0x{self.instruction:04X}\n'
+            f'Instruction count: {self.instructionCount}\n'
+            f'Rom loaded? {self.romLoaded}'
             f'{self.registers}\n'
             f'{self.stack}\n'
             f'{self.keypad}'
