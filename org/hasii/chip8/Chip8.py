@@ -242,18 +242,15 @@ class Chip8:
 
         instruction()
         self.instructionCount += 1
-        if self.instructionCount == 9:
-            self.logger.info(f"CPU DUMP: \n {self.__repr__()}")
-            self.logger.info(f"--------------------------------")
 
     def fetchInstruction(self):
         self.instruction = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
-        self.logger.info(f"pc: {hex(self.pc)} instruction: {hex(self.instruction)}")
+        self.logger.debug(f"pc: {hex(self.pc)} instruction: {hex(self.instruction)}")
 
     def jumpToAddress(self):
         addr = self.instruction & 0x0FFF
         self.pc = addr
-        self.logger.info(f"new pc: {hex(self.pc)}")
+        self.logger.debug(f"new pc: {hex(self.pc)}")
 
     def skipIfRegisterEqualToLiteral(self):
         """
@@ -330,7 +327,7 @@ class Chip8:
         """
 
         subOpCode: int = self._decodeRegisterToRegisterOpCode()
-        self.logger.info(f"Reg to Reg subOpCode: {subOpCode:X}")
+        self.logger.debug(f"Reg to Reg subOpCode: {subOpCode:X}")
 
         leftRegister:  Chip8RegisterName = self._decodeLeftRegister()
         rightRegister: Chip8RegisterName = self._decodeRightRegister()
@@ -448,7 +445,7 @@ class Chip8:
         RDR  = 0xF065   # Fx65; RDR Vx, [I];    Read registers V0-Vx from memory starting at location I.
         """
         subOpCode: int = self._decodeSpecialRegistersSubOpCode()
-        self.logger.info(f"Special Registers subOpCode: {subOpCode:X}")
+        self.logger.debug(f"Special Registers subOpCode: {subOpCode:X}")
 
         regName: Chip8RegisterName = self._decodeLeftRegister()
 
@@ -517,6 +514,7 @@ class Chip8:
         """
         self.registers.setValue(Chip8RegisterName.VF, Chip8Registers.NO_SPRITE_COLLISION_BIT)
 
+        self.logger.info(f'Draw at ({xCoord},{yCoord})')
         startAddress: int = self.indexRegister
 
         drawY: int = yCoord
@@ -539,7 +537,9 @@ class Chip8:
                 #
                 # TODO: This should be an XOR and set of VF register if there was a collision
                 #
-                currentVirtualScreenRow[drawX] = spriteBit
+                if currentVirtualScreenRow[drawX] == 1 and spriteBit == 1:
+                    self.registers.setValue(v=Chip8RegisterName.VF, newValue=Chip8Registers.SPRITE_COLLISION_BIT)
+                currentVirtualScreenRow[drawX] ^= spriteBit
                 drawX += 1
             drawY += 1
 

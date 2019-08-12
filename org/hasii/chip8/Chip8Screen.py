@@ -106,7 +106,7 @@ class Chip8Screen(Widget):
         self.rect = Rect(0, 0, (self.WIDTH * self.SCALE_FACTOR), (self.HEIGHT * self.SCALE_FACTOR))
 
         w, h = self.size
-        self.logger.info(f" w: {w} h: {h} rect: {self.rect}")
+        self.logger.debug(f" w: {w} h: {h} rect: {self.rect}")
         self.points = [[100, 50], [w - 50, 100], [50, h - 50]]
 
         def randomValue():

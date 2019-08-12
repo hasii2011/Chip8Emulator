@@ -82,7 +82,7 @@ class Chip8UIScreen(Screen):
         }
         contents = Column([framedMenuBar, chip8Screen], **columnAttrs)
 
-        self.logger.info(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
+        self.logger.debug(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
         self.add(contents)
 
     def timer_event(self, theEvent: Event):
