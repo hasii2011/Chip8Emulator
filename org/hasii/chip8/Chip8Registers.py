@@ -107,24 +107,27 @@ class Chip8Registers:
         VF is set to 0 when there's a borrow, and 1 when there isn't
 
         Args:
-            vx:  Source register
+            vx:  Register to store value into after subtract from it
             vy:  Register with value to subtract
         """
         vxVal: int = self.registers[vx]
         vyVal: int = self.registers[vy]
-        if vxVal < vyVal:
-            self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
-        else:
+        self.logger.info(f'subRegisterToRegister - vxVal: {vxVal} vyVal: {vyVal}')
+        # If a borrow is NOT generated, set a carry flag in register VF.
+        if vxVal > vyVal:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
+        else:
+            self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
 
         tempReg: int = vxVal - vyVal
-        tempReg = tempReg & 0xFF
+        tempReg &= 0xFF
 
         self.registers[vx] = tempReg
 
     def subRegisterVyFromRegisterVx(self, vx: Chip8RegisterName, vy: Chip8RegisterName):
         """
-        8xy7; SUBN Vx, Vy;    Set Vx = Vy - Vx        VF is set to 0 when there's a borrow, and 1 when there isn't
+        8xy7; SUBN Vx, Vy;    Set Vx = Vy - Vx
+        VF is set to 0 when there's a borrow, and 1 when there isn't
 
         Args:
             vx:  Register with value to subtract
@@ -132,6 +135,8 @@ class Chip8Registers:
         """
         vxVal: int = self.registers[vx]
         vyVal: int = self.registers[vy]
+
+        self.logger.info(f'subRegisterVyFromRegisterVx - vxVal: {vxVal} vyVal: {vyVal}')
 
         if vyVal < vxVal:       # flipped, I think this is correct
             self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
@@ -160,11 +165,11 @@ class Chip8Registers:
 
     def __repr__(self):
 
-        strMe: str = "Register Dump:\n"
+        strMe: str = "Register Dump - "
 
         for v in Chip8RegisterName:
             if v != Chip8RegisterName.VF:
                 strMe += f'{v.name}:0x{self.registers[v]:<2X} '
             else:
-                strMe += f'\nFlag Register: 0x{self.registers[v]:02X}'
+                strMe += f'Flag Register: 0x{self.registers[v]:02X}'
         return strMe

@@ -1,3 +1,4 @@
+from typing import cast
 
 from logging import Logger
 from logging import getLogger
@@ -24,6 +25,7 @@ from org.hasii.chip8.Chip8Screen import Chip8Screen
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
+from org.hasii.chip8.Chip8Beep import Chip8Beep
 
 
 class Chip8UIScreen(Screen):
@@ -67,6 +69,8 @@ class Chip8UIScreen(Screen):
         # TEMP TEMP TEMP; until I get File->Load working
         #
         self.chip8.loadROM("Missile")
+
+        self.note: Chip8Beep = cast(Chip8Beep, None)
 
         menus = [
             Chip8UIScreen.fileMenu, Chip8UIScreen.helpMenu
@@ -120,11 +124,19 @@ class Chip8UIScreen(Screen):
         return True
 
     def key_down(self, theKeyEvent: Event):
+        """
+        Seems like part of the Chip 8 emulator has to happen here:
+        http://laurencescotford.co.uk/?p=347
 
+        Args:
+            theKeyEvent:  The PyGame key event
+        """
         pressedKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(theKeyEvent.key)
         self.logger.debug(f"key down: {pressedKey.value:X}")
         self.chip8.keypad.keyDown(pressedKey)
         self.logger.debug(f"keypad: {self.chip8.keypad}")
+        self.note = Chip8Beep(440)
+        self.note.play(-1)
 
     def key_up(self, theKeyEvent: Event):
 
@@ -132,6 +144,7 @@ class Chip8UIScreen(Screen):
         self.logger.debug(f"key up: {releasedKey.value:X}")
         self.chip8.keypad.keyUp(releasedKey)
         self.logger.debug(f"keypad: {self.chip8.keypad}")
+        self.note.stop()
 
     def processLoad_cmd(self):
         self.logger.info("Executed load item command")

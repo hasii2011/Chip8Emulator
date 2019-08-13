@@ -13,6 +13,9 @@ KNOWN_SMALL_VALUE:    int = 0x00
 VALUE_WITH_KNOWN_MSB: int = 0xF0
 VALUE_WITH_KNOWN_LSB: int = 0x0F
 
+MISSILE_VALUE_TO_SUBTRACT: int = 3
+MISSILE_KNOWN_SMALL_VALUE: int = 2
+
 LOGICAL_OP_MASK:    int = 0xF0
 BITS_TO_SHIFT:      int = 1
 VALUE_TO_ADD:       int = 1
@@ -161,7 +164,7 @@ class TestChipRegisters(BaseTest):
 
         self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
 
-    def testSubRegisterVyFromRegisterVx(self):
+    def testSubtractRegisterVyFromRegisterVx(self):
 
         self.registers.setValue(Chip8RegisterName.V7, VALUE_TO_SUBTRACT)
         self.registers.setValue(Chip8RegisterName.V8, KNOWN_VALUE)
@@ -176,7 +179,7 @@ class TestChipRegisters(BaseTest):
         self.assertEqual(expectedValue, actualValue, "Register to register subtract did not work")
         self.assertEqual(Chip8Registers.NO_BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
 
-    def testBorrowSubRegisterVyFromRegisterVx(self):
+    def testBorrowSubtractRegisterVyFromRegisterVx(self):
 
         self.registers.setValue(Chip8RegisterName.V2, VALUE_TO_SUBTRACT)
         self.registers.setValue(Chip8RegisterName.V3, KNOWN_SMALL_VALUE)
@@ -192,3 +195,19 @@ class TestChipRegisters(BaseTest):
 
         self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
 
+    def testBorrowSubtractRegisterV0MissileBug(self):
+        """
+        Attempt to replicate Missile ROM error where V0 decrements past 0
+        """
+        self.registers.setValue(Chip8RegisterName.V0, MISSILE_KNOWN_SMALL_VALUE)
+        self.registers.setValue(Chip8RegisterName.V2, MISSILE_VALUE_TO_SUBTRACT)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterToRegister(vx=Chip8RegisterName.V0, vy=Chip8RegisterName.V2)
+
+        expectedValue: int = 0xFF
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V0)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register borrow subtract did not work")
+        self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")

@@ -514,7 +514,7 @@ class Chip8:
         """
         self.registers.setValue(Chip8RegisterName.VF, Chip8Registers.NO_SPRITE_COLLISION_BIT)
 
-        self.logger.info(f'Draw at ({xCoord},{yCoord})')
+        self.logger.info(f'Draw ({xCoord},{yCoord}) {self.registers}')
         startAddress: int = self.indexRegister
 
         drawY: int = yCoord
