@@ -42,6 +42,7 @@ class Chip8:
     OPCODE_MASK           = 0xF000
     ENHANCED_OP_CODE_MASK = 0xF0FF
     SKIP_OP_CODE_MASK     = 0xF0FF
+    ADDRESS_MASK          = 0x0FFF
 
     SPECIAL_REGISTERS_BASE_OP_CODE: int = 0xF000
     SKIP_BASED_ON_KEYBOARD_OP_CODE: int = 0xE000
@@ -129,6 +130,7 @@ class Chip8:
         self.opCodeMethods: Dict[int, Callable] = {
 
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
+            Chip8Mnemonics.CALL.value: self.callSubroutine,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
@@ -248,9 +250,20 @@ class Chip8:
         self.logger.debug(f"pc: {hex(self.pc)} instruction: {hex(self.instruction)}")
 
     def jumpToAddress(self):
-        addr = self.instruction & 0x0FFF
+        addr = self.instruction & Chip8.ADDRESS_MASK
         self.pc = addr
         self.logger.debug(f"new pc: {hex(self.pc)}")
+
+    def callSubroutine(self):
+        """
+        2nnn - CALL addr
+        Call subroutine at nnn.
+
+        The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
+        """
+        self.stack.push(self.pc)
+        subroutineAddr: int = self.instruction & Chip8.ADDRESS_MASK
+        self.pc = subroutineAddr
 
     def skipIfRegisterEqualToLiteral(self):
         """
@@ -514,7 +527,7 @@ class Chip8:
         """
         self.registers.setValue(Chip8RegisterName.VF, Chip8Registers.NO_SPRITE_COLLISION_BIT)
 
-        self.logger.info(f'Draw ({xCoord},{yCoord}) {self.registers}')
+        self.logger.debug(f'Draw ({xCoord},{yCoord}) {self.registers}')
         startAddress: int = self.indexRegister
 
         drawY: int = yCoord

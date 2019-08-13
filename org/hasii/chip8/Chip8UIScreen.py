@@ -68,7 +68,7 @@ class Chip8UIScreen(Screen):
         #
         # TEMP TEMP TEMP; until I get File->Load working
         #
-        self.chip8.loadROM("Missile")
+        self.chip8.loadROM("Invaders")
 
         self.note: Chip8Beep = cast(Chip8Beep, None)
 

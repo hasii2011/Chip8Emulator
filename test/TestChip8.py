@@ -62,6 +62,33 @@ class TestChip8(BaseTest):
 
         self.assertEqual(newPc, 0x219, "Did not do jump")
 
+    def testCallSubroutine(self):
+        """
+            CALL = 0x2000   # 2nnn;     Call subroutine at location nnn
+        """
+        self.chip8.pc = Chip8.PROGRAM_START_ADDRESS + 0x100
+        self.chip8.stack.empty()
+
+        instruction: int = 0x2200
+
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedPC: int = 0x200
+        actualPC:   int = self.chip8.pc
+
+        self.assertEqual(expectedPC, actualPC, 'Program counter not set to subroutine address')
+
+        expectedStackSize: int = 1
+        actualStackSize:   int = self.chip8.stack.size()
+        self.assertEqual(expectedStackSize, actualStackSize, 'Stack has been improperly manipulated')
+
+        #
+        # The PC is already pointing to the next address when the Call op is executed; That is where we want to return
+        #
+        expectedTopOfStackValue: int = Chip8.PROGRAM_START_ADDRESS + 0x100 + Chip8.INSTRUCTION_SIZE
+        actualTopOfStackValue:   int = self.chip8.stack.peek()
+        self.assertEqual(expectedTopOfStackValue, actualTopOfStackValue, 'PC not correctly stored on stack')
+
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """
         3xkk SE V0, #40;

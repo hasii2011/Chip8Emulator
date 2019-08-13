@@ -21,6 +21,9 @@ class Chip8Stack:
     def isEmpty(self):
         return self.items == []
 
+    def empty(self):
+        self.items.clear()
+
     def push(self, item: int):
         self.items.append(item)
         if len(self.items) > Chip8Stack.STACK_LIMIT:
