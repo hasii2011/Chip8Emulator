@@ -39,13 +39,15 @@ class Chip8:
     PROGRAM_START_ADDRESS: int = 0x200
     INSTRUCTION_SIZE:      int = 2       # in bytes
 
-    OPCODE_MASK           = 0xF000
-    ENHANCED_OP_CODE_MASK = 0xF0FF
-    SKIP_OP_CODE_MASK     = 0xF0FF
-    ADDRESS_MASK          = 0x0FFF
+    OPCODE_MASK             = 0xF000
+    ENHANCED_OP_CODE_MASK   = 0xF0FF
+    SKIP_OP_CODE_MASK       = 0xF0FF
+    RET_OR_CLS_OP_CODE_MASK = 0x00FF
+    ADDRESS_MASK            = 0x0FFF
 
     SPECIAL_REGISTERS_BASE_OP_CODE: int = 0xF000
     SKIP_BASED_ON_KEYBOARD_OP_CODE: int = 0xE000
+    RET_OR_CLS_OP_CODE:             int = 0x0000
 
     IDX_REG_MASK:    int = 0x0FFF
     LOC_JMP_MASK:    int = 0x0FFF
@@ -129,6 +131,7 @@ class Chip8:
         seed()
         self.opCodeMethods: Dict[int, Callable] = {
 
+            Chip8Mnemonics.RET.value:  self.returnFromSubroutine,
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
@@ -234,6 +237,8 @@ class Chip8:
             op = self.instruction & Chip8.ENHANCED_OP_CODE_MASK
         elif op == Chip8.SKIP_BASED_ON_KEYBOARD_OP_CODE:
             op = self.instruction & Chip8.SKIP_OP_CODE_MASK
+        elif op == Chip8.RET_OR_CLS_OP_CODE:
+            op = self.instruction & Chip8.RET_OR_CLS_OP_CODE_MASK
 
         opStr: str = hex(op)
         self.logger.debug(f"opStr: {opStr}")
@@ -264,6 +269,13 @@ class Chip8:
         self.stack.push(self.pc)
         subroutineAddr: int = self.instruction & Chip8.ADDRESS_MASK
         self.pc = subroutineAddr
+
+    def returnFromSubroutine(self):
+        """
+            RET = 0x00EE    # 00EE;
+            Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
+        """
+        pass
 
     def skipIfRegisterEqualToLiteral(self):
         """

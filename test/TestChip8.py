@@ -5,11 +5,9 @@ from logging import getLogger
 from test.BaseTest import BaseTest
 
 from org.hasii.chip8.Chip8 import Chip8
-
+from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
-from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
-
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 
 
@@ -88,6 +86,16 @@ class TestChip8(BaseTest):
         expectedTopOfStackValue: int = Chip8.PROGRAM_START_ADDRESS + 0x100 + Chip8.INSTRUCTION_SIZE
         actualTopOfStackValue:   int = self.chip8.stack.peek()
         self.assertEqual(expectedTopOfStackValue, actualTopOfStackValue, 'PC not correctly stored on stack')
+
+    def testReturnFromSubroutine(self):
+        """
+        RET = 0x00EE
+        00EE; Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
+
+        """
+
+        instruction: int = 0x00EE
+        self.chip8.emulateSingleCpuCycle(instruction)
 
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """
