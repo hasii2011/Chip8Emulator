@@ -157,13 +157,13 @@ class Chip8Registers:
 
             val: value to add to the register
         """
-        self.logger.info(f'addToRegister: {vx}={self.registers[vx]} val: {val}')
+        self.logger.debug(f'addToRegister: {vx}={self.registers[vx]} val: {val}')
         tempReg: int = self.registers[vx] + val
         if tempReg > 255:
             self.registers[vx] = tempReg - 256
         else:
             self.registers[vx] = tempReg
-        self.logger.info(f'{vx}={self.registers[vx]}')
+        self.logger.debug(f'{vx}={self.registers[vx]}')
 
     def __repr__(self):
 
