@@ -93,9 +93,15 @@ class TestChip8(BaseTest):
         00EE; Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
 
         """
-
+        expectedPC: int = 0x500
+        self.chip8.stack.push(0x220)
+        self.chip8.stack.push(0x400)
+        self.chip8.stack.push(expectedPC)
         instruction: int = 0x00EE
         self.chip8.emulateSingleCpuCycle(instruction)
+
+        actualPC: int = self.chip8.pc
+        self.assertEqual(expectedPC, actualPC, 'Incorrect program counter. Bad return')
 
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """

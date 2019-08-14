@@ -275,7 +275,7 @@ class Chip8:
             RET = 0x00EE    # 00EE;
             Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
         """
-        pass
+        self.pc = self.stack.pop()
 
     def skipIfRegisterEqualToLiteral(self):
         """
