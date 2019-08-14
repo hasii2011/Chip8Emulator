@@ -132,6 +132,7 @@ class Chip8:
         self.opCodeMethods: Dict[int, Callable] = {
 
             Chip8Mnemonics.RET.value:  self.returnFromSubroutine,
+            Chip8Mnemonics.CLS.value:  self.clearScreen,
             Chip8Mnemonics.JP.value:   self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
@@ -276,6 +277,12 @@ class Chip8:
             Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
         """
         self.pc = self.stack.pop()
+
+    def clearScreen(self):
+        for yCoord in range(0, self.VIRTUAL_HEIGHT):
+            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
+            for xCoord in range(0, self.VIRTUAL_WIDTH):
+                currentVirtualScreenRow[xCoord] = 0
 
     def skipIfRegisterEqualToLiteral(self):
         """

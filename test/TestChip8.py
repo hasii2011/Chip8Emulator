@@ -103,6 +103,12 @@ class TestChip8(BaseTest):
         actualPC: int = self.chip8.pc
         self.assertEqual(expectedPC, actualPC, 'Incorrect program counter. Bad return')
 
+    def testClearScreen(self):
+        """
+        TODO;
+        """
+        pass
+
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """
         3xkk SE V0, #40;
