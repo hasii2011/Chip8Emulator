@@ -231,7 +231,7 @@ class TestChip8(BaseTest):
 
         self.chip8.emulateSingleCpuCycle(instruction)
 
-        expectedValue:   int = 0x01
+        expectedValue:   int = 0x00
         actualValue:     int = self.chip8.registers.getValue(Chip8RegisterName.V8)
         carryFlagActual: int = self.chip8.registers.getValue(Chip8RegisterName.VF)
 
