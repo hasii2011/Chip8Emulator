@@ -1,3 +1,5 @@
+from os import getcwd
+
 from typing import cast
 
 from logging import Logger
@@ -7,6 +9,8 @@ from pygame import Surface
 from pygame.event import Event
 
 from albow.core.ui.Screen import Screen
+
+from albow.dialog.FileDialogUtilities import request_old_filename
 
 from albow.core.ui.Shell import Shell
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
@@ -51,8 +55,6 @@ class Chip8UIScreen(Screen):
         """
 
         Args:
-            self:
-
             theShell:  The shell that wraps this screen
 
             theSurface: The pygame surface to use to drawn on
@@ -68,7 +70,7 @@ class Chip8UIScreen(Screen):
         #
         # TEMP TEMP TEMP; until I get File->Load working
         #
-        self.chip8.loadROM("Pong")
+        self.chip8.loadROM("Invaders")
 
         self.note: Chip8Beep = cast(Chip8Beep, None)
 
@@ -147,7 +149,10 @@ class Chip8UIScreen(Screen):
         self.note.stop()
 
     def processLoad_cmd(self):
-        self.logger.info("Executed load item command")
+
+        cwd: str = getcwd() + '/org/hasii/chip8/roms'
+        path = request_old_filename(directory=cwd)
+        self.logger.info(f'path: {path}')
 
     def processExit_cmd(self):
         self.logger.info("Executed exit item command")

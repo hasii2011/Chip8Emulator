@@ -1,6 +1,5 @@
 
 from typing import Dict
-from typing import cast
 
 from logging import Logger
 from logging import getLogger
@@ -42,6 +41,10 @@ class Chip8KeyPad:
 
     def isKeyPressed(self, key: Chip8KeyPadKeys) -> bool:
         return self.keyPressed[key]
+
+    def initialize(self):
+        for keyName in Chip8KeyPadKeys:
+            self.keyUp(key=keyName)
 
     def __repr__(self):
 

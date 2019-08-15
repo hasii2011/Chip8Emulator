@@ -96,7 +96,8 @@ class Chip8Screen(Widget):
     def __init__(self, virtualScreen: List[Chip8.VIRTUAL_SCREEN_ROW], **attrs):
 
         self.border_width = 1
-        self.border_color = Theme.BLACK
+        self.border_color = Theme.WHITE
+        self.bg_color     = Theme.BLACK
 
         self.virtualScreen: List[Chip8.VIRTUAL_SCREEN_ROW] = virtualScreen
         super().__init__(**attrs)

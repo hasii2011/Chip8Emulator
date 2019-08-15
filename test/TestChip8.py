@@ -60,6 +60,60 @@ class TestChip8(BaseTest):
 
         self.assertEqual(newPc, 0x219, "Did not do jump")
 
+    def testResetCPU(self):
+
+        self._setupCpuForResetTest()
+        self._drawOnScreenForResetCpuTest()
+
+        self.chip8.resetCPU()
+
+        self.assertEqual(0, self.chip8.indexRegister, 'Index register not reset')
+        self.assertEqual(0, self.chip8.delayTimer, 'Delay timer not reset')
+        self.assertEqual(0, self.chip8.soundTimer, 'Sound timer not reset')
+        self.assertEqual(Chip8.PROGRAM_START_ADDRESS, self.chip8.pc, 'Program counter not reset')
+        self.assertEqual(0, self.chip8.instruction, 'Current instruction not cleared')
+        self.assertEqual(0, self.chip8.instructionCount, 'Instruction count diagnostic not reset')
+
+        self.assertTrue(self.chip8.stack.isEmpty(), 'Stack has not been reset')
+        #
+        # Check that all the registers have been initialized
+        #
+        #
+        for regName in Chip8RegisterName:
+            self.assertEqual(0, self.chip8.registers.getValue(regName), f'Register {regName} not reset')
+        #
+        # Check that keypad has been reset
+        #
+        for keyName in Chip8KeyPadKeys:
+            self.assertFalse(self.chip8.keypad.isKeyPressed(keyName), f'key {keyName} has not been reset')
+        #
+        # Check that virtual screen has been cleared
+        #
+        for yCoord in range(0, Chip8.VIRTUAL_HEIGHT):
+            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.chip8.virtualScreen[yCoord]
+            for xCoord in range(0, Chip8.VIRTUAL_WIDTH):
+                self.assertTrue(currentVirtualScreenRow[xCoord] == 0, f'Pixel at ({xCoord},{yCoord}) is not cleared')
+        #
+        # Check that memory is cleared
+        #
+        for x in range(Chip8.PROGRAM_START_ADDRESS, Chip8.MEMORY_SIZE):
+            self.assertTrue(self.chip8.memory[x] == 0, f'memory at byte 0x{x:04X} is not clear')
+
+    def _setupCpuForResetTest(self):
+        self.chip8.loadROM('Missile')
+        self.chip8.instruction = self.chip8.fetchInstruction()
+        for regName in Chip8RegisterName:
+            self.chip8.registers.setValue(v=regName, newValue=0xCC)
+        self.chip8.registers.setValue(v=Chip8RegisterName.VF, newValue=0x1)
+        self.chip8.indexRegister = 0x500
+        self.chip8.delayTimer = 23
+        self.chip8.soundTimer = 26
+        self.chip8.instructionCount = 44
+        self.chip8.stack.push(0x200)
+        self.chip8.stack.push(0x220)
+        self.chip8.stack.push(0x27F)
+        self.chip8.keypad.keyDown(Chip8KeyPadKeys.F)
+
     def testCallSubroutine(self):
         """
             CALL = 0x2000   # 2nnn;     Call subroutine at location nnn
@@ -823,3 +877,10 @@ class TestChip8(BaseTest):
         actualValue: int = self.chip8.delayTimer
 
         self.assertEqual(expectedValue, actualValue, "Delay timer incorrectly set")
+
+    def _drawOnScreenForResetCpuTest(self):
+        self.chip8.indexRegister = Chip8.SPRITE_START_ADDRESS + ((Chip8.NUM_SPRITES - 1) * Chip8.BYTES_PER_SPRITE)
+        xCoord: int = Chip8.VIRTUAL_WIDTH // 2
+        yCoord: int = Chip8.VIRTUAL_HEIGHT // 2
+        nBytes: int = len(Chip8.SPRITE_F)
+        self.chip8.drawOnVirtualScreen(xCoord=xCoord, yCoord=yCoord, nBytes=nBytes)

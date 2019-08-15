@@ -31,7 +31,8 @@ class Chip8:
     debugVirtualScreen: bool = False
     debugPrintMemory:   bool = False
 
-    ROM_PKG: str            = "org.hasii.chip8.roms"
+    MEMORY_SIZE: int = 4096             # in bytes
+    ROM_PKG:     str = "org.hasii.chip8.roms"
     #
     # from http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
     #
@@ -119,7 +120,7 @@ class Chip8:
         self.pc:            int = Chip8.PROGRAM_START_ADDRESS
         self.instruction:   int = 0x0000
 
-        self.memory:     List[int]      = [0] * 4096
+        self.memory:     List[int]      = [0] * Chip8.MEMORY_SIZE
         self.stack:      Chip8Stack     = Chip8Stack()
         self.registers:  Chip8Registers = Chip8Registers()
         self.keypad:     Chip8KeyPad    = Chip8KeyPad()
@@ -178,11 +179,30 @@ class Chip8:
         self.romLoaded:        bool = False
         self.instructionCount: int  = 0
 
+    def resetCPU(self):
+        """
+        Reset the emulator to its initial state.  Note some of this code is duplicated from the class
+        constructor.  PEP-8 requires that you define instance variables in the constructor
+        """
+        self.pc            = Chip8.PROGRAM_START_ADDRESS
+        self.instruction   = 0x0000
+        self.delayTimer    = 0x0
+        self.soundTimer    = 0x0
+        self.indexRegister = 0x0
+        self.instructionCount = 0
+
+        self._clearMemory()
+        self._clearVirtualScreen()
+        self._loadAllSpritesInMemory()
+        self.stack.empty()
+        self.registers.initialize()
+        self.keypad.initialize()
+
     def getDelayTimer(self) -> int:
         return self._delayTimer
 
     def setDelayTimer(self, theNewValue: int):
-        if theNewValue > 0:
+        if theNewValue > -1:
             self._delayTimer = theNewValue
 
     def decrementDelayTimer(self):
@@ -193,7 +213,7 @@ class Chip8:
         return self._soundTimer
 
     def setSoundTimer(self, theNewValue: int):
-        if theNewValue > 0:
+        if theNewValue > -1:
             self._soundTimer = theNewValue
 
     def decrementSoundTimer(self):
@@ -279,10 +299,7 @@ class Chip8:
         self.pc = self.stack.pop()
 
     def clearScreen(self):
-        for yCoord in range(0, self.VIRTUAL_HEIGHT):
-            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
-            for xCoord in range(0, self.VIRTUAL_WIDTH):
-                currentVirtualScreenRow[xCoord] = 0
+        self._clearVirtualScreen()
 
     def skipIfRegisterEqualToLiteral(self):
         """
@@ -634,6 +651,21 @@ class Chip8:
         for sprite in theSprite:
             self.memory[memAddress] = sprite
             memAddress += 1
+
+    def _clearMemory(self):
+        """
+        Clear everything from the start of program memory to the end;  Don't stomp
+        on the sprite space
+        """
+        for x in range(Chip8.PROGRAM_START_ADDRESS, Chip8.MEMORY_SIZE):
+            self.memory[x] = 0
+
+    def _clearVirtualScreen(self):
+
+        for yCoord in range(0, self.VIRTUAL_HEIGHT):
+            currentVirtualScreenRow: Chip8.VIRTUAL_SCREEN_ROW = self.virtualScreen[yCoord]
+            for xCoord in range(0, self.VIRTUAL_WIDTH):
+                currentVirtualScreenRow[xCoord] = 0
 
     def _debugPrintMemory(self, startByteNbr: int, nBytes: int, bytesPerRow: int = 32):
         """

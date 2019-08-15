@@ -165,6 +165,10 @@ class Chip8Registers:
             self.registers[vx] = tempReg
         self.logger.debug(f'{vx}={self.registers[vx]}')
 
+    def initialize(self):
+        for regName in Chip8RegisterName:
+            self.setValue(v=regName, newValue=0)
+
     def __repr__(self):
 
         strMe: str = "Register Dump - "
