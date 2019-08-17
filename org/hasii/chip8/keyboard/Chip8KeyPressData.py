@@ -13,3 +13,12 @@ class Chip8KeyPressData:
     waitingForKey: bool = False
     pressedKey:    Chip8KeyPadKeys   = cast(Chip8KeyPadKeys, None)
     storeRegister: Chip8RegisterName = cast(Chip8RegisterName, None)
+
+    def __repr__(self):
+
+        retStr: str = (
+            f'waitingForKey: "{self.waitingForKey}" '
+            f'pressedKey: "{self.pressedKey}" '
+            f'storeRegister: "{self.storeRegister}"'
+        )
+        return retStr
