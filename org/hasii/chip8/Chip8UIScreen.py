@@ -1,8 +1,6 @@
 from os import getcwd
 from os.path import basename
 
-from typing import cast
-
 from logging import Logger
 from logging import getLogger
 
@@ -24,7 +22,7 @@ from albow.layout.Column import Column
 from albow.layout.Frame import Frame
 
 from org.hasii.chip8.Chip8 import Chip8
-from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue

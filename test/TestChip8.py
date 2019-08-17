@@ -5,7 +5,7 @@ from logging import getLogger
 from test.BaseTest import BaseTest
 
 from org.hasii.chip8.Chip8 import Chip8
-from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue

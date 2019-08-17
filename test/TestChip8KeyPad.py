@@ -4,7 +4,7 @@ from logging import getLogger
 
 from test.BaseTest import BaseTest
 
-from org.hasii.chip8.Chip8KeyPad import Chip8KeyPad
+from org.hasii.chip8.keyboard.Chip8KeyPad import Chip8KeyPad
 
 
 class TestChip8KeyPad(BaseTest):

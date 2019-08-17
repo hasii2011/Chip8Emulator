@@ -4,7 +4,7 @@ from typing import cast
 from dataclasses import dataclass
 
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
-from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 
 
 @dataclass

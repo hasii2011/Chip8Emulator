@@ -28,7 +28,7 @@ from albow.dialog.DialogUtilities import alert
 from albow.References import AttrRef
 
 from org.hasii.chip8.Chip8 import Chip8
-from org.hasii.chip8.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 
