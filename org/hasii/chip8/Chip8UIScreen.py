@@ -72,7 +72,7 @@ class Chip8UIScreen(Screen):
         # TEMP TEMP TEMP; until I get File->Load working
         #
 
-        self.note: Chip8Beep = cast(Chip8Beep, None)
+        self.note = Chip8Beep(440)
 
         menus = [
             Chip8UIScreen.fileMenu, Chip8UIScreen.helpMenu
@@ -110,10 +110,12 @@ class Chip8UIScreen(Screen):
         self.logger.debug(f"seconds: {seconds:5.3f}")
         try:
             if self.chip8.romLoaded is True:
-                if self.chip8.keyPressData.waitingForKey is False:
+                if self.chip8.isCPUWaitingForKeyPress() is False:
                     self.chip8.emulateSingleCpuCycle()
                 self.chip8.decrementDelayTimer()
                 self.chip8.decrementSoundTimer()
+                if self.chip8.soundTimer == 0:
+                    self.note.stop()
         except (UnknownInstructionError, InvalidIndexRegisterValue, UnKnownSpecialRegistersSubOpCode) as e:
             self.logger.error(f"Chip 8 failure: {e}")
             self.logger.error(f"Chip Dump:\n {self.chip8}")
@@ -138,7 +140,9 @@ class Chip8UIScreen(Screen):
         self.logger.debug(f"key down: {pressedKey.value:X}")
         self.chip8.keypad.keyDown(pressedKey)
         self.logger.debug(f"keypad: {self.chip8.keypad}")
-        self.note = Chip8Beep(440)
+        if self.chip8.keyPressData.waitingForKey is True:
+            self.chip8.setKeyPressed(pressedKey)
+
         self.note.play(-1)
 
     def key_up(self, theKeyEvent: Event):

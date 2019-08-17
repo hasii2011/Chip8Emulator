@@ -32,6 +32,43 @@ class TestChip8(BaseTest):
         self.chip8:  Chip8  = Chip8()
         self.logger: Logger = TestChip8.clsLogger
 
+    def testIsCPUWaitingForKeyPress(self):
+        """
+        At initialize time should not be waiting
+        """
+        self.assertEqual(False, self.chip8.isCPUWaitingForKeyPress(), 'CPU is in invalid mode on startup')
+
+    def testSetKeyPressed(self):
+
+        self.chip8.keyPressData.waitingForKey = True
+        self.chip8.keyPressData.storeRegister = Chip8RegisterName.V8
+        self.chip8.registers.setValue(v=Chip8RegisterName.V8, newValue=0)
+
+        self.chip8.setKeyPressed(pressedKey=Chip8KeyPadKeys.B)
+
+        self.assertFalse(self.chip8.isCPUWaitingForKeyPress(), 'Key was pressed but CPU is in error')
+
+        expectedValue: int = Chip8KeyPadKeys.B.value
+        actualValue:   int = self.chip8.registers.getValue(v=Chip8RegisterName.V8)
+
+        self.assertEqual(expectedValue, actualValue, 'CPU did not store correct key press value or stored it in incorrect register')
+
+    def testWaitForKeyPress(self):
+        """
+         Fx0A; LDK Vx, K;          Wait for a key press, store the value of the key in Vx.
+        """
+        instruction: int = 0xFB0A
+        self.chip8.emulateSingleCpuCycle(instruction)
+
+        expectedRegister: Chip8RegisterName = Chip8RegisterName.VB
+        actualRegister:   Chip8RegisterName = self.chip8.keyPressData.storeRegister
+
+        self.assertEqual(expectedRegister, actualRegister, 'CPU did not set correct register')
+
+        expectedValue: bool = True
+        actualValue:  bool = self.chip8.keyPressData.waitingForKey
+        self.assertEqual(expectedValue, actualValue, 'CPU not set to wait for keypress')
+
     def testRepr(self):
 
         self.chip8.loadROM("Missile")
@@ -73,6 +110,7 @@ class TestChip8(BaseTest):
         self.assertEqual(Chip8.PROGRAM_START_ADDRESS, self.chip8.pc, 'Program counter not reset')
         self.assertEqual(0, self.chip8.instruction, 'Current instruction not cleared')
         self.assertEqual(0, self.chip8.instructionCount, 'Instruction count diagnostic not reset')
+        self.assertFalse(self.chip8.isCPUWaitingForKeyPress(), 'CPU has not been properly reset')
 
         self.assertTrue(self.chip8.stack.isEmpty(), 'Stack has not been reset')
         #
@@ -98,21 +136,6 @@ class TestChip8(BaseTest):
         #
         for x in range(Chip8.PROGRAM_START_ADDRESS, Chip8.MEMORY_SIZE):
             self.assertTrue(self.chip8.memory[x] == 0, f'memory at byte 0x{x:04X} is not clear')
-
-    def _setupCpuForResetTest(self):
-        self.chip8.loadROM('Missile')
-        self.chip8.instruction = self.chip8.fetchInstruction()
-        for regName in Chip8RegisterName:
-            self.chip8.registers.setValue(v=regName, newValue=0xCC)
-        self.chip8.registers.setValue(v=Chip8RegisterName.VF, newValue=0x1)
-        self.chip8.indexRegister = 0x500
-        self.chip8.delayTimer = 23
-        self.chip8.soundTimer = 26
-        self.chip8.instructionCount = 44
-        self.chip8.stack.push(0x200)
-        self.chip8.stack.push(0x220)
-        self.chip8.stack.push(0x27F)
-        self.chip8.keypad.keyDown(Chip8KeyPadKeys.F)
 
     def testCallSubroutine(self):
         """
@@ -798,6 +821,23 @@ class TestChip8(BaseTest):
         expectedPC: int = Chip8.PROGRAM_START_ADDRESS + Chip8.INSTRUCTION_SIZE
 
         self._setupAndExecuteKeyNotPressedTest(expectedPC, 'PC should NOT have skipped next instruction')
+
+    def _setupCpuForResetTest(self):
+
+        self.chip8.loadROM('Missile')
+        self.chip8.instruction = self.chip8.fetchInstruction()
+        for regName in Chip8RegisterName:
+            self.chip8.registers.setValue(v=regName, newValue=0xCC)
+        self.chip8.registers.setValue(v=Chip8RegisterName.VF, newValue=0x1)
+        self.chip8.indexRegister = 0x500
+        self.chip8.delayTimer = 23
+        self.chip8.soundTimer = 26
+        self.chip8.instructionCount = 44
+        self.chip8.stack.push(0x200)
+        self.chip8.stack.push(0x220)
+        self.chip8.stack.push(0x27F)
+        self.chip8.keypad.keyDown(Chip8KeyPadKeys.F)
+        self.chip8.keyPressData.waitingForKey = True
 
     def _setupAndExecuteKeyNotPressedTest(self, expectedPC: int, failureMessage: str):
         instruction: int = 0xEAA1

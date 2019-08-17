@@ -194,6 +194,7 @@ class Chip8:
         self.soundTimer    = 0x0
         self.indexRegister = 0x0
         self.instructionCount = 0
+        self.keyPressData     = Chip8KeyPressData()
 
         self._clearMemory()
         self._clearVirtualScreen()
@@ -505,7 +506,8 @@ class Chip8:
         if subOpCode == 0x07:
             self.registers.setValue(v=regName, newValue=self.delayTimer)
         elif subOpCode == 0x0A:
-            self._setupChipToWaitForKeyPress(regName=regName)
+            self.logger.info(f"Wait for key press; store value in {regName}")
+            self.setupChipToWaitForKeyPress(regName=regName)
         elif subOpCode == 0x15:
             self.delayTimer = self.registers.getValue(regName)
         elif subOpCode == 0x18:
@@ -557,6 +559,32 @@ class Chip8:
         self.logger.debug(f"{self.memory}")
         self._debugPrintMemory(startByteNbr=0, nBytes=len(self.memory))
 
+    def isCPUWaitingForKeyPress(self) -> bool:
+        return self.keyPressData.waitingForKey
+
+    def setupChipToWaitForKeyPress(self, regName: Chip8RegisterName):
+        """
+        Called by the CPU opCode (Fx0A; LDK Vx, K) to set the CPU into wait mode
+        Args:
+            regName:  The register into which to store the key that was pressed
+        """
+        self.keyPressData.waitingForKey = True
+        self.keyPressData.storeRegister = regName
+
+    def setKeyPressed(self, pressedKey: Chip8KeyPadKeys):
+        """
+        The external keyboard handler should only call this method when it detects a keypress event
+        and `keyPressData.waitingForKey` is set to True
+
+        Called by the external keyboard handler when it detects a keypres
+        Args:
+            pressedKey:  The keyname that was pressed
+        """
+        self.keyPressData.waitingForKey = False
+        self.keyPressData.pressedKey    = pressedKey
+        self.registers.setValue(v=self.keyPressData.storeRegister, newValue=pressedKey.value)
+        self.logger.info(f'Key pressed: {self.keyPressData}')
+
     def drawOnVirtualScreen(self, xCoord: int, yCoord: int, nBytes: int):
         """
 
@@ -604,14 +632,6 @@ class Chip8:
 
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
-
-    def _setupChipToWaitForKeyPress(self, regName: Chip8RegisterName):
-        """
-
-        Args:
-            regName:  The register into which to store the key that was pressed
-        """
-        pass
 
     def _decodeLeftRegister(self) -> Chip8RegisterName:
         return self._decodeRegister()
