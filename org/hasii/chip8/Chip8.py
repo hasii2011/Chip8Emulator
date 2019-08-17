@@ -194,7 +194,9 @@ class Chip8:
         self.soundTimer    = 0x0
         self.indexRegister = 0x0
         self.instructionCount = 0
-        self.keyPressData     = Chip8KeyPressData()
+        self.keyPressData.waitingForKey = False
+        self.keyPressData.storeRegister = cast(Chip8RegisterName, None)
+        self.keyPressData.pressedKey    = cast(Chip8KeyPadKeys, None)
 
         self._clearMemory()
         self._clearVirtualScreen()
@@ -435,7 +437,7 @@ class Chip8:
         targetRegister: Chip8RegisterName = self._decodeLeftRegister()
         lit:        int = self._decodeLiteral()
         randByte:   int = self.generateRandomByte()
-        self.logger.info(f"randByte: {randByte:X}")
+        self.logger.debug(f"randByte: {randByte:X}")
 
         tempReg: int = randByte & lit
         self.registers.setValue(v=targetRegister, newValue=tempReg)
@@ -734,8 +736,7 @@ class Chip8:
                 z += bytesPerRow
 
     def _dumpVirtualScreen(self,
-                           startRow: int = 0, xCoord: int = 0, nRows: int = VIRTUAL_HEIGHT,
-                           startCol: int = 0, yCoord: int = 0, nCols: int = VIRTUAL_WIDTH):
+                           startRow: int = 0, nRows: int = VIRTUAL_HEIGHT, startCol: int = 0, nCols: int = VIRTUAL_WIDTH):
 
         if self.debugVirtualScreen is True:
             self.logger.info("DUMPING VIRTUAL SCREEN")
