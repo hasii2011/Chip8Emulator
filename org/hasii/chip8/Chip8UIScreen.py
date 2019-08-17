@@ -1,4 +1,5 @@
 from os import getcwd
+from os.path import basename
 
 from typing import cast
 
@@ -70,7 +71,6 @@ class Chip8UIScreen(Screen):
         #
         # TEMP TEMP TEMP; until I get File->Load working
         #
-        self.chip8.loadROM("Invaders")
 
         self.note: Chip8Beep = cast(Chip8Beep, None)
 
@@ -110,7 +110,8 @@ class Chip8UIScreen(Screen):
         self.logger.debug(f"seconds: {seconds:5.3f}")
         try:
             if self.chip8.romLoaded is True:
-                self.chip8.emulateSingleCpuCycle()
+                if self.chip8.keyPressData.waitingForKey is False:
+                    self.chip8.emulateSingleCpuCycle()
                 self.chip8.decrementDelayTimer()
                 self.chip8.decrementSoundTimer()
         except (UnknownInstructionError, InvalidIndexRegisterValue, UnKnownSpecialRegistersSubOpCode) as e:
@@ -153,6 +154,9 @@ class Chip8UIScreen(Screen):
         cwd: str = getcwd() + '/org/hasii/chip8/roms'
         path = request_old_filename(directory=cwd)
         self.logger.info(f'path: {path}')
+        self.chip8.resetCPU()
+        fName: str = basename(path)
+        self.chip8.loadROM(theFilename=fName)
 
     def processExit_cmd(self):
         self.logger.info("Executed exit item command")

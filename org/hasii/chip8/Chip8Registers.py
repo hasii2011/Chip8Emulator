@@ -112,7 +112,7 @@ class Chip8Registers:
         """
         vxVal: int = self.registers[vx]
         vyVal: int = self.registers[vy]
-        self.logger.info(f'subRegisterToRegister - vxVal: {vxVal} vyVal: {vyVal}')
+        self.logger.debug(f'subRegisterToRegister - vxVal: {vxVal} vyVal: {vyVal}')
         # If a borrow is NOT generated, set a carry flag in register VF.
         if vxVal > vyVal:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
@@ -136,7 +136,7 @@ class Chip8Registers:
         vxVal: int = self.registers[vx]
         vyVal: int = self.registers[vy]
 
-        self.logger.info(f'subRegisterVyFromRegisterVx - vxVal: {vxVal} vyVal: {vyVal}')
+        self.logger.debug(f'subRegisterVyFromRegisterVx - vxVal: {vxVal} vyVal: {vyVal}')
 
         if vyVal < vxVal:       # flipped, I think this is correct
             self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT

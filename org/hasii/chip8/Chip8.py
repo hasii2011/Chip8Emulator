@@ -19,6 +19,7 @@ from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
+from org.hasii.chip8.Chip8KeyPressData import Chip8KeyPressData
 
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
@@ -125,6 +126,8 @@ class Chip8:
         self.registers:  Chip8Registers = Chip8Registers()
         self.keypad:     Chip8KeyPad    = Chip8KeyPad()
 
+        self.keyPressData: Chip8KeyPressData = Chip8KeyPressData()
+
         self._indexRegister: int = 0
         self._delayTimer:    int = 0
         self._soundTimer:    int = 0
@@ -177,6 +180,7 @@ class Chip8:
 
         self._loadAllSpritesInMemory()
         self.romLoaded:        bool = False
+
         self.instructionCount: int  = 0
 
     def resetCPU(self):
@@ -501,7 +505,7 @@ class Chip8:
         if subOpCode == 0x07:
             self.registers.setValue(v=regName, newValue=self.delayTimer)
         elif subOpCode == 0x0A:
-            pass
+            self._setupChipToWaitForKeyPress(regName=regName)
         elif subOpCode == 0x15:
             self.delayTimer = self.registers.getValue(regName)
         elif subOpCode == 0x18:
@@ -600,6 +604,14 @@ class Chip8:
 
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
+
+    def _setupChipToWaitForKeyPress(self, regName: Chip8RegisterName):
+        """
+
+        Args:
+            regName:  The register into which to store the key that was pressed
+        """
+        pass
 
     def _decodeLeftRegister(self) -> Chip8RegisterName:
         return self._decodeRegister()
