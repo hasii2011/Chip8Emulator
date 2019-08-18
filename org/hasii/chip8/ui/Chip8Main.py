@@ -10,7 +10,7 @@ from pygame import Surface
 from albow.themes.ThemeLoader import ThemeLoader
 from albow.themes.Theme import Theme
 
-from org.hasii.chip8.Chip8UIShell import Chip8UIShell
+from org.hasii.chip8.ui.Chip8UIShell import Chip8UIShell
 
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 

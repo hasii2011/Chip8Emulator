@@ -28,7 +28,7 @@ from org.hasii.chip8.Chip8Screen import Chip8Screen
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
-from org.hasii.chip8.Chip8Beep import Chip8Beep
+from org.hasii.chip8.ui.Chip8Beep import Chip8Beep
 
 
 class Chip8UIScreen(Screen):
