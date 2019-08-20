@@ -169,6 +169,12 @@ class Chip8Registers:
         for regName in Chip8RegisterName:
             self.setValue(v=regName, newValue=0)
 
+    def __getitem__(self, key):
+        return self.registers[key]
+
+    def __setitem__(self, key: Chip8RegisterName, value: int):
+        self.registers[key] = value
+
     def __repr__(self):
 
         strMe: str = "Register Dump - "

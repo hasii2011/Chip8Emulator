@@ -37,7 +37,7 @@ class Chip8KeyPadKeys(Enum):
     D     = 0xD
     E     = 0xE
     F     = 0xF
-    UNSUPPORTED = 0xFFFF
+    UNSUPPORTED = 0xDEADBEEF
 
     @staticmethod
     def toEnum(key: int) -> 'Chip8KeyPadKeys':

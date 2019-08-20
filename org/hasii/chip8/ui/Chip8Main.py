@@ -18,6 +18,7 @@ JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
 MADE_UP_PRETTY_MAIN_NAME     = "Chip8Main"
 
 MENU_BAR_HEIGHT_ADJUSTMENT: int = 24
+INTERNALS_DISPLAY_HEIGHT_ADJUSTMENT: int = 80
 
 
 def main():
@@ -40,7 +41,7 @@ def main():
     pygame.display.set_caption("Python Chip 8 Emulator")
 
     surface: Surface = pygame.display.set_mode(
-        (Chip8Screen.WIDTH * Chip8Screen.SCALE_FACTOR, (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT)
+        (Chip8Screen.WIDTH * Chip8Screen.SCALE_FACTOR, (Chip8Screen.HEIGHT * Chip8Screen.SCALE_FACTOR) + MENU_BAR_HEIGHT_ADJUSTMENT + INTERNALS_DISPLAY_HEIGHT_ADJUSTMENT)
     )
     shell:   Chip8UIShell = Chip8UIShell(theSurface=surface)
 

@@ -1,17 +1,28 @@
+
+from typing import List
+
 from os import getcwd
 from os.path import basename
+
+from pkg_resources import resource_filename
 
 from logging import Logger
 from logging import getLogger
 
+from pygame import event as Event
 from pygame import Surface
-from pygame.event import Event
+from pygame.font import Font
 
+from albow.References import AttrRef
+from albow.References import ItemRef
+
+from albow.themes.Theme import Theme
 from albow.core.ui.Screen import Screen
 
 from albow.dialog.FileDialogUtilities import request_old_filename
 
 from albow.core.ui.Shell import Shell
+from albow.core.ui.Widget import Widget
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
 
 from albow.menu.Menu import Menu
@@ -19,10 +30,15 @@ from albow.menu.MenuBar import MenuBar
 from albow.menu.MenuItem import MenuItem
 
 from albow.layout.Column import Column
+from albow.layout.Row import Row
 from albow.layout.Frame import Frame
+
+from albow.widgets.Label import Label
+from albow.widgets.ValueDisplay import ValueDisplay
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Screen import Chip8Screen
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
@@ -33,8 +49,9 @@ from org.hasii.chip8.ui.Chip8Beep import Chip8Beep
 
 class Chip8UIScreen(Screen):
 
-    CPU_CYCLE_EVENT = AlbowEventLoop.MUSIC_END_EVENT + 1
-    SIXTY_HERTZ       = 1000 // 60
+    FONT_PKG:        str = 'org.hasii.chip8.resources'
+    CPU_CYCLE_EVENT: int = AlbowEventLoop.MUSIC_END_EVENT + 1
+    SIXTY_HERTZ:     int = 1000 // 60
 
     fileItems = [
 
@@ -66,9 +83,9 @@ class Chip8UIScreen(Screen):
         self.surface: Surface = theSurface
         self.logger:  Logger = getLogger(__name__)
         self.chip8:   Chip8 = Chip8()
-        #
-        # TEMP TEMP TEMP; until I get File->Load working
-        #
+
+        fullFileName:       str = self._findFont('MonoFonto.ttf')
+        self.internalsFont: Font = Font(fullFileName, 12)
 
         self.note = Chip8Beep(440)
 
@@ -80,11 +97,15 @@ class Chip8UIScreen(Screen):
 
         framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
         chip8Screen:   Chip8Screen = Chip8Screen(self.chip8.virtualScreen)
+        internalsDisp: Row         = self.makeCpuInternalsDisplay()
+        registerDisp:  Row         = self.makeRegisterDisplay()
         columnAttrs = {
             "align": "l",
-            'expand': 0
+            'expand': 0,
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'margin': 1
         }
-        contents = Column([framedMenuBar, chip8Screen], **columnAttrs)
+        contents = Column([framedMenuBar, chip8Screen, internalsDisp, registerDisp], **columnAttrs)
 
         self.logger.debug(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
         self.add(contents)
@@ -136,20 +157,22 @@ class Chip8UIScreen(Screen):
         """
         pressedKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(theKeyEvent.key)
         self.logger.debug(f"key down: {pressedKey.value:X}")
-        self.chip8.keypad.keyDown(pressedKey)
-        self.logger.debug(f"keypad: {self.chip8.keypad}")
-        if self.chip8.keyPressData.waitingForKey is True:
-            self.chip8.setKeyPressed(pressedKey)
+        if pressedKey != Chip8KeyPadKeys.UNSUPPORTED:
+            self.chip8.keypad.keyDown(pressedKey)
+            self.logger.debug(f"keypad: {self.chip8.keypad}")
+            if self.chip8.keyPressData.waitingForKey is True:
+                self.chip8.setKeyPressed(pressedKey)
 
-        self.note.play(-1)
+            self.note.play(-1)
 
     def key_up(self, theKeyEvent: Event):
 
         releasedKey: Chip8KeyPadKeys = Chip8KeyPadKeys.toEnum(theKeyEvent.key)
         self.logger.debug(f"key up: {releasedKey.value:X}")
-        self.chip8.keypad.keyUp(releasedKey)
-        self.logger.debug(f"keypad: {self.chip8.keypad}")
-        self.note.stop()
+        if releasedKey != Chip8KeyPadKeys.UNSUPPORTED:
+            self.chip8.keypad.keyUp(releasedKey)
+            self.logger.debug(f"keypad: {self.chip8.keypad}")
+            self.note.stop()
 
     def processLoad_cmd(self):
 
@@ -169,3 +192,76 @@ class Chip8UIScreen(Screen):
 
     def processHelp_cmd(self):
         self.logger.info("Executed help item command")
+
+    def makeCpuInternalsDisplay(self) -> Row:
+
+        pcRow:        Row = self._makeLabelValueRow(refName='pc',               attrLabel='PC:',          attrFormat='0x%04X', valueWidth=50)
+        idxRow:       Row = self._makeLabelValueRow(refName='indexRegister',    attrLabel='Idx:',         attrFormat='0x%04X', valueWidth=40)
+        sndTimerRow:  Row = self._makeLabelValueRow(refName='soundTimer',       attrLabel='Sound Timer:', attrFormat='0x%04X', valueWidth=40)
+        dlyTimerRow:  Row = self._makeLabelValueRow(refName='delayTimer',       attrLabel='Delay Timer:', attrFormat='0x%04X', valueWidth=40)
+        instCountRow: Row = self._makeLabelValueRow(refName='instructionCount', attrLabel='Inst Cnt:',    valueWidth=50)
+
+        retAttrs = {
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'fg_color': Theme.WHITE,
+            'spacing': 2,
+        }
+        retContainer: Row = Row([pcRow, idxRow, sndTimerRow, dlyTimerRow, instCountRow], **retAttrs)
+
+        return retContainer
+
+    def makeRegisterDisplay(self) -> Row:
+
+        attrs = {
+            'fg_color': Theme.WHITE,
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'font': self.internalsFont
+        }
+        rowAttrs = {
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'margin': 2,
+            'spacing': 2,
+        }
+
+        widgetList: List[Widget] = []
+        for regName in Chip8RegisterName:
+            itemRef:  ItemRef      = ItemRef(base=self.chip8.registers, index=regName)
+            regLabel: Label        = Label(regName.name + ':', **attrs)
+            regValue: ValueDisplay = ValueDisplay(ref=itemRef, width=40, **attrs)
+            regValue.format        = '0x%04X'
+
+            pairRow: Row = Row([regLabel, regValue], border_width=1, **rowAttrs)
+            widgetList.append(pairRow)
+
+        retRow: Row = Row(widgetList, **rowAttrs)
+        return retRow
+
+    def _makeLabelValueRow(self, refName: str, attrLabel: str, attrFormat: str = None, valueWidth: int = 100) -> Row:
+
+        attrs = {
+            'fg_color': Theme.WHITE,
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'font': self.internalsFont,
+        }
+        attrRef:   AttrRef      = AttrRef(base=self.chip8, name=refName)
+        attrLabel: Label        = Label(attrLabel, **attrs)
+        attrValue: ValueDisplay = ValueDisplay(ref=attrRef, width=valueWidth, **attrs)
+        if attrFormat is not None:
+            attrValue.format = attrFormat
+
+        retAttrs = {
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'margin': 2,
+            'spacing': 3,
+        }
+
+        retRow: Row = Row([attrLabel, attrValue], **retAttrs)
+
+        return retRow
+
+    def _findFont(self, theFileName: str):
+
+        fileName = resource_filename(Chip8UIScreen.FONT_PKG, theFileName)
+
+        self.logger.debug(f"The full file name: {fileName}")
+        return fileName
