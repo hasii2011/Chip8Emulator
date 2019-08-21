@@ -27,7 +27,7 @@ EXPECTED_XOR_VALUE: int = 0xD3
 EXPECTED_SHL_VALUE: int = 0x46
 EXPECTED_SHR_VALUE: int = 0x11
 
-EXPECTED_OVERFLOW_ADD_VALUE: int = 0x01
+EXPECTED_OVERFLOW_ADD_VALUE: int = 0x00
 
 
 class TestChipRegisters(BaseTest):
@@ -211,3 +211,22 @@ class TestChipRegisters(BaseTest):
 
         self.assertEqual(expectedValue, actualValue, "Register to register borrow subtract did not work")
         self.assertEqual(Chip8Registers.BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")
+
+    def testScTestOneMinusOne(self):
+        """
+        ERROR 6
+        After subtraction 1-1 register VF must be 1, but is still 0.
+
+        """
+        self.registers.setValue(Chip8RegisterName.V7, 1)
+        self.registers.setValue(Chip8RegisterName.V8, 1)
+
+        self.registers.setValue(Chip8RegisterName.VF, 0)    # Clear the flag register
+
+        self.registers.subRegisterToRegister(vx=Chip8RegisterName.V7, vy=Chip8RegisterName.V8)
+
+        expectedValue: int = 0
+        actualValue:   int = self.registers.getValue(Chip8RegisterName.V7)
+
+        self.assertEqual(expectedValue, actualValue, "Register to register subtract did not work")
+        self.assertEqual(Chip8Registers.NO_BORROW_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register incorrect")

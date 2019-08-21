@@ -96,7 +96,7 @@ class Chip8Registers:
 
         if tempReg > 255:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.CARRY_BIT
-            self.registers[vx] = tempReg - 255
+            self.registers[vx] = 0
         else:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_CARRY_BIT
             self.registers[vx] = tempReg
@@ -114,7 +114,7 @@ class Chip8Registers:
         vyVal: int = self.registers[vy]
         self.logger.debug(f'subRegisterToRegister - vxVal: {vxVal} vyVal: {vyVal}')
         # If a borrow is NOT generated, set a carry flag in register VF.
-        if vxVal > vyVal:
+        if vxVal >= vyVal:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
         else:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
