@@ -530,9 +530,11 @@ class Chip8:
             self.memory[memLoc + 2] = (regVal % 100) % 10
             self.logger.info(f"memLoc: '{self.memory[memLoc]}' memLoc+1: '{self.memory[memLoc+1]}' memLoc+2: '{self.memory[memLoc+2]}'")
         elif subOpCode == 0x55:
-            lastRegValue: int = cast(int, regName.value)
+            lastRegValue: int               = cast(int, regName.value)
             for x in range(0, lastRegValue + 1):
-                self.memory[self.indexRegister + x] = self.registers.getValue(regName)
+                currRegName = Chip8RegisterName(x)
+                self.memory[self.indexRegister + x] = self.registers.getValue(currRegName)
+                self.logger.debug(f'currRegName: {currRegName} value: {self.registers[currRegName]:04X}')
         elif subOpCode == 0x65:
             lastRegValue: int = cast(int, regName.value)
             self._debugPrintMemory(startByteNbr=self.indexRegister, nBytes=lastRegValue, bytesPerRow=8)

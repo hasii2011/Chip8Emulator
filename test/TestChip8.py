@@ -14,10 +14,11 @@ from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegiste
 class TestChip8(BaseTest):
 
     MAX_GEN_RAND_LOOP_COUNT: int = 256
-    REGISTER_STORE_VALUE:    int = 0xFE
+    REGISTER_STORE_VALUE:    int = 0xBB
     REGISTER_READ_VALUE:     int = 0xCC
     RANDOM_VALUE:            int = 0xBB
     TEST_STACK_DEPTH:        int = 5
+    REGISTER_STORE_ADDRESS:  int = 0x0400
 
     clsLogger: Logger = None
 
@@ -637,13 +638,21 @@ class TestChip8(BaseTest):
         #
         self._setupMemory(TestChip8.RANDOM_VALUE)
 
+        self.chip8.indexRegister = TestChip8.REGISTER_STORE_ADDRESS
         instruction: int = 0xF355
+        self.chip8.debugPrintMemory = True
+        self.chip8._debugPrintMemory(startByteNbr=TestChip8.REGISTER_STORE_ADDRESS, nBytes=8)
+
         self.chip8.emulateSingleCpuCycle(instruction)
 
+        self.chip8._debugPrintMemory(startByteNbr=TestChip8.REGISTER_STORE_ADDRESS, nBytes=8)
+
+        self.chip8.indexRegister = TestChip8.REGISTER_STORE_ADDRESS
         expectedValue: int = TestChip8.REGISTER_STORE_VALUE
         for y in range(0, Chip8RegisterName.V3.value + 1):
             actualValue: int = self.chip8.memory[self.chip8.indexRegister + y]
             self.assertEqual(expectedValue, actualValue, f"Register V{y:X} not correctly stored")
+            expectedValue += 1
 
     def testReadRegisters(self):
         """
@@ -882,15 +891,15 @@ class TestChip8(BaseTest):
 
     def _setupRegisters(self, registerValue: int):
         """
+
         Initializes registers V0-V3
         Args:
             registerValue: Load into registers
         """
-        self.chip8.indexRegister = 0x0400
         self.chip8.registers.setValue(Chip8RegisterName.V0, registerValue)
-        self.chip8.registers.setValue(Chip8RegisterName.V1, registerValue)
-        self.chip8.registers.setValue(Chip8RegisterName.V2, registerValue)
-        self.chip8.registers.setValue(Chip8RegisterName.V3, registerValue)
+        self.chip8.registers.setValue(Chip8RegisterName.V1, registerValue + 1)
+        self.chip8.registers.setValue(Chip8RegisterName.V2, registerValue + 2)
+        self.chip8.registers.setValue(Chip8RegisterName.V3, registerValue + 3)
 
     def _setupMemory(self, memoryValue: int):
         for x in range(0, Chip8RegisterName.V3.value + 1):
