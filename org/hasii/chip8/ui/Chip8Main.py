@@ -17,8 +17,8 @@ from org.hasii.chip8.Chip8Screen import Chip8Screen
 JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
 MADE_UP_PRETTY_MAIN_NAME     = "Chip8Main"
 
-MENU_BAR_HEIGHT_ADJUSTMENT: int = 24
-INTERNALS_DISPLAY_HEIGHT_ADJUSTMENT: int = 80
+MENU_BAR_HEIGHT_ADJUSTMENT:          int = 24
+INTERNALS_DISPLAY_HEIGHT_ADJUSTMENT: int = 240
 
 
 def main():

@@ -17,12 +17,13 @@ from albow.References import AttrRef
 from albow.References import ItemRef
 
 from albow.themes.Theme import Theme
+
+from albow.core.ui.Widget import Widget
 from albow.core.ui.Screen import Screen
 
 from albow.dialog.FileDialogUtilities import request_old_filename
 
 from albow.core.ui.Shell import Shell
-from albow.core.ui.Widget import Widget
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
 
 from albow.menu.Menu import Menu
@@ -31,6 +32,7 @@ from albow.menu.MenuItem import MenuItem
 
 from albow.layout.Column import Column
 from albow.layout.Row import Row
+from albow.layout.Grid import Grid
 from albow.layout.Frame import Frame
 
 from albow.widgets.Label import Label
@@ -98,7 +100,7 @@ class Chip8UIScreen(Screen):
         framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
         chip8Screen:   Chip8Screen = Chip8Screen(self.chip8.virtualScreen)
         internalsDisp: Row         = self.makeCpuInternalsDisplay()
-        registerDisp:  Row         = self.makeRegisterDisplay()
+        registerDisp:  Grid         = self.makeRegisterDisplay()
         columnAttrs = {
             "align": "l",
             'expand': 0,
@@ -223,18 +225,28 @@ class Chip8UIScreen(Screen):
             'spacing': 2,
         }
 
-        widgetList: List[Widget] = []
+        leftList:  List[Widget] = []
+        rightList: List[Widget] = []
         for regName in Chip8RegisterName:
             itemRef:  ItemRef      = ItemRef(base=self.chip8.registers, index=regName)
             regLabel: Label        = Label(regName.name + ':', **attrs)
             regValue: ValueDisplay = ValueDisplay(ref=itemRef, width=40, **attrs)
             regValue.format        = '0x%04X'
 
-            pairRow: Row = Row([regLabel, regValue], border_width=1, **rowAttrs)
-            widgetList.append(pairRow)
+            pairRow: Row = Row([regLabel, regValue], **rowAttrs)
+            if regName.value % 2:
+                rightList.append(pairRow)
+            else:
+                leftList.append(pairRow)
 
-        retRow: Row = Row(widgetList, **rowAttrs)
-        return retRow
+        leftColumn:  Column = Column(leftList, **rowAttrs)
+        rightColumn: Column = Column(rightList, **rowAttrs)
+        gridAttrs = {
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'margin': 2,
+        }
+        retGrid: Row = Row([leftColumn, rightColumn], **gridAttrs)
+        return retGrid
 
     def _makeLabelValueRow(self, refName: str, attrLabel: str, attrFormat: str = None, valueWidth: int = 100) -> Row:
 
