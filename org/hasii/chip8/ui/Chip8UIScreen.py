@@ -32,7 +32,7 @@ from albow.menu.MenuItem import MenuItem
 
 from albow.layout.Column import Column
 from albow.layout.Row import Row
-from albow.layout.Grid import Grid
+
 from albow.layout.Frame import Frame
 
 from albow.widgets.Label import Label
@@ -87,7 +87,7 @@ class Chip8UIScreen(Screen):
         self.chip8:   Chip8 = Chip8()
 
         fullFileName:       str = self._findFont('MonoFonto.ttf')
-        self.internalsFont: Font = Font(fullFileName, 12)
+        self.internalsFont: Font = Font(fullFileName, 13)
 
         self.note = Chip8Beep(440)
 
@@ -100,12 +100,13 @@ class Chip8UIScreen(Screen):
         framedMenuBar: Frame       = Frame(client=menuBar, width=self.shell.width)
         chip8Screen:   Chip8Screen = Chip8Screen(self.chip8.virtualScreen)
         internalsDisp: Row         = self.makeCpuInternalsDisplay()
-        registerDisp:  Grid         = self.makeRegisterDisplay()
+        registerDisp:  Row         = self.makeRegisterDisplay()
         columnAttrs = {
             "align": "l",
             'expand': 0,
             'bg_color': Theme.LAMAS_MEDIUM_BLUE,
-            'margin': 1
+            'margin': 1,
+            'spacing': 2,
         }
         contents = Column([framedMenuBar, chip8Screen, internalsDisp, registerDisp], **columnAttrs)
 
@@ -244,6 +245,7 @@ class Chip8UIScreen(Screen):
         gridAttrs = {
             'bg_color': Theme.LAMAS_MEDIUM_BLUE,
             'margin': 2,
+            'border_width': 1
         }
         retGrid: Row = Row([leftColumn, rightColumn], **gridAttrs)
         return retGrid
