@@ -37,6 +37,7 @@ from albow.layout.Frame import Frame
 
 from albow.widgets.Label import Label
 from albow.widgets.ValueDisplay import ValueDisplay
+from albow.widgets.TextBox import TextBox
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
@@ -91,6 +92,17 @@ class Chip8UIScreen(Screen):
 
         self.note = Chip8Beep(440)
 
+        self.labelAttrs = {
+            'fg_color': Theme.WHITE,
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'font': self.internalsFont,
+        }
+        self.rowColumnAttrs = {
+            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
+            'margin': 2,
+            'spacing': 3,
+        }
+
         menus = [
             Chip8UIScreen.fileMenu, Chip8UIScreen.helpMenu
         ]
@@ -101,14 +113,18 @@ class Chip8UIScreen(Screen):
         chip8Screen:   Chip8Screen = Chip8Screen(self.chip8.virtualScreen)
         internalsDisp: Row         = self.makeCpuInternalsDisplay()
         registerDisp:  Row         = self.makeRegisterDisplay()
-        columnAttrs = {
+        stackDisp:     Column      = self.makeStackDisplay()
+
+        registerStackDisp: Row = Row([registerDisp, stackDisp], align='b', **self.rowColumnAttrs)
+
+        contentAttrs = {
             "align": "l",
             'expand': 0,
             'bg_color': Theme.LAMAS_MEDIUM_BLUE,
             'margin': 1,
             'spacing': 2,
         }
-        contents = Column([framedMenuBar, chip8Screen, internalsDisp, registerDisp], **columnAttrs)
+        contents = Column([framedMenuBar, chip8Screen, internalsDisp, registerStackDisp], **contentAttrs)
 
         self.logger.debug(f"Menu bar size: {framedMenuBar.size}, shell width: {self.shell.width}")
         self.add(contents)
@@ -199,9 +215,9 @@ class Chip8UIScreen(Screen):
     def makeCpuInternalsDisplay(self) -> Row:
 
         pcRow:        Row = self._makeLabelValueRow(refName='pc',               attrLabel='PC:',          attrFormat='0x%04X', valueWidth=50)
-        idxRow:       Row = self._makeLabelValueRow(refName='indexRegister',    attrLabel='Idx:',         attrFormat='0x%04X', valueWidth=40)
-        sndTimerRow:  Row = self._makeLabelValueRow(refName='soundTimer',       attrLabel='Sound Timer:', attrFormat='0x%04X', valueWidth=40)
-        dlyTimerRow:  Row = self._makeLabelValueRow(refName='delayTimer',       attrLabel='Delay Timer:', attrFormat='0x%04X', valueWidth=40)
+        idxRow:       Row = self._makeLabelValueRow(refName='indexRegister',    attrLabel='Idx:',         attrFormat='0x%04X', valueWidth=42)
+        sndTimerRow:  Row = self._makeLabelValueRow(refName='soundTimer',       attrLabel='Sound Timer:', attrFormat='0x%04X', valueWidth=42)
+        dlyTimerRow:  Row = self._makeLabelValueRow(refName='delayTimer',       attrLabel='Delay Timer:', attrFormat='0x%04X', valueWidth=42)
         instCountRow: Row = self._makeLabelValueRow(refName='instructionCount', attrLabel='Inst Cnt:',    valueWidth=50)
 
         retAttrs = {
@@ -215,33 +231,22 @@ class Chip8UIScreen(Screen):
 
     def makeRegisterDisplay(self) -> Row:
 
-        attrs = {
-            'fg_color': Theme.WHITE,
-            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
-            'font': self.internalsFont
-        }
-        rowAttrs = {
-            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
-            'margin': 2,
-            'spacing': 2,
-        }
-
         leftList:  List[Widget] = []
         rightList: List[Widget] = []
         for regName in Chip8RegisterName:
             itemRef:  ItemRef      = ItemRef(base=self.chip8.registers, index=regName)
-            regLabel: Label        = Label(regName.name + ':', **attrs)
-            regValue: ValueDisplay = ValueDisplay(ref=itemRef, width=40, **attrs)
+            regLabel: Label        = Label(regName.name + ':', **self.labelAttrs)
+            regValue: ValueDisplay = ValueDisplay(ref=itemRef, width=42, **self.labelAttrs)
             regValue.format        = '0x%04X'
 
-            pairRow: Row = Row([regLabel, regValue], **rowAttrs)
+            pairRow: Row = Row([regLabel, regValue], **self.rowColumnAttrs)
             if regName.value % 2:
                 rightList.append(pairRow)
             else:
                 leftList.append(pairRow)
 
-        leftColumn:  Column = Column(leftList, **rowAttrs)
-        rightColumn: Column = Column(rightList, **rowAttrs)
+        leftColumn:  Column = Column(leftList, **self.rowColumnAttrs)
+        rightColumn: Column = Column(rightList, **self.rowColumnAttrs)
         gridAttrs = {
             'bg_color': Theme.LAMAS_MEDIUM_BLUE,
             'margin': 2,
@@ -250,26 +255,23 @@ class Chip8UIScreen(Screen):
         retGrid: Row = Row([leftColumn, rightColumn], **gridAttrs)
         return retGrid
 
+    def makeStackDisplay(self) -> Column:
+
+        stackLabel: Label   = Label("Stack", **self.labelAttrs)
+        stackBox:   TextBox = TextBox(theNumberOfColumns=12, theNumberOfRows=10)
+
+        stackContainer: Column = Column([stackLabel, stackBox], **self.rowColumnAttrs)
+        return stackContainer
+
     def _makeLabelValueRow(self, refName: str, attrLabel: str, attrFormat: str = None, valueWidth: int = 100) -> Row:
 
-        attrs = {
-            'fg_color': Theme.WHITE,
-            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
-            'font': self.internalsFont,
-        }
         attrRef:   AttrRef      = AttrRef(base=self.chip8, name=refName)
-        attrLabel: Label        = Label(attrLabel, **attrs)
-        attrValue: ValueDisplay = ValueDisplay(ref=attrRef, width=valueWidth, **attrs)
+        attrLabel: Label        = Label(attrLabel, **self.labelAttrs)
+        attrValue: ValueDisplay = ValueDisplay(ref=attrRef, width=valueWidth, **self.labelAttrs)
         if attrFormat is not None:
             attrValue.format = attrFormat
 
-        retAttrs = {
-            'bg_color': Theme.LAMAS_MEDIUM_BLUE,
-            'margin': 2,
-            'spacing': 3,
-        }
-
-        retRow: Row = Row([attrLabel, attrValue], **retAttrs)
+        retRow: Row = Row([attrLabel, attrValue], **self.rowColumnAttrs)
 
         return retRow
 

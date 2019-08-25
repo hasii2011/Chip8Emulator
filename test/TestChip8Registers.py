@@ -88,6 +88,7 @@ class TestChipRegisters(BaseTest):
 
         self.registers.setValue(v=Chip8RegisterName.V5, newValue=VALUE_WITH_KNOWN_MSB)
         self.logger.info(f"Binary value to shift left: {self.registers.getValue(Chip8RegisterName.V5):b}")
+        self.logger.info(f'Original {Chip8RegisterName.V5.name} value,  {self.registers[Chip8RegisterName.V5]}')
 
         self.registers.shiftLeft(v=Chip8RegisterName.V5, numBitsToShift=BITS_TO_SHIFT)
 
@@ -95,6 +96,8 @@ class TestChipRegisters(BaseTest):
         self.logger.info(f"Flag Register: {self.registers.getValue(Chip8RegisterName.VF):b}")
 
         self.assertEqual(0x0001, self.registers.getValue(Chip8RegisterName.VF), "Flag register not set")
+
+        self.logger.info(f'New {Chip8RegisterName.V5.name} value,  {self.registers[Chip8RegisterName.V5]}')
 
     def testShiftRightLSBStore(self):
         self.registers.setValue(v=Chip8RegisterName.V4, newValue=VALUE_WITH_KNOWN_LSB)
