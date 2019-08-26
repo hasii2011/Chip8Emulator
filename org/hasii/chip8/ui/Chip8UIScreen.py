@@ -37,12 +37,12 @@ from albow.layout.Frame import Frame
 
 from albow.widgets.Label import Label
 from albow.widgets.ValueDisplay import ValueDisplay
-from albow.widgets.TextBox import TextBox
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Screen import Chip8Screen
+from org.hasii.chip8.ui.Chip8UIStack import Chip8UIStack
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
@@ -258,7 +258,7 @@ class Chip8UIScreen(Screen):
     def makeStackDisplay(self) -> Column:
 
         stackLabel: Label   = Label("Stack", **self.labelAttrs)
-        stackBox:   TextBox = TextBox(theNumberOfColumns=12, theNumberOfRows=10)
+        stackBox:   Chip8UIStack = Chip8UIStack(theChipStack=self.chip8.stack)
 
         stackContainer: Column = Column([stackLabel, stackBox], **self.rowColumnAttrs)
         return stackContainer

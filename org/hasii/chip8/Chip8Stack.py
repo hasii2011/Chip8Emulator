@@ -38,6 +38,13 @@ class Chip8Stack:
     def size(self) -> int:
         return len(self.items)
 
+    def toString(self):
+        stackDump: str = ''
+        stackDepth: int = len(self.items)
+        for x in range(stackDepth):
+            stackDump += f'[{x}] - 0x{self.items[x]:04X}\n'
+        return stackDump
+
     def __repr__(self):
         stackDump: str = (
             f'Stack Dump\n'
