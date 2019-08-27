@@ -13,6 +13,9 @@ KNOWN_SMALL_VALUE:    int = 0x00
 VALUE_WITH_KNOWN_MSB: int = 0xF0
 VALUE_WITH_KNOWN_LSB: int = 0x0F
 
+KNOWN_CAUSE_OVERFLOW_LEFT_OVER: int = 0x20
+KNOWN_NON_BOUNDARY_VALUE:       int = 0xD0
+
 MISSILE_VALUE_TO_SUBTRACT: int = 3
 MISSILE_KNOWN_SMALL_VALUE: int = 2
 
@@ -28,6 +31,9 @@ EXPECTED_SHL_VALUE: int = 0x46
 EXPECTED_SHR_VALUE: int = 0x11
 
 EXPECTED_OVERFLOW_ADD_VALUE: int = 0x00
+EXPECTED_OVERFLOW_LEFT_OVER: int = KNOWN_CAUSE_OVERFLOW_LEFT_OVER - 1
+
+EXPECTED_OVERFLOW_NON_BOUNDARY_LEFT_OVER: int = 0xA0
 
 
 class TestChipRegisters(BaseTest):
@@ -134,6 +140,27 @@ class TestChipRegisters(BaseTest):
         actualValue: int = self.registers.getValue(Chip8RegisterName.V7)
 
         self.assertEqual(EXPECTED_OVERFLOW_ADD_VALUE, actualValue, "Register to register overflow add did not work")
+        self.assertEqual(Chip8Registers.CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register overflow")
+
+    def testOverflowRegisterToRegisterAddKeepingLowest8Bits(self):
+
+        self.registers[Chip8RegisterName.VA] = KNOWN_LARGE_VALUE
+        self.registers[Chip8RegisterName.VC] = KNOWN_CAUSE_OVERFLOW_LEFT_OVER
+        self.registers.addRegisterToRegister(vx=Chip8RegisterName.VA, vy=Chip8RegisterName.VC)
+
+        actualValue: int = self.registers.getValue(Chip8RegisterName.VA)
+
+        self.assertEqual(EXPECTED_OVERFLOW_LEFT_OVER, actualValue, "Register to register bpundar overflow add did not work")
+        self.assertEqual(Chip8Registers.CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register overflow")
+
+    def testOverflowRegisterToRegisterAddKeepingLowest8BitsNonBoundaryVxValue(self):
+        self.registers[Chip8RegisterName.V3] = KNOWN_NON_BOUNDARY_VALUE
+        self.registers[Chip8RegisterName.V9] = KNOWN_NON_BOUNDARY_VALUE
+
+        self.registers.addRegisterToRegister(vx=Chip8RegisterName.V3, vy=Chip8RegisterName.V9)
+
+        actualValue: int = self.registers.getValue(Chip8RegisterName.V3)
+        self.assertEqual(EXPECTED_OVERFLOW_NON_BOUNDARY_LEFT_OVER, actualValue, "Register to register non-boundary overflow add did not work")
         self.assertEqual(Chip8Registers.CARRY_BIT, self.registers.getValue(Chip8RegisterName.VF), "Flag register overflow")
 
     def testBasicRegisterToRegisterSubtract(self):

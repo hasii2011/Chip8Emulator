@@ -85,6 +85,7 @@ class Chip8Registers:
         """
         8xy4; ADD Vx, Vy;     Set Vx = Vx + Vy
         VF is set to 1 when there is a carry, and to 0 when there is not
+        Only the lowest 8 bits of the result are kept, and stored in Vx.
 
         Args:
             vx:  Source register
@@ -96,7 +97,7 @@ class Chip8Registers:
 
         if tempReg > 255:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.CARRY_BIT
-            self.registers[vx] = 0
+            self.registers[vx] = tempReg & 0xFF
         else:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_CARRY_BIT
             self.registers[vx] = tempReg
