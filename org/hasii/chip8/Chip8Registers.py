@@ -139,7 +139,7 @@ class Chip8Registers:
 
         self.logger.debug(f'subRegisterVyFromRegisterVx - vxVal: {vxVal} vyVal: {vyVal}')
 
-        if vyVal < vxVal:       # flipped, I think this is correct
+        if vyVal >= vxVal:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.BORROW_BIT
         else:
             self.registers[Chip8RegisterName.VF] = Chip8Registers.NO_BORROW_BIT
