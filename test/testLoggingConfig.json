@@ -31,6 +31,11 @@
             ],
             "propagate": "False"
         },
+        "TestChip8Disassembler": {
+            "level":     "INFO",
+            "handlers":  ["consoleHandler"],
+            "propagate": "False"
+        },
         "TestChip8Registers": {
             "level":     "INFO",
             "handlers":  ["consoleHandler"],

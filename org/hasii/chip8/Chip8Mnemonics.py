@@ -5,7 +5,7 @@ from enum import Enum
 class Chip8Mnemonics(Enum):
 
     SYS = 0x0000    # 0nnn; Jump to a machine code routine at nnn; ignored by modern interpreters                                   (TBD)
-    RET = 0x00EE    # 00EE; Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
+    RTS = 0x00EE    # 00EE; Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
 
     CLS = 0x00E0    # Clear the display                                                                                             (TBD)
 

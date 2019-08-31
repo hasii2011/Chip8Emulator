@@ -135,14 +135,14 @@ class Chip8:
         seed()
         self.opCodeMethods: Dict[int, Callable] = {
 
-            Chip8Mnemonics.RET.value:  self.returnFromSubroutine,
-            Chip8Mnemonics.CLS.value:  self.clearScreen,
-            Chip8Mnemonics.JP.value:   self.jumpToAddress,
+            Chip8Mnemonics.RTS.value :  self.returnFromSubroutine,
+            Chip8Mnemonics.CLS.value :  self.clearScreen,
+            Chip8Mnemonics.JP.value  :   self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
-            Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
+            Chip8Mnemonics.SEL.value :  self.skipIfRegisterEqualToLiteral,
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
-            Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
-            Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
+            Chip8Mnemonics.SER.value :  self.skipIfRegisterEqualToRegister,
+            Chip8Mnemonics.LDL.value :  self.loadRegisterWithLiteral,
             Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
             Chip8Mnemonics.LDR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.OR.value:   self.registerToRegisterInstructions,
@@ -300,7 +300,7 @@ class Chip8:
 
     def returnFromSubroutine(self):
         """
-            RET = 0x00EE    # 00EE;
+            RTS = 0x00EE    # 00EE;
             Return from a subroutine; Set PC to the address at top of the stack, then subtracts 1 from the stack pointer.
         """
         self.pc = self.stack.pop()
