@@ -137,38 +137,38 @@ class Chip8:
 
             Chip8Mnemonics.RTS.value :  self.returnFromSubroutine,
             Chip8Mnemonics.CLS.value :  self.clearScreen,
-            Chip8Mnemonics.JP.value  :   self.jumpToAddress,
+            Chip8Mnemonics.JUMP.value:   self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
             Chip8Mnemonics.SEL.value :  self.skipIfRegisterEqualToLiteral,
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
             Chip8Mnemonics.SER.value :  self.skipIfRegisterEqualToRegister,
             Chip8Mnemonics.LDL.value :  self.loadRegisterWithLiteral,
-            Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
-            Chip8Mnemonics.LDR.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.OR.value:   self.registerToRegisterInstructions,
-            Chip8Mnemonics.AND.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.XOR.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.ADD.value :  self.addLiteralToRegister,
+            Chip8Mnemonics.MOV.value :  self.registerToRegisterInstructions,
+            Chip8Mnemonics.OR.value  :   self.registerToRegisterInstructions,
+            Chip8Mnemonics.AND.value :  self.registerToRegisterInstructions,
+            Chip8Mnemonics.XOR.value :  self.registerToRegisterInstructions,
             Chip8Mnemonics.ADDR.value: self.registerToRegisterInstructions,
-            Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
-            Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
-            Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
-            Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
-            Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
-            Chip8Mnemonics.RND.value:  self.rndByte,
-            Chip8Mnemonics.DRW.value:  self.displaySprite,
-            Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
-            Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
-            Chip8Mnemonics.LDRT.value: self.specialRegistersInstructions,
-            Chip8Mnemonics.LDK.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.SDT.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.SST.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.ADDI.value: self.specialRegistersInstructions,
-            Chip8Mnemonics.LDIS.value: self.specialRegistersInstructions,
-            Chip8Mnemonics.LDB.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.STR.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.RDR.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.SUB.value    :  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHR.value    :  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SUBN.value   : self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHL.value    :  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SNER.value   : self.skipIfRegisterNotEqualToRegister,
+            Chip8Mnemonics.LDI.value    :  self.loadIndexRegister,
+            Chip8Mnemonics.JPV.value    :  self.jumpToLocationPlusVZero,
+            Chip8Mnemonics.RNDMSK.value :  self.rndByte,
+            Chip8Mnemonics.DRAW.value   :  self.displaySprite,
+            Chip8Mnemonics.SKP.value    :  self.skipNextKeyPressedInstructions,
+            Chip8Mnemonics.SKNP.value   : self.skipNextKeyPressedInstructions,
+            Chip8Mnemonics.LDDT.value   : self.specialRegistersInstructions,
+            Chip8Mnemonics.WAITKEY.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.SDT.value    :  self.specialRegistersInstructions,
+            Chip8Mnemonics.SST.value    :  self.specialRegistersInstructions,
+            Chip8Mnemonics.ADDI.value   : self.specialRegistersInstructions,
+            Chip8Mnemonics.LDIS.value   : self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVBCD.value :  self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVM.value   :  self.specialRegistersInstructions,
+            Chip8Mnemonics.READM.value :  self.specialRegistersInstructions,
         }
         self.logger.debug(f"{self.memory}")
 
@@ -390,7 +390,7 @@ class Chip8:
 
         rightRegVal: int = self.registers.getValue(rightRegister)
 
-        if subOpCode == 0x0:    # 8xy0; LDR Vx, Vy;     Set Vx = Vy.
+        if subOpCode == 0x0:    # 8xy0; MOV Vx, Vy;     Set Vx = Vy.
             self.registers.setValue(v=leftRegister, newValue=rightRegVal)
         elif subOpCode == 0x1:  # 8xy1; OR Vx, Vy;      Set Vx = Vx OR Vy
             self.registers.orOp(v=leftRegister, mask=rightRegVal)
@@ -419,7 +419,7 @@ class Chip8:
 
     def jumpToLocationPlusVZero(self):
         """
-        Bnnn; JP V0, addr;    Jump to location nnn + V0
+        Bnnn; JUMP V0, addr;    Jump to location nnn + V0
         The program counter is set to nnn plus the value of V0
         """
         v0Val:    int = self.registers.getValue(Chip8RegisterName.V0)
@@ -429,7 +429,7 @@ class Chip8:
 
     def rndByte(self):
         """
-        Cxkk; RND Vx, byte;   Set Vx = random byte AND kk
+        Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
 
         Interpreter generates a random number from 0 to 255
 
@@ -444,7 +444,7 @@ class Chip8:
 
     def displaySprite(self):
         """
-        Dxyn; DRW Vx, Vy, nibble;
+        Dxyn; DRAW Vx, Vy, nibble;
 
         Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
 
@@ -490,15 +490,15 @@ class Chip8:
 
     def specialRegistersInstructions(self):
         """
-        LDRT = 0xF007   # Fx07; LDT Vx, DT;     Set Vx = delay timer value
-        LDK  = 0xF00A   # Fx0A; LDK Vx, K;      Wait for a key press, store the value of the key in Vx.
+        LDDT = 0xF007   # Fx07; LDT Vx, DT;     Set Vx = delay timer value
+        WAITKEY  = 0xF00A   # Fx0A; WAITKEY Vx, K;      Wait for a key press, store the value of the key in Vx.
         SDT  = 0xF015   # Fx15; SDT DT, Vx;     Set delay timer = Vx
         SST  = 0xF018   # Fx18; SST ST, Vx;     Set sound timer = Vx
         ADDI = 0xF01E   # Fx1E; ADDI I, Vx;     Set I = I + Vx
         LDIS = 0xF029   # Fx29; LDIS F, Vx;     I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
-        LDB  = 0xF033   # Fx33; LDB B, Vx;      Store BCD representation of Vx in memory locations I, I+1, and I+2
-        STR  = 0xF055   # Fx55; STR [I], Vx;    Store registers V0-Vx in memory starting at location I.
-        RDR  = 0xF065   # Fx65; RDR Vx, [I];    Read registers V0-Vx from memory starting at location I.
+        MOVBCD  = 0xF033   # Fx33; MOVBCD B, Vx;      Store BCD representation of Vx in memory locations I, I+1, and I+2
+        MOVM  = 0xF055   # Fx55; MOVM [I], Vx;    Store registers V0-Vx in memory starting at location I.
+        READM  = 0xF065   # Fx65; READM Vx, [I];    Read registers V0-Vx from memory starting at location I.
         """
         subOpCode: int = self._decodeSpecialRegistersSubOpCode()
         self.logger.debug(f"Special Registers subOpCode: {subOpCode:X}")
@@ -568,7 +568,7 @@ class Chip8:
 
     def setupChipToWaitForKeyPress(self, regName: Chip8RegisterName):
         """
-        Called by the CPU opCode (Fx0A; LDK Vx, K) to set the CPU into wait mode
+        Called by the CPU opCode (Fx0A; WAITKEY Vx, K) to set the CPU into wait mode
         Args:
             regName:  The register into which to store the key that was pressed
         """

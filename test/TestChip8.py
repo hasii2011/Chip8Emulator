@@ -56,7 +56,7 @@ class TestChip8(BaseTest):
 
     def testWaitForKeyPress(self):
         """
-         Fx0A; LDK Vx, K;          Wait for a key press, store the value of the key in Vx.
+         Fx0A; WAITKEY Vx, K;          Wait for a key press, store the value of the key in Vx.
         """
         instruction: int = 0xFB0A
         self.chip8.emulateSingleCpuCycle(instruction)
@@ -318,7 +318,7 @@ class TestChip8(BaseTest):
 
     def testLoadFromRegister(self):
         """
-        8xy0; LDR Vx, Vy;     Set Vx = Vy.
+        8xy0; MOV Vx, Vy;     Set Vx = Vy.
         """
         instruction: int = 0x8EA0
 
@@ -489,7 +489,7 @@ class TestChip8(BaseTest):
 
     def testJumpToLocationPlusVZero(self):
         """
-        Bnnn; JP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
+        Bnnn; JUMP V0, addr;    Jump to location nnn + V0       The program counter is set to nnn plus the value of V0
         """
         instruction: int = 0xB123
 
@@ -508,7 +508,7 @@ class TestChip8(BaseTest):
 
     def testRndByte(self):
         """
-        Cxkk; RND Vx, byte;   Set Vx = random byte AND kk
+        Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
 
         The Interpreter generates a random number from 0 to 255
         """
@@ -605,7 +605,7 @@ class TestChip8(BaseTest):
 
     def testStoreBCD(self):
         """
-        # Fx33; LDB B, Vx;
+        # Fx33; MOVBCD B, Vx;
         Store BCD representation of Vx in memory locations I, I+1, and I+2
         """
         instruction: int = 0xF033
@@ -629,7 +629,7 @@ class TestChip8(BaseTest):
 
     def testStoreRegisters(self):
         """
-        Fx55; STR [I], Vx;
+        Fx55; MOVM [I], Vx;
         Store registers V0-Vx in memory starting at location I.
         """
         self._setupRegisters(TestChip8.REGISTER_STORE_VALUE)
@@ -656,7 +656,7 @@ class TestChip8(BaseTest):
 
     def testReadRegisters(self):
         """
-        Fx65 RDR Vx, [I];
+        Fx65 READM Vx, [I];
         Read registers V0-Vx from memory starting at location I.
         """
         self._setupRegisters(TestChip8.RANDOM_VALUE)
