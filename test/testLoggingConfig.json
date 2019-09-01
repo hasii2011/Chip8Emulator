@@ -19,16 +19,12 @@
     "loggers": {
         "root": {
             "level": "INFO",
-            "handlers": [
-                "consoleHandler"
-            ],
+            "handlers": ["consoleHandler"],
             "propagate": "False"
         },
         "TestChip8": {
             "level": "INFO",
-            "handlers": [
-                "consoleHandler"
-            ],
+            "handlers": ["consoleHandler"],
             "propagate": "False"
         },
         "TestChip8Disassembler": {
@@ -56,6 +52,5 @@
             "handlers":  ["consoleHandler"],
             "propagate": "False"
         }
-
     }
 }
