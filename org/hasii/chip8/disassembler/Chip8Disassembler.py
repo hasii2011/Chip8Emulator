@@ -65,7 +65,11 @@ class Chip8Disassembler:
         return strInstruction
 
     def clearScreen(self, opCode: int) -> str:
-        pass
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'CLS'
+        )
+        return strInstruction
 
     def jumpToAddress(self, opCode: int) -> str:
         pass
