@@ -20,6 +20,7 @@ from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
 from org.hasii.chip8.keyboard.Chip8KeyPressData import Chip8KeyPressData
+from org.hasii.chip8.Chip8Decoder import Chip8Decoder
 
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
@@ -27,7 +28,7 @@ from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpeci
 from org.hasii.chip8.errors.UnknownKeyPressedOpSubOpCode import UnknownKeyPressedOpSubOpCode
 
 
-class Chip8:
+class Chip8(Chip8Decoder):
 
     debugVirtualScreen: bool = False
     debugPrintMemory:   bool = False
@@ -116,6 +117,7 @@ class Chip8:
 
     def __init__(self):
 
+        super().__init__()
         self.logger: Logger = getLogger(__name__)
 
         self.pc:            int = Chip8.PROGRAM_START_ADDRESS
@@ -645,16 +647,6 @@ class Chip8:
         register: Chip8RegisterName = Chip8RegisterName(vx)
 
         return register
-
-    def _decodeRegister(self) -> Chip8RegisterName:
-
-        vx = (self.instruction & 0x0F00) >> 8
-        register: Chip8RegisterName = Chip8RegisterName(vx)
-
-        return register
-
-    def _decodeLiteral(self) -> int:
-        return self.instruction & 0x00FF
 
     def _decodeNibble(self) -> int:
         return self.instruction & 0x00F

@@ -7,16 +7,20 @@ from logging import getLogger
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
+from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
+from org.hasii.chip8.Chip8Decoder import Chip8Decoder
+
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 
 
-class Chip8Disassembler:
+class Chip8Disassembler(Chip8Decoder):
 
     def __init__(self):
 
         self.logger: Logger = getLogger(__name__)
 
-        self.pc: int = 0x0000
+        self.pc:          int = 0x0000
+        self.instruction: int = 0x0000
 
         self.opCodeMethods: Dict[int, Callable] = {
 
@@ -24,6 +28,7 @@ class Chip8Disassembler:
             Chip8Mnemonics.CLS.value:  self.clearScreen,
             Chip8Mnemonics.JUMP.value: self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
+            Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -35,7 +40,9 @@ class Chip8Disassembler:
 
         Returns:  An assembly language version of the input opCode
         """
-        self.pc = pc
+        self.pc:          int = pc
+        self.instruction: int = instruction
+
         instStr: str = hex(instruction)
         self.logger.debug(f"currentInstruction: {instStr}")
         op: int = instruction & Chip8.OPCODE_MASK
@@ -52,11 +59,11 @@ class Chip8Disassembler:
         except KeyError:
             raise UnknownInstructionError(badInstruction=op)
 
-        mnemonicInstr = decode(op)
+        mnemonicInstr = decode()
 
         return mnemonicInstr
 
-    def returnFromSubroutine(self, opCode: int) -> str:
+    def returnFromSubroutine(self) -> str:
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
@@ -64,18 +71,45 @@ class Chip8Disassembler:
         )
         return strInstruction
 
-    def clearScreen(self, opCode: int) -> str:
+    def clearScreen(self) -> str:
         strInstruction: str = (
             f'{self._memoryAddress()}'
             f'CLS'
         )
         return strInstruction
 
-    def jumpToAddress(self, opCode: int) -> str:
-        pass
+    def jumpToAddress(self) -> str:
+        addr = self.instruction & Chip8.ADDRESS_MASK
+        self.pc = addr
+        self.logger.debug(f"new pc: {hex(self.pc)}")
 
-    def callSubroutine(self, opCode: int) -> str:
-        pass
+    def callSubroutine(self, ) -> str:
+
+        subroutineAddr: int = self.instruction & Chip8.ADDRESS_MASK
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'Call  '
+            f'0x{subroutineAddr:04X}'
+        )
+
+        return strInstruction
+
+    def skipIfRegisterEqualToLiteral(self) -> str:
+        """
+        3xkk; SEL Vx, kk
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+        lit:      int               = self._decodeLiteral()
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'SEL '
+            f'{register.name},'
+            f'0x{lit:02X}'
+        )
+
+        return strInstruction
 
     def _memoryAddress(self) -> str:
         return f'0x{self.pc:04X}    '
