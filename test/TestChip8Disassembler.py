@@ -67,3 +67,11 @@ class TestChip8Disassembler(BaseTest):
 
         self.assertEqual('0x0222    SNEL VC,0x0C', asm, 'SNEL Disassembly not correct')
 
+    def testSkipBasedOnRegisterToRegisterEqual(self):
+
+        instr: int = 0x55C0
+        asm:   str = self.disassembler.disAssemble(pc=0x222, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual('0x0222    SER V5,VC', asm, 'SER Disassembly not correct')
