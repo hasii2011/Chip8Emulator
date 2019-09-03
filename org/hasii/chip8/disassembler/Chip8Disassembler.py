@@ -29,6 +29,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.JUMP.value: self.jumpToAddress,
             Chip8Mnemonics.CALL.value: self.callSubroutine,
             Chip8Mnemonics.SEL.value:  self.skipIfRegisterEqualToLiteral,
+            Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -105,6 +106,22 @@ class Chip8Disassembler(Chip8Decoder):
         strInstruction: str = (
             f'{self._memoryAddress()}'
             f'SEL '
+            f'{register.name},'
+            f'0x{lit:02X}'
+        )
+
+        return strInstruction
+
+    def skipIfRegisterNotEqualToLiteral(self):
+        """
+        4xkk; SNEL Vx, kk;
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+        lit:      int               = self._decodeLiteral()
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'SNEL '
             f'{register.name},'
             f'0x{lit:02X}'
         )

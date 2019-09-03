@@ -57,3 +57,13 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual('0x0222    SEL VC,0x0C', asm, 'SEL Disassembly not correct')
+
+    def testSkipBasedOnRegisterNotEqualToLiteral(self):
+
+        instr: int = 0x4C0c
+        asm:   str = self.disassembler.disAssemble(pc=0x222, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual('0x0222    SNEL VC,0x0C', asm, 'SNEL Disassembly not correct')
+
