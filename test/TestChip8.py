@@ -405,7 +405,7 @@ class TestChip8(BaseTest):
         """
         pass
 
-    def testSubRegisterVyFromRegisterVx(self):
+    def testSubtractRegisterVyFromRegisterVx(self):
         """
         Already tested by TestChip8Registers.testSubRegisterVyFromRegisterVx
         """
