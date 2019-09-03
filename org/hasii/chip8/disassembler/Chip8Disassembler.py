@@ -17,6 +17,7 @@ class Chip8Disassembler(Chip8Decoder):
 
     def __init__(self):
 
+        super().__init__()
         self.logger: Logger = getLogger(__name__)
 
         self.pc:          int = 0x0000
@@ -32,6 +33,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SNEL.value: self.skipIfRegisterNotEqualToLiteral,
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
             Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
+            Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -82,9 +84,15 @@ class Chip8Disassembler(Chip8Decoder):
         return strInstruction
 
     def jumpToAddress(self) -> str:
+
         addr = self.instruction & Chip8.ADDRESS_MASK
-        self.pc = addr
-        self.logger.debug(f"new pc: {hex(self.pc)}")
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'JUMP  '
+            f'0x{addr:04X}'
+        )
+        return strInstruction
 
     def callSubroutine(self, ) -> str:
 
@@ -92,10 +100,9 @@ class Chip8Disassembler(Chip8Decoder):
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
-            f'Call  '
+            f'CALL  '
             f'0x{subroutineAddr:04X}'
         )
-
         return strInstruction
 
     def skipIfRegisterEqualToLiteral(self) -> str:
@@ -145,7 +152,7 @@ class Chip8Disassembler(Chip8Decoder):
         )
         return strInstruction
 
-    def loadRegisterWithLiteral(self):
+    def loadRegisterWithLiteral(self) -> str:
         """
         6xkk; LDL Vx, kk
         """
@@ -154,6 +161,19 @@ class Chip8Disassembler(Chip8Decoder):
         strInstruction: str = (
             f'{self._memoryAddress()}'
             f'LDL '
+            f'{register.name},'
+            f'{self._literal()}'
+        )
+        return strInstruction
+
+    def addLiteralToRegister(self) -> str:
+        """
+        7xkk; ADD Vx, kk;
+        """
+        register: Chip8RegisterName = self._decodeRegister()
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'ADD '
             f'{register.name},'
             f'{self._literal()}'
         )

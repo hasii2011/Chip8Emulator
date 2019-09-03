@@ -38,6 +38,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
         self.assertEqual(f'{ADDR1_STR}    RTS', asm, 'RTS Disassembly not correct')
 
+    def testJumpToAddress(self):
+
+        instr: int = 0x1219
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    JUMP  0x0219', asm, 'Call Disassembly not correct')
+
     def testCLS(self):
 
         instruction: int = Chip8Mnemonics.CLS.value
@@ -48,11 +56,11 @@ class TestChip8Disassembler(BaseTest):
 
     def testCallSubroutine(self):
 
-        instruction: int = 0x2123
-        asm: str = self.disassembler.disAssemble(pc=ADDR1, instruction=instruction)
+        instr: int = 0x2123
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    Call  0x0123', asm, 'Call Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    CALL  0x0123', asm, 'Call Disassembly not correct')
 
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """
@@ -89,9 +97,20 @@ class TestChip8Disassembler(BaseTest):
         6xkk; LDL Vx, kk
         """
         instr: int = 0x6ABB
-
         asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
 
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR3_STR}    LDL VA,0xBB', asm, 'LDL Disassembly not correct')
+
+    def testAddLiteralToRegister(self):
+        """
+        7xkk; ADD Vx, kk
+
+        """
+        instr: int = 0x78BB
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    ADD V8,0xBB', asm, 'LDL Disassembly not correct')

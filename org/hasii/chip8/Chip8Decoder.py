@@ -3,7 +3,6 @@ from logging import getLogger
 from logging import Logger
 
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
-
 class Chip8Decoder:
 
     def __init__(self):

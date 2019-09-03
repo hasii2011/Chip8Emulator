@@ -282,7 +282,7 @@ class TestChip8(BaseTest):
         actualValue:   int = self.chip8.registers.getValue(Chip8RegisterName.VA)
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.VA.value:X} not set")
 
-    def testAddToRegisterNoOverflow(self):
+    def testAddLiteralToRegisterNoOverflow(self):
         """
         7xkk; ADD Vx, kk;     Adds the value kk to the value of register Vx, then stores the result in Vx
 
@@ -300,7 +300,7 @@ class TestChip8(BaseTest):
         self.assertEqual(expectedValue, actualValue, f"Register V{Chip8RegisterName.V8.value:X} not added to")
         self.assertEqual(0x01, carryFlagActual, f"Carry flag incorrectly cleared")
 
-    def testAddToRegisterWithOverflow(self):
+    def testAddLiteralToRegisterWithOverflow(self):
 
         instruction: int = 0x7801
 
