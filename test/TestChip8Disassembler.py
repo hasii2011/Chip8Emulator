@@ -213,3 +213,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    SHL VA', asm, 'SHL Disassembly not correct')
+
+    def testSkipIfRegisterNotEqualToRegister(self):
+        """
+        9xy0; SNER Vx, Vy;    Skip next instruction if Vx != Vy
+        """
+        instr: int = 0x9670
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    SNER V6,V7', asm, 'SNER Disassembly not correct')

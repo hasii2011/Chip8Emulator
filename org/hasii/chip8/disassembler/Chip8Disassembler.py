@@ -41,6 +41,8 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SHL.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
+
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -213,13 +215,29 @@ class Chip8Disassembler(Chip8Decoder):
         elif subOpCode == 0x7:   # SUBN Vx, Vy;    Set Vx = Vy - Vx
             opStr = f'SUBN'
         elif subOpCode == 0xE:   # 8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1
-            opStr = f'SHL'
+            opStr = f'{self._memoryAddress()}SHL {vxReg.name}'
+            return opStr
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
             f'{opStr} {vxReg.name},{vyReg.name}'
         )
 
+        return strInstruction
+
+    def skipIfRegisterNotEqualToRegister(self):
+        """
+        SNER Vx,Vy;    Skip next instruction if Vx != Vy
+        """
+        vxReg:  Chip8RegisterName = self._decodeLeftRegister()
+        vyReg: Chip8RegisterName = self._decodeRightRegister()
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'SNER '
+            f'{vxReg.name},'
+            f'{vyReg.name}'
+        )
         return strInstruction
 
     def _literal(self):
