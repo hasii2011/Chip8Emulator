@@ -40,6 +40,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHL.value: self.registerToRegisterInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -211,6 +212,8 @@ class Chip8Disassembler(Chip8Decoder):
             return opStr
         elif subOpCode == 0x7:   # SUBN Vx, Vy;    Set Vx = Vy - Vx
             opStr = f'SUBN'
+        elif subOpCode == 0xE:   # 8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1
+            opStr = f'SHL'
 
         strInstruction: str = (
             f'{self._memoryAddress()}'

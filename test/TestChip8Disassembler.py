@@ -202,3 +202,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR1_STR}    SUBN VA,V0', asm, 'SUBN Disassembly not correct')
+
+    def testRegisterShiftLeft(self):
+        """
+        8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1
+        """
+        instr: int = 0x8A0E
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    SHL VA', asm, 'SHL Disassembly not correct')
