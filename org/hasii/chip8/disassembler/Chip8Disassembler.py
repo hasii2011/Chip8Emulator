@@ -189,7 +189,7 @@ class Chip8Disassembler(Chip8Decoder):
 
         opStr: str = ''
         if subOpCode == 0x0:    # 8xy0; MOV Vx, Vy
-            opStr = 'MOV '
+            opStr = f'MOV {vxReg.name},{vyReg.name}'
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
