@@ -6,6 +6,14 @@ from test.BaseTest import BaseTest
 from org.hasii.chip8.disassembler.Chip8Disassembler import Chip8Disassembler
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 
+ADDR1: int = 0x0200
+ADDR2: int = 0x0222
+ADDR3: int = 0x02F0
+
+ADDR1_STR: str = '0x0200'
+ADDR2_STR: str = '0x0222'
+ADDR3_STR: str = '0x02F0'
+
 
 class TestChip8Disassembler(BaseTest):
 
@@ -25,26 +33,26 @@ class TestChip8Disassembler(BaseTest):
     def testRTS(self):
 
         instruction: int = Chip8Mnemonics.RTS.value
-        asm: str = self.disassembler.disAssemble(pc=0x200, instruction=instruction)
+        asm: str = self.disassembler.disAssemble(pc=ADDR1, instruction=instruction)
 
         self.logger.info(f'{asm}')
-        self.assertEqual('0x0200    RTS', asm, 'RTS Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    RTS', asm, 'RTS Disassembly not correct')
 
     def testCLS(self):
 
         instruction: int = Chip8Mnemonics.CLS.value
-        asm: str = self.disassembler.disAssemble(pc=0x200, instruction=instruction)
+        asm: str = self.disassembler.disAssemble(pc=ADDR1, instruction=instruction)
 
         self.logger.info(f'{asm}')
-        self.assertEqual('0x0200    CLS', asm, 'CLS Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    CLS', asm, 'CLS Disassembly not correct')
 
     def testCallSubroutine(self):
 
         instruction: int = 0x2123
-        asm: str = self.disassembler.disAssemble(pc=0x200, instruction=instruction)
+        asm: str = self.disassembler.disAssemble(pc=ADDR1, instruction=instruction)
         self.logger.info(f'{asm}')
 
-        self.assertEqual('0x0200    Call  0x0123', asm, 'Call Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    Call  0x0123', asm, 'Call Disassembly not correct')
 
     def testSkipBasedOnRegisterEqualToLiteral(self):
         """
@@ -52,26 +60,38 @@ class TestChip8Disassembler(BaseTest):
 
         """
         instr: int = 0x3C0c
-        asm:   str = self.disassembler.disAssemble(pc=0x222, instruction=instr)
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual('0x0222    SEL VC,0x0C', asm, 'SEL Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    SEL VC,0x0C', asm, 'SEL Disassembly not correct')
 
     def testSkipBasedOnRegisterNotEqualToLiteral(self):
 
         instr: int = 0x4C0c
-        asm:   str = self.disassembler.disAssemble(pc=0x222, instruction=instr)
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual('0x0222    SNEL VC,0x0C', asm, 'SNEL Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    SNEL VC,0x0C', asm, 'SNEL Disassembly not correct')
 
     def testSkipBasedOnRegisterToRegisterEqual(self):
 
         instr: int = 0x55C0
-        asm:   str = self.disassembler.disAssemble(pc=0x222, instruction=instr)
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual('0x0222    SER V5,VC', asm, 'SER Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    SER V5,VC', asm, 'SER Disassembly not correct')
+
+    def testLoadRegisterWithLiteral(self):
+        """
+        6xkk; LDL Vx, kk
+        """
+        instr: int = 0x6ABB
+
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    LDL VA,0xBB', asm, 'LDL Disassembly not correct')
