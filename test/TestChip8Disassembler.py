@@ -120,9 +120,74 @@ class TestChip8Disassembler(BaseTest):
         8xy0; MOV Vx, Vy;     Set Vx = Vy.
         """
         instr: int = 0x8EA0
-
         asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
 
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR3_STR}    MOV VE,VA', asm, 'MOV Disassembly not correct')
+
+    def testRegisterToRegisterOR(self):
+        """
+        8xy1; OR Vx, Vy;      Set Vx = Vx OR Vy
+        """
+        instr: int = 0x8C41
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    OR VC,V4', asm, 'OR Disassembly not correct')
+
+    def testRegisterToRegisterAnd(self):
+        """
+        8xy2; AND Vx,Vy;     Set Vx = Vx AND Vy
+        """
+        instr: int = 0x8C42
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    AND VC,V4', asm, 'AND Disassembly not correct')
+
+    def testRegisterToRegisterXor(self):
+        """
+        8xy3; XOR Vx,Vy;     Set Vx = Vx XOR Vy
+        """
+        instr: int = 0x8C43
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    XOR VC,V4', asm, 'XOR Disassembly not correct')
+
+    def testRegisterToRegisterAdd(self):
+        """
+        8xy4; ADDR Vx,Vy;     Set Vx = Vx + Vy
+        """
+        instr: int = 0x8D24
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    ADDR VD,V2', asm, 'ADDR Disassembly not correct')
+
+    def testRegisterToRegisterSubtract(self):
+        """
+        8xy5; SUB Vx,Vy;     Set Vx = Vx - Vy
+        """
+        instr: int = 0x8D25
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    SUB VD,V2', asm, 'SUB Disassembly not correct')
+
+    def testRegisterShiftRight(self):
+        """
+        8xy6; Set Vx = Vx >> 1
+        """
+        instr: int = 0x8A06
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    SHR VA', asm, 'SHR Disassembly not correct')

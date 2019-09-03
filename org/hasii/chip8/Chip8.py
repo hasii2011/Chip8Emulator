@@ -400,7 +400,7 @@ class Chip8(Chip8Decoder):
             self.registers.andOp(v=leftRegister, mask=rightRegVal)
         elif subOpCode == 0x3:   # 8xy3; XOR Vx, Vy;     Set Vx = Vx XOR Vy
             self.registers.xorOp(v=leftRegister, mask=rightRegVal)
-        elif subOpCode == 0x4:   # 8xy4; ADD Vx, Vy;     Set Vx = Vx + Vy
+        elif subOpCode == 0x4:   # 8xy4; ADDR Vx, Vy;     Set Vx = Vx + Vy
             self.registers.addRegisterToRegister(leftRegister, rightRegister)
         elif subOpCode == 0x5:   # 8xy5; SUB Vx, Vy;     Set Vx = Vx - Vy
             self.registers.subRegisterToRegister(leftRegister, rightRegister)

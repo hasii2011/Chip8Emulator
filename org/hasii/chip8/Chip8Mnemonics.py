@@ -22,7 +22,7 @@ class Chip8Mnemonics(Enum):
     XOR    = 0x8003   # 8xy3; XOR Vx, Vy;     Set Vx = Vx XOR Vy
     ADDR   = 0x8004   # 8xy4; ADD Vx, Vy;     Set Vx = Vx + Vy        VF is set to 1 when there's a carry, and to 0 when there isn't
     SUB    = 0x8005   # 8xy5; SUB Vx, Vy;     Set Vx = Vx - Vy        VF is set to 0 when there's a borrow, and 1 when there isn't
-    SHR    = 0x8006   # 8xy6; SHR Vx, Vy;     Set Vx = Vx SHR 1       Store least significant bit of VX in VF; shifts VX to the right by 1
+    SHR    = 0x8006   # 8xy6; SHR Vx, Vy;     Set Vx = Vx >> 1        Store least significant bit of VX in VF; shifts VX to the right by 1
     SUBN   = 0x8007   # 8xy7; SUBN Vx, Vy;    Set Vx = Vy - Vx        VF is set to 0 when there's a borrow, and 1 when there isn't
     SHL    = 0x800E   # 8xyE; SHL Vx, Vy;     Set Vx = Vx SHL 1       Stores most significant bit of VX in VF; shifts VX to the left by 1
     SNER   = 0x9000   # 9xy0; SNER Vx, Vy;    Skip next instruction if Vx != Vy

@@ -33,7 +33,12 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
             Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
             Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
-            Chip8Mnemonics.MOV.value:  self.registerToRegisterInstructions
+            Chip8Mnemonics.MOV.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.OR.value:   self.registerToRegisterInstructions,
+            Chip8Mnemonics.AND.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.ADDR.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -188,12 +193,26 @@ class Chip8Disassembler(Chip8Decoder):
         vyReg: Chip8RegisterName = self._decodeRightRegister()
 
         opStr: str = ''
-        if subOpCode == 0x0:    # 8xy0; MOV Vx, Vy
-            opStr = f'MOV {vxReg.name},{vyReg.name}'
+        if subOpCode == 0x0:     # 8xy0; MOV Vx,Vy
+            opStr = f'MOV'
+        elif subOpCode == 0x1:   # 8xy1; OR VxVy
+            opStr = f'OR'
+        elif subOpCode == 0x2:   # 8xy2; AND Vx,Vy
+            opStr = f'AND'
+        elif subOpCode == 0x3:   # 8xy3; XOR Vx,Vy
+            opStr = f'XOR'
+        elif subOpCode == 0x4:   # 8xy4; ADD Vx,Vy;     Set Vx = Vx + Vy
+            opStr = f'ADDR'
+        elif subOpCode == 0x5:   # 8xy5; SUB Vx,Vy;     Set Vx = Vx - Vy
+            opStr = f'SUB'
+        elif subOpCode == 0x6:   # 8xy5; SHR Vx,Vy;     Set Vx = Vx >> Vy
+            opStr = f'{self._memoryAddress()}SHR {vxReg.name}'
+            return opStr
 
         strInstruction: str = (
+
             f'{self._memoryAddress()}'
-            f'{opStr}'
+            f'{opStr} {vxReg.name},{vyReg.name}'
         )
 
         return strInstruction
