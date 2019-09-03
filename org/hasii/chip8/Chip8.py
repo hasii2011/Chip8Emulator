@@ -651,9 +651,6 @@ class Chip8(Chip8Decoder):
     def _decodeSpecialRegistersSubOpCode(self) -> int:
         return self.instruction & 0x00FF
 
-    def _decodeRegisterToRegisterOpCode(self) -> int:
-        return self.instruction & 0x000F
-
     def _loadAllSpritesInMemory(self):
         startAddress: int = Chip8.SPRITE_START_ADDRESS
         spriteLen: int = len(Chip8.SPRITE_0)

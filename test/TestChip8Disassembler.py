@@ -113,4 +113,16 @@ class TestChip8Disassembler(BaseTest):
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR3_STR}    ADD V8,0xBB', asm, 'LDL Disassembly not correct')
+        self.assertEqual(f'{ADDR3_STR}    ADD V8,0xBB', asm, 'ADD Disassembly not correct')
+
+    def testLoadFromRegister(self):
+        """
+        8xy0; MOV Vx, Vy;     Set Vx = Vy.
+        """
+        instr: int = 0x8EA0
+
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    MOV VE,VA', asm, 'MOV Disassembly not correct')

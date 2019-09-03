@@ -21,7 +21,6 @@ class Chip8Disassembler(Chip8Decoder):
         self.logger: Logger = getLogger(__name__)
 
         self.pc:          int = 0x0000
-        self.instruction: int = 0x0000
 
         self.opCodeMethods: Dict[int, Callable] = {
 
@@ -34,6 +33,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SER.value:  self.skipIfRegisterEqualToRegister,
             Chip8Mnemonics.LDL.value:  self.loadRegisterWithLiteral,
             Chip8Mnemonics.ADD.value:  self.addLiteralToRegister,
+            Chip8Mnemonics.MOV.value:  self.registerToRegisterInstructions
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -110,7 +110,6 @@ class Chip8Disassembler(Chip8Decoder):
         3xkk; SEL Vx, kk
         """
         register: Chip8RegisterName = self._decodeRegister()
-        lit:      int               = self._decodeLiteral()
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
@@ -126,7 +125,6 @@ class Chip8Disassembler(Chip8Decoder):
         4xkk; SNEL Vx, kk;
         """
         register: Chip8RegisterName = self._decodeRegister()
-        lit:      int               = self._decodeLiteral()
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
@@ -177,6 +175,27 @@ class Chip8Disassembler(Chip8Decoder):
             f'{register.name},'
             f'{self._literal()}'
         )
+        return strInstruction
+
+    def registerToRegisterInstructions(self):
+        """
+        Handles 0x8000 through 0x8007 and 0x800E
+        """
+        subOpCode: int = self._decodeRegisterToRegisterOpCode()
+        self.logger.info(f"Reg to Reg subOpCode: {subOpCode:X}")
+
+        vxReg: Chip8RegisterName = self._decodeLeftRegister()
+        vyReg: Chip8RegisterName = self._decodeRightRegister()
+
+        opStr: str = ''
+        if subOpCode == 0x0:    # 8xy0; MOV Vx, Vy
+            opStr = 'MOV '
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'{opStr}'
+        )
+
         return strInstruction
 
     def _literal(self):
