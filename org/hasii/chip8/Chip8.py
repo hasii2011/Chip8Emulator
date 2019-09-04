@@ -158,7 +158,7 @@ class Chip8(Chip8Decoder):
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
             Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
             Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
-            Chip8Mnemonics.RNDMSK.value:  self.rndByte,
+            Chip8Mnemonics.RNDMSK.value:  self.rndMask,
             Chip8Mnemonics.DRAW.value:  self.displaySprite,
             Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
             Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
@@ -429,7 +429,7 @@ class Chip8(Chip8Decoder):
 
         self.pc = instrVal + v0Val
 
-    def rndByte(self):
+    def rndMask(self):
         """
         Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
 
