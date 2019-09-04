@@ -34,3 +34,5 @@ class Chip8Decoder:
 
         return register
 
+    def _decodeNibble(self) -> int:
+        return self.instruction & 0x00F

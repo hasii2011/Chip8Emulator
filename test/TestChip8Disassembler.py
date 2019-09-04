@@ -257,3 +257,15 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    RNDMSK V9,0x22', asm, 'RNDMSK Disassembly not correct')
+
+    def testDisplaySprite(self):
+        """
+        DRAW   = 0xD000   # Dxyn; DRAW Vx, Vy, nibble;  Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+        """
+
+        instr: int = 0xD7A4
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    DRAW V7,VA,0x4', asm, 'RNDMSK Disassembly not correct')

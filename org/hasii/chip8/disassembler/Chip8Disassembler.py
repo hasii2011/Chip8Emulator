@@ -45,7 +45,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
             Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
             Chip8Mnemonics.RNDMSK.value: self.rndMask,
-
+            Chip8Mnemonics.DRAW.value: self.displaySprite,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -282,6 +282,26 @@ class Chip8Disassembler(Chip8Decoder):
             f'RNDMSK '
             f'{targetRegister.name},'
             f'0x{lit:02X}'
+        )
+        return strInstruction
+
+    def displaySprite(self):
+        """
+        Dxyn; DRAW Vx, Vy, nibble;
+
+        Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+
+        """
+        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
+        vyRegName: Chip8RegisterName = self._decodeRightRegister()
+        nibble:    int =               self._decodeNibble()
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'DRAW '
+            f'{vxRegName.name},'
+            f'{vyRegName.name},'
+            f'0x{nibble:1X}'
         )
         return strInstruction
 

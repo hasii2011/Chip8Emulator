@@ -639,9 +639,6 @@ class Chip8(Chip8Decoder):
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
 
-    def _decodeNibble(self) -> int:
-        return self.instruction & 0x00F
-
     def _decodeSkipKeyboardRegisterSubOpCode(self) -> int:
         """
         Same mask but want code to self-document
