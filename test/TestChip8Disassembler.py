@@ -291,3 +291,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR1_STR}    SKPN VD', asm, 'SKPN Disassembly not correct')
+
+    def testSetVxToDelayTimer(self):
+        """
+        # Fx07; LDT Vx, DT;     Set Vx = delay timer value
+        """
+        instr: int = 0xF107
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.LDDT.name} V1,DT', asm, 'LDDT Disassembly not correct')

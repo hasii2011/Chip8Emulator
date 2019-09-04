@@ -10,10 +10,8 @@ from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Decoder import Chip8Decoder
 
-from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
-
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
-
+from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
 
 class Chip8Disassembler(Chip8Decoder):
 
@@ -50,6 +48,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.DRAW.value: self.displaySprite,
             Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
             Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
+            Chip8Mnemonics.LDDT.value: self.specialRegistersInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -193,7 +192,7 @@ class Chip8Disassembler(Chip8Decoder):
         )
         return strInstruction
 
-    def registerToRegisterInstructions(self):
+    def registerToRegisterInstructions(self) -> str:
         """
         Handles 0x8000 through 0x8007 and 0x800E
         """
@@ -232,7 +231,7 @@ class Chip8Disassembler(Chip8Decoder):
 
         return strInstruction
 
-    def skipIfRegisterNotEqualToRegister(self):
+    def skipIfRegisterNotEqualToRegister(self) -> str:
         """
         SNER Vx,Vy;    Skip next instruction if Vx != Vy
         """
@@ -247,7 +246,7 @@ class Chip8Disassembler(Chip8Decoder):
         )
         return strInstruction
 
-    def loadIndexRegister(self):
+    def loadIndexRegister(self) -> str:
         """
         Annn; LDI I,addr;    Set I = nnn; The value of register I is set to nnn
         """
@@ -271,7 +270,7 @@ class Chip8Disassembler(Chip8Decoder):
         )
         return strInstruction
 
-    def rndMask(self):
+    def rndMask(self) -> str:
         """
         Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
 
@@ -309,7 +308,7 @@ class Chip8Disassembler(Chip8Decoder):
         )
         return strInstruction
 
-    def skipNextKeyPressedInstructions(self):
+    def skipNextKeyPressedInstructions(self) -> str:
         """
         Ex9E; SKP Vx;       Skip next instruction if key with the value of Vx is pressed
         ExA1; SKNP Vx;      Skip next instruction if key with the value of Vx is not pressed
@@ -329,6 +328,53 @@ class Chip8Disassembler(Chip8Decoder):
             f'{instr} '
             f'{vxRegName.name}'
         )
+        return strInstruction
+
+    def specialRegistersInstructions(self) -> str:
+        """
+        Fx07; LDDT Vx, DT;       Set Vx = delay timer value
+        Fx0A; WAITKEY Vx, K;    Wait for a key press, store the value of the key in Vx.
+        Fx15; SDT DT, Vx;       Set delay timer = Vx
+        Fx18; SST ST, Vx;       Set sound timer = Vx
+        Fx1E; ADDI I, Vx;       Set I = I + Vx
+        Fx29; LDIS F, Vx;       I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
+        Fx33; MOVBCD B, Vx;     Store BCD representation of Vx in memory locations I, I+1, and I+2
+        Fx55; MOVM [I], Vx;     Store registers V0-Vx in memory starting at location I.
+        Fx65; READM Vx, [I];    Read registers V0-Vx from memory starting at location I.
+        """
+        subOpCode: int = self._decodeSpecialRegistersSubOpCode()
+        self.logger.debug(f"Special Registers subOpCode: {subOpCode:X}")
+
+        vxReg: Chip8RegisterName = self._decodeLeftRegister()
+
+        opStr: str = ''
+        if subOpCode == 0x07:
+            opStr: str = Chip8Mnemonics.LDDT.name
+        elif subOpCode == 0x0A:
+            self.logger.info(f"Wait for key press; store value in {vxReg.name}")
+            pass
+        elif subOpCode == 0x15:
+            pass
+        elif subOpCode == 0x18:
+            pass
+        elif subOpCode == 0x1E:
+            pass
+        elif subOpCode == 0x29:
+            pass
+        elif subOpCode == 0x33:
+            pass
+        elif subOpCode == 0x55:
+            pass
+        elif subOpCode == 0x65:
+            pass
+        else:
+            raise UnKnownSpecialRegistersSubOpCode(invalidSubOpCode=subOpCode)
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'{opStr} {vxReg.name},DT'
+        )
+
         return strInstruction
 
     def _literal(self):
