@@ -235,3 +235,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    LDI I,0x046', asm, 'LDI Disassembly not correct')
+
+    def testJumpToLocationPlusVZero(self):
+        """
+        Bnnn; JUMP V0,addr;    Jump to location nnn + V0
+        """
+        instr: int = 0xB123
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    JPV V0,0x123', asm, 'LDI Disassembly not correct')

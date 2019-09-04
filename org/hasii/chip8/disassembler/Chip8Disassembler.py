@@ -43,6 +43,8 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SHL.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
             Chip8Mnemonics.LDI.value: self.loadIndexRegister,
+            Chip8Mnemonics.JPV.value: self.jumpToLocationPlusVZero,
+
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -249,6 +251,18 @@ class Chip8Disassembler(Chip8Decoder):
             f'{self._memoryAddress()}'
             f'LDI I,'
             f'0x{valToLoad:03X}'
+        )
+        return strInstruction
+
+    def jumpToLocationPlusVZero(self):
+        """
+        Bnnn; JUMP V0, addr;    Jump to location nnn + V0
+        """
+        addrVal: int = self.instruction & 0x0FFF
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'JPV V0,'
+            f'0x{addrVal:03X}'
         )
         return strInstruction
 
