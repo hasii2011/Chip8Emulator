@@ -224,3 +224,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    SNER V6,V7', asm, 'SNER Disassembly not correct')
+
+    def testLoadIndexRegister(self):
+        """
+        Annn; LDI I, addr;    Set I = nnn; The value of register I is set to nnn
+        """
+        instr: int = 0xA046
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    LDI I,0x046', asm, 'LDI Disassembly not correct')

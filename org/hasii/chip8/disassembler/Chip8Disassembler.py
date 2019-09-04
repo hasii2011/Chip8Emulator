@@ -42,7 +42,7 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SHL.value: self.registerToRegisterInstructions,
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
-
+            Chip8Mnemonics.LDI.value: self.loadIndexRegister,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -237,6 +237,18 @@ class Chip8Disassembler(Chip8Decoder):
             f'SNER '
             f'{vxReg.name},'
             f'{vyReg.name}'
+        )
+        return strInstruction
+
+    def loadIndexRegister(self):
+        """
+        Annn; LDI I,addr;    Set I = nnn; The value of register I is set to nnn
+        """
+        valToLoad: int = self.instruction & Chip8.IDX_REG_MASK
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'LDI I,'
+            f'0x{valToLoad:03X}'
         )
         return strInstruction
 
