@@ -639,15 +639,6 @@ class Chip8(Chip8Decoder):
         self.logger.debug(f"The full file name: {fileName}")
         return fileName
 
-    def _decodeSkipKeyboardRegisterSubOpCode(self) -> int:
-        """
-        Same mask but want code to self-document
-        """
-        return self._decodeSpecialRegistersSubOpCode()
-
-    def _decodeSpecialRegistersSubOpCode(self) -> int:
-        return self.instruction & 0x00FF
-
     def _loadAllSpritesInMemory(self):
         startAddress: int = Chip8.SPRITE_START_ADDRESS
         spriteLen: int = len(Chip8.SPRITE_0)

@@ -10,6 +10,8 @@ from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Decoder import Chip8Decoder
 
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
+
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 
 
@@ -46,6 +48,8 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
             Chip8Mnemonics.RNDMSK.value: self.rndMask,
             Chip8Mnemonics.DRAW.value: self.displaySprite,
+            Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
+            Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -302,6 +306,28 @@ class Chip8Disassembler(Chip8Decoder):
             f'{vxRegName.name},'
             f'{vyRegName.name},'
             f'0x{nibble:1X}'
+        )
+        return strInstruction
+
+    def skipNextKeyPressedInstructions(self):
+        """
+        Ex9E; SKP Vx;       Skip next instruction if key with the value of Vx is pressed
+        ExA1; SKNP Vx;      Skip next instruction if key with the value of Vx is not pressed
+        """
+        subOpCode: int = self._decodeSkipKeyboardRegisterSubOpCode()
+
+        if subOpCode == 0x9E:
+            instr: str = 'SKP'
+        elif subOpCode == 0xA1:
+            instr: str = 'SKPN'
+        else:
+            instr: str = 'BadOpCode'
+
+        vxRegName: Chip8RegisterName = self._decodeLeftRegister()
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'{instr} '
+            f'{vxRegName.name}'
         )
         return strInstruction
 

@@ -36,3 +36,12 @@ class Chip8Decoder:
 
     def _decodeNibble(self) -> int:
         return self.instruction & 0x00F
+
+    def _decodeSpecialRegistersSubOpCode(self) -> int:
+        return self.instruction & 0x00FF
+
+    def _decodeSkipKeyboardRegisterSubOpCode(self) -> int:
+        """
+        Same mask but want code to self-document
+        """
+        return self._decodeSpecialRegistersSubOpCode()

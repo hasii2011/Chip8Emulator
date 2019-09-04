@@ -245,7 +245,7 @@ class TestChip8Disassembler(BaseTest):
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR2_STR}    JPV V0,0x123', asm, 'LDI Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    JPV V0,0x123', asm, 'JPV Disassembly not correct')
 
     def testRndByte(self):
         """
@@ -268,4 +268,26 @@ class TestChip8Disassembler(BaseTest):
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    DRAW V7,VA,0x4', asm, 'RNDMSK Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    DRAW V7,VA,0x4', asm, 'DRAW Disassembly not correct')
+
+    def testSkpNextInstructionIfKeyPressed(self):
+        """
+        Ex9E; SKP Vx;       Skip next instruction if key with the value of Vx is pressed
+        """
+        instr: int = 0xEA9E
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    SKP VA', asm, 'SKP Disassembly not correct')
+
+    def testSkpNextInstructionIfKeyNotPressed(self):
+        """
+        ExA1; SKNP Vx;      Skip next instruction if key with the value of Vx is not pressed
+        """
+        instr: int = 0xEDA1
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    SKPN VD', asm, 'SKPN Disassembly not correct')
