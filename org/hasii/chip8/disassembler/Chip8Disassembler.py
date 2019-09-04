@@ -40,10 +40,11 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SUB.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SHR.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SUBN.value: self.registerToRegisterInstructions,
-            Chip8Mnemonics.SHL.value: self.registerToRegisterInstructions,
+            Chip8Mnemonics.SHL.value:  self.registerToRegisterInstructions,
             Chip8Mnemonics.SNER.value: self.skipIfRegisterNotEqualToRegister,
-            Chip8Mnemonics.LDI.value: self.loadIndexRegister,
-            Chip8Mnemonics.JPV.value: self.jumpToLocationPlusVZero,
+            Chip8Mnemonics.LDI.value:  self.loadIndexRegister,
+            Chip8Mnemonics.JPV.value:  self.jumpToLocationPlusVZero,
+            Chip8Mnemonics.RNDMSK.value: self.rndMask,
 
         }
 
@@ -263,6 +264,24 @@ class Chip8Disassembler(Chip8Decoder):
             f'{self._memoryAddress()}'
             f'JPV V0,'
             f'0x{addrVal:03X}'
+        )
+        return strInstruction
+
+    def rndMask(self):
+        """
+        Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
+
+        Interpreter generates a random number from 0 to 255
+
+        """
+        targetRegister: Chip8RegisterName = self._decodeLeftRegister()
+        lit:        int = self._decodeLiteral()
+
+        strInstruction: str = (
+            f'{self._memoryAddress()}'
+            f'RNDMSK '
+            f'{targetRegister.name},'
+            f'0x{lit:02X}'
         )
         return strInstruction
 

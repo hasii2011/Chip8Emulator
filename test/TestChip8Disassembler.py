@@ -246,3 +246,14 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    JPV V0,0x123', asm, 'LDI Disassembly not correct')
+
+    def testRndByte(self):
+        """
+        Cxkk; RNDMSK Vx, byte;   Set Vx = random byte AND kk
+        """
+        instr: int = 0xC922
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    RNDMSK V9,0x22', asm, 'RNDMSK Disassembly not correct')
