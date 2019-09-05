@@ -532,7 +532,7 @@ class Chip8(Chip8Decoder):
             self.memory[memLoc + 2] = (regVal % 100) % 10
             self.logger.info(f"memLoc: '{self.memory[memLoc]}' memLoc+1: '{self.memory[memLoc+1]}' memLoc+2: '{self.memory[memLoc+2]}'")
         elif subOpCode == 0x55:
-            lastRegValue: int               = cast(int, regName.value)
+            lastRegValue: int = cast(int, regName.value)
             for x in range(0, lastRegValue + 1):
                 currRegName = Chip8RegisterName(x)
                 self.memory[self.indexRegister + x] = self.registers.getValue(currRegName)

@@ -346,3 +346,15 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.ADDI.name} V7', asm, 'ADDI Disassembly not correct')
+
+    def testSetIToLocationOfSprite(self):
+        """
+        Fx29; LDIS F, Vx;        I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
+        """
+        instr: int = 0xFB29
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.LDIS.name} VB', asm, 'LDIS Disassembly not correct')
+
