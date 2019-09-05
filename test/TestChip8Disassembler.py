@@ -294,47 +294,47 @@ class TestChip8Disassembler(BaseTest):
 
     def testSetVxToDelayTimer(self):
         """
-        # Fx07; LDT Vx, DT;     Set Vx = delay timer value
+        # Fx07; LDDT Vx,DT;     Set Vx = delay timer value
         """
         instr: int = 0xF107
         asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.LDDT.name} V1', asm, 'LDDT Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.LDDT.name} V1,DT', asm, 'LDDT Disassembly not correct')
 
     def testWaitKey(self):
         """
-        Fx0A; WAITKEY Vx, K;   Wait for a key press, store the value of the key in Vx.
+        Fx0A; WAITKEY Vx,K;   Wait for a key press, store the value of the key in Vx.
         """
         instr: int = 0xFC0A
         asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.WAITKEY.name} VC', asm, 'LDDT Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.WAITKEY.name} VC,K', asm, 'LDDT Disassembly not correct')
 
     def testSetDelayTimer(self):
         """
-        Fx15; SDT DT, Vx;        Set delay timer = Vx
+        Fx15; SDT DT,Vx;        Set delay timer = Vx
         """
         instr: int = 0xFC15
         asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SDT.name} VC', asm, 'SDT Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SDT.name} DT,VC', asm, 'SDT Disassembly not correct')
 
     def testSetSoundTimer(self):
         """
-        Fx18; SST ST, Vx;        Set sound timer = Vx
+        Fx18; SST ST,Vx;        Set sound timer = Vx
         """
         instr: int = 0xFA18
         asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SST.name} VA', asm, 'SST Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SST.name} ST,VA', asm, 'SST Disassembly not correct')
 
     def testAddToIndexRegister(self):
         """
@@ -345,16 +345,51 @@ class TestChip8Disassembler(BaseTest):
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.ADDI.name} V7', asm, 'ADDI Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.ADDI.name} I,V7', asm, 'ADDI Disassembly not correct')
 
     def testSetIToLocationOfSprite(self):
         """
-        Fx29; LDIS F, Vx;        I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
+        Fx29; LDIS F,Vx;        I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
         """
         instr: int = 0xFB29
         asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.LDIS.name} VB', asm, 'LDIS Disassembly not correct')
+        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.LDIS.name} F,VB', asm, 'LDIS Disassembly not correct')
 
+    def testStoreBCD(self):
+        """
+        Fx33; MOVBCD B, Vx;
+        Store BCD representation of Vx in memory locations I, I+1, and I+2
+        """
+        instr: int = 0xF133
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.MOVBCD.name} B,V1', asm, 'MOVBCD Disassembly not correct')
+
+    def testStoreRegisters(self):
+        """
+        Fx55; MOVM [I], Vx;
+        Store registers V0-Vx in memory starting at location I.
+        """
+        instr: int = 0xF355
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    {Chip8Mnemonics.MOVM.name} [I],V3', asm, 'MOVM Disassembly not correct')
+
+    def testReadRegisters(self):
+        """
+        Fx65 READM Vx, [I];
+        Read registers V0-Vx from memory starting at location I.
+        """
+        instr: int = 0xF365
+        asm:   str = self.disassembler.disAssemble(pc=ADDR3, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR3_STR}    {Chip8Mnemonics.READM.name} V3,[I]', asm, 'READM Disassembly not correct')

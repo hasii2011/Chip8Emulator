@@ -32,14 +32,14 @@ class Chip8Mnemonics(Enum):
     DRAW   = 0xD000   # Dxyn; DRAW Vx, Vy, nibble;  Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
     SKP    = 0xE09E   # Ex9E; SKP Vx;             Skip next instruction if key with the value of Vx is pressed
     SKNP   = 0xE0A1   # ExA1; SKNP Vx;            Skip next instruction if key with the value of Vx is not pressed
-    LDDT   = 0xF007   # Fx07; LDT Vx, DT;         Set Vx = delay timer value
+    LDDT    = 0xF007  # Fx07; LDT Vx, DT;      Set Vx = delay timer value
     WAITKEY = 0xF00A  # Fx0A; WAITKEY Vx, K;   Wait for a key press, store the value of the key in Vx.
-    SDT  = 0xF015   # Fx15; SDT DT, Vx;        Set delay timer = Vx
-    SST  = 0xF018   # Fx18; SST ST, Vx;        Set sound timer = Vx
-    ADDI = 0xF01E   # Fx1E; ADDI I, Vx;        Set I = I + Vx
-    LDIS = 0xF029   # Fx29; LDIS F, Vx;        I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
-    MOVBCD  = 0xF033   # Fx33; MOVBCD B, Vx;    Store BCD representation of Vx in memory locations I, I+1, and I+2
-    MOVM    = 0xF055   # Fx55; MOVM [I], Vx;    Store registers V0-Vx in memory starting at location I.
-    READM   = 0xF065   # Fx65; READM Vx, [I];   Read registers V0 through Vx from memory starting at location I.
+    SDT     = 0xF015  # Fx15; SDT DT, Vx;      Set delay timer = Vx
+    SST     = 0xF018  # Fx18; SST ST, Vx;      Set sound timer = Vx
+    ADDI    = 0xF01E  # Fx1E; ADDI I, Vx;      Set I = I + Vx
+    LDIS     = 0xF029 # Fx29; LDIS F, Vx;      I equals location of sprite for the character in Vx; chars 0-F represented by a 4x5 font
+    MOVBCD  = 0xF033  # Fx33; MOVBCD B, Vx;    Store BCD representation of Vx in memory locations I, I+1, and I+2
+    MOVM    = 0xF055  # Fx55; MOVM [I], Vx;    Store registers V0-Vx in memory starting at location I.
+    READM   = 0xF065  # Fx65; READM Vx, [I];   Read registers V0 through Vx from memory starting at location I.
 
 

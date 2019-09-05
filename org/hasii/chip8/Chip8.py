@@ -168,8 +168,8 @@ class Chip8(Chip8Decoder):
             Chip8Mnemonics.SST.value:  self.specialRegistersInstructions,
             Chip8Mnemonics.ADDI.value: self.specialRegistersInstructions,
             Chip8Mnemonics.LDIS.value: self.specialRegistersInstructions,
-            Chip8Mnemonics.MOVBCD.value:  self.specialRegistersInstructions,
-            Chip8Mnemonics.MOVM.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVBCD.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVM.value:   self.specialRegistersInstructions,
             Chip8Mnemonics.READM.value:  self.specialRegistersInstructions,
         }
         self.logger.debug(f"{self.memory}")

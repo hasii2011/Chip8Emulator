@@ -55,6 +55,9 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SST.value:     self.specialRegistersInstructions,
             Chip8Mnemonics.ADDI.value:    self.specialRegistersInstructions,
             Chip8Mnemonics.LDIS.value:    self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVBCD.value:  self.specialRegistersInstructions,
+            Chip8Mnemonics.MOVM.value:    self.specialRegistersInstructions,
+            Chip8Mnemonics.READM.value: self.specialRegistersInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -353,32 +356,42 @@ class Chip8Disassembler(Chip8Decoder):
 
         vxReg: Chip8RegisterName = self._decodeLeftRegister()
 
-        opStr: str = ''
+        hasSuffix: bool = False
+        suffix:    str  = ''
         if subOpCode == 0x07:
-            opStr: str = Chip8Mnemonics.LDDT.name
+            opStr:  str = f'{Chip8Mnemonics.LDDT.name} '
+            suffix: str = ',DT'
+            hasSuffix = True
         elif subOpCode == 0x0A:
-            opStr: str = f'{Chip8Mnemonics.WAITKEY.name}'
+            opStr:  str = f'{Chip8Mnemonics.WAITKEY.name} '
+            suffix: str = ',K'
+            hasSuffix = True
         elif subOpCode == 0x15:
-            opStr: str = f'{Chip8Mnemonics.SDT.name}'
+            opStr: str = f'{Chip8Mnemonics.SDT.name} DT,'
         elif subOpCode == 0x18:
-            opStr: str = f'{Chip8Mnemonics.SST.name}'
+            opStr: str = f'{Chip8Mnemonics.SST.name} ST,'
         elif subOpCode == 0x1E:
-            opStr: str = f'{Chip8Mnemonics.ADDI.name}'
+            opStr: str = f'{Chip8Mnemonics.ADDI.name} I,'
         elif subOpCode == 0x29:
-            opStr: str = f'{Chip8Mnemonics.LDIS.name}'
+            opStr: str = f'{Chip8Mnemonics.LDIS.name} F,'
         elif subOpCode == 0x33:
-            pass
+            opStr: str = f'{Chip8Mnemonics.MOVBCD.name} B,'
         elif subOpCode == 0x55:
-            pass
+            opStr: str = f'{Chip8Mnemonics.MOVM.name} [I],'
         elif subOpCode == 0x65:
-            pass
+            opStr: str = f'{Chip8Mnemonics.READM.name} '
+            suffix: str = ',[I]'
+            hasSuffix = True
         else:
             raise UnKnownSpecialRegistersSubOpCode(invalidSubOpCode=subOpCode)
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
-            f'{opStr} {vxReg.name}'
+            f'{opStr}{vxReg.name}'
         )
+
+        if hasSuffix is True:
+            strInstruction += suffix
 
         return strInstruction
 
