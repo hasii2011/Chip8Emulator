@@ -301,4 +301,26 @@ class TestChip8Disassembler(BaseTest):
 
         self.logger.info(f'{asm}')
 
-        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.LDDT.name} V1,DT', asm, 'LDDT Disassembly not correct')
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.LDDT.name} V1', asm, 'LDDT Disassembly not correct')
+
+    def testWaitKey(self):
+        """
+        Fx0A; WAITKEY Vx, K;   Wait for a key press, store the value of the key in Vx.
+        """
+        instr: int = 0xFC0A
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.WAITKEY.name} VC', asm, 'LDDT Disassembly not correct')
+
+    def testSetDelayTimer(self):
+        """
+        Fx15; SDT DT, Vx;        Set delay timer = Vx
+        """
+        instr: int = 0xFC15
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SDT.name} VC', asm, 'SDT Disassembly not correct')

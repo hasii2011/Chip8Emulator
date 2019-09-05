@@ -13,6 +13,7 @@ from org.hasii.chip8.Chip8Decoder import Chip8Decoder
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
 
+
 class Chip8Disassembler(Chip8Decoder):
 
     def __init__(self):
@@ -49,6 +50,8 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.SKP.value:  self.skipNextKeyPressedInstructions,
             Chip8Mnemonics.SKNP.value: self.skipNextKeyPressedInstructions,
             Chip8Mnemonics.LDDT.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.WAITKEY.value: self.specialRegistersInstructions,
+            Chip8Mnemonics.SDT.value:     self.specialRegistersInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -351,10 +354,9 @@ class Chip8Disassembler(Chip8Decoder):
         if subOpCode == 0x07:
             opStr: str = Chip8Mnemonics.LDDT.name
         elif subOpCode == 0x0A:
-            self.logger.info(f"Wait for key press; store value in {vxReg.name}")
-            pass
+            opStr: str = f'{Chip8Mnemonics.WAITKEY.name}'
         elif subOpCode == 0x15:
-            pass
+            opStr: str = f'{Chip8Mnemonics.SDT.name}'
         elif subOpCode == 0x18:
             pass
         elif subOpCode == 0x1E:
@@ -372,7 +374,7 @@ class Chip8Disassembler(Chip8Decoder):
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
-            f'{opStr} {vxReg.name},DT'
+            f'{opStr} {vxReg.name}'
         )
 
         return strInstruction
