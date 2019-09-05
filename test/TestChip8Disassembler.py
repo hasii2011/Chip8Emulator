@@ -324,3 +324,25 @@ class TestChip8Disassembler(BaseTest):
         self.logger.info(f'{asm}')
 
         self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SDT.name} VC', asm, 'SDT Disassembly not correct')
+
+    def testSetSoundTimer(self):
+        """
+        Fx18; SST ST, Vx;        Set sound timer = Vx
+        """
+        instr: int = 0xFA18
+        asm:   str = self.disassembler.disAssemble(pc=ADDR1, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR1_STR}    {Chip8Mnemonics.SST.name} VA', asm, 'SST Disassembly not correct')
+
+    def testAddToIndexRegister(self):
+        """
+        Fx1E; ADDI I, Vx;        Set I = I + Vx
+        """
+        instr: int = 0xF71E
+        asm:   str = self.disassembler.disAssemble(pc=ADDR2, instruction=instr)
+
+        self.logger.info(f'{asm}')
+
+        self.assertEqual(f'{ADDR2_STR}    {Chip8Mnemonics.ADDI.name} V7', asm, 'ADDI Disassembly not correct')

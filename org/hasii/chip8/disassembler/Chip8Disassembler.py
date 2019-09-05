@@ -52,6 +52,8 @@ class Chip8Disassembler(Chip8Decoder):
             Chip8Mnemonics.LDDT.value: self.specialRegistersInstructions,
             Chip8Mnemonics.WAITKEY.value: self.specialRegistersInstructions,
             Chip8Mnemonics.SDT.value:     self.specialRegistersInstructions,
+            Chip8Mnemonics.SST.value:     self.specialRegistersInstructions,
+            Chip8Mnemonics.ADDI.value:    self.specialRegistersInstructions,
         }
 
     def disAssemble(self, pc: int, instruction: int) -> str:
@@ -358,9 +360,9 @@ class Chip8Disassembler(Chip8Decoder):
         elif subOpCode == 0x15:
             opStr: str = f'{Chip8Mnemonics.SDT.name}'
         elif subOpCode == 0x18:
-            pass
+            opStr: str = f'{Chip8Mnemonics.SST.name}'
         elif subOpCode == 0x1E:
-            pass
+            opStr: str = f'{Chip8Mnemonics.ADDI.name}'
         elif subOpCode == 0x29:
             pass
         elif subOpCode == 0x33:
