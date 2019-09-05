@@ -19,7 +19,7 @@ class Chip8UIStack(TextBox):
         self.chip8Stack:   Chip8Stack = theChipStack
         self.lastStackLen: int        = self.chip8Stack.size()
 
-        super().__init__(theNumberOfColumns=theNumberOfColumns, theNumberOfRows=theNumberOfColumns)
+        super().__init__(theNumberOfColumns=theNumberOfColumns, theNumberOfRows=theNumberOfRows)
 
     def draw(self, theSurface: Surface):
 
