@@ -703,8 +703,7 @@ class Chip8(Chip8Decoder):
 
                 z += bytesPerRow
 
-    def _dumpVirtualScreen(self,
-                           startRow: int = 0, nRows: int = VIRTUAL_HEIGHT, startCol: int = 0, nCols: int = VIRTUAL_WIDTH):
+    def _dumpVirtualScreen(self, startRow: int = 0, nRows: int = VIRTUAL_HEIGHT, startCol: int = 0, nCols: int = VIRTUAL_WIDTH):
 
         if self.debugVirtualScreen is True:
             self.logger.info("DUMPING VIRTUAL SCREEN")
