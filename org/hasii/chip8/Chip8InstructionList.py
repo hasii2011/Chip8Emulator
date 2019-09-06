@@ -1,8 +1,8 @@
 
+from typing import List
+
 from logging import Logger
 from logging import getLogger
-
-from collections import deque
 
 
 class Chip8InstructionList:
@@ -12,10 +12,12 @@ class Chip8InstructionList:
     """
     MAX_INSTRUCTIONS: int = 10
 
-    def __init__(self):
+    def __init__(self, maxItems: int = MAX_INSTRUCTIONS):
 
         self.logger: Logger = getLogger(__name__)
-        self.deque:  deque  = deque(maxlen=Chip8InstructionList.MAX_INSTRUCTIONS)
+        self.maxlen: int       = maxItems
+        self.items:  List[str] = []
+
         self._dirty: bool   = False
 
     def getDirty(self) -> bool:
@@ -24,27 +26,34 @@ class Chip8InstructionList:
     def setDirty(self, newValue: bool):
         self._dirty = newValue
 
-    dirty    = property(getDirty, setDirty)
+    dirty = property(getDirty, setDirty)
 
     def add(self, item: str):
-        self.deque.appendleft(item)
+        self.items.append(item)
         self.dirty = True
 
     def remove(self) -> str:
         self.dirty = True
-        return self.deque.pop()
+        return self.items.pop(0)
 
     def size(self) -> int:
-        return len(self.deque)
+        return len(self.items)
+
+    def toString(self):
+        queueDump: str = ''
+        queueDepth: int = len(self.items)
+        for x in range(queueDepth):
+            queueDump += f'{self.items[x]}\n'
+        return queueDump
 
     def __repr__(self):
 
         retStr: str = '['
-        for item in self.deque:
+        for item in self.items:
             retStr += f'{item}, '
 
         retStr = retStr.strip(', ')
-        retStr += f', maxlen={self.deque.maxlen}'
+        retStr += f', maxlen={self.maxlen}'
         retStr += ']'
 
         return retStr
