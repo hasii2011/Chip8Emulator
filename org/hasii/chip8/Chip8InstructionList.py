@@ -8,6 +8,7 @@ from collections import deque
 class Chip8InstructionList:
     """
     Implements a FIFO queue;  Items enter on the left and exit on the right.
+    It is up to the consumer to set `dirty` to False when it reads the list
     """
     MAX_INSTRUCTIONS: int = 10
 
@@ -15,11 +16,22 @@ class Chip8InstructionList:
 
         self.logger: Logger = getLogger(__name__)
         self.deque:  deque  = deque(maxlen=Chip8InstructionList.MAX_INSTRUCTIONS)
+        self._dirty: bool   = False
+
+    def getDirty(self) -> bool:
+        return self._dirty
+
+    def setDirty(self, newValue: bool):
+        self._dirty = newValue
+
+    dirty    = property(getDirty, setDirty)
 
     def add(self, item: str):
         self.deque.appendleft(item)
+        self.dirty = True
 
     def remove(self) -> str:
+        self.dirty = True
         return self.deque.pop()
 
     def size(self) -> int:
