@@ -42,11 +42,13 @@ from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Screen import Chip8Screen
-from org.hasii.chip8.ui.Chip8UIStack import Chip8UIStack
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
+
+from org.hasii.chip8.ui.Chip8UIStack import Chip8UIStack
+from org.hasii.chip8.ui.Chip8UIInstructionList import Chip8UIInstructionList
 from org.hasii.chip8.ui.Chip8Beep import Chip8Beep
 
 
@@ -114,8 +116,9 @@ class Chip8UIScreen(Screen):
         internalsDisp: Row         = self.makeCpuInternalsDisplay()
         registerDisp:  Row         = self.makeRegisterDisplay()
         stackDisp:     Column      = self.makeStackDisplay()
+        instrDisp:     Column      = self.makeInstructionListDisplay()
 
-        registerStackDisp: Row = Row([registerDisp, stackDisp], align='b', **self.rowColumnAttrs)
+        registerStackDisp: Row = Row([registerDisp, stackDisp, instrDisp], align='b', **self.rowColumnAttrs)
 
         contentAttrs = {
             "align": "l",
@@ -262,6 +265,14 @@ class Chip8UIScreen(Screen):
 
         stackContainer: Column = Column([stackLabel, stackBox], **self.rowColumnAttrs)
         return stackContainer
+
+    def makeInstructionListDisplay(self) -> Column:
+
+        instrLabel: Label   = Label("Instructions", **self.labelAttrs)
+        instrBox:   Chip8UIInstructionList = Chip8UIInstructionList(instructionList=self.chip8.instructionList);
+
+        instrContainer: Column = Column([instrLabel, instrBox], **self.rowColumnAttrs)
+        return instrContainer
 
     def _makeLabelValueRow(self, refName: str, attrLabel: str, attrFormat: str = None, valueWidth: int = 100) -> Row:
 

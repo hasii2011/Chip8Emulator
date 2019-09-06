@@ -24,6 +24,8 @@ from org.hasii.chip8.keyboard.Chip8KeyPressData import Chip8KeyPressData
 from org.hasii.chip8.keyboard.Chip8KeyPad import Chip8KeyPad
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 
+from org.hasii.chip8.disassembler.Chip8Disassembler import Chip8Disassembler
+
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnKnownSpecialRegistersSubOpCode import UnKnownSpecialRegistersSubOpCode
@@ -44,17 +46,6 @@ class Chip8(Chip8Decoder):
     PROGRAM_START_ADDRESS: int = 0x200
     INSTRUCTION_SIZE:      int = 2       # in bytes
 
-    OPCODE_MASK             = 0xF000
-    ENHANCED_OP_CODE_MASK   = 0xF0FF
-    SKIP_OP_CODE_MASK       = 0xF0FF
-    RET_OR_CLS_OP_CODE_MASK = 0x00FF
-    ADDRESS_MASK            = 0x0FFF
-
-    SPECIAL_REGISTERS_BASE_OP_CODE: int = 0xF000
-    SKIP_BASED_ON_KEYBOARD_OP_CODE: int = 0xE000
-    RET_OR_CLS_OP_CODE:             int = 0x0000
-
-    IDX_REG_MASK:    int = 0x0FFF
     LOC_JMP_MASK:    int = 0x0FFF
     MAX_IDX_REG_VAL: int = 0x0FFF
 
@@ -132,6 +123,7 @@ class Chip8(Chip8Decoder):
 
         self.keyPressData:    Chip8KeyPressData    = Chip8KeyPressData()
         self.instructionList: Chip8InstructionList = Chip8InstructionList()
+        self.disassembler:    Chip8Disassembler    = Chip8Disassembler()
 
         self._indexRegister: int = 0
         self._delayTimer:    int = 0
@@ -259,6 +251,9 @@ class Chip8(Chip8Decoder):
             self.fetchInstruction()
         else:
             self.instruction = instruction
+        instr: str = self.disassembler.disAssemble(pc=self.pc, instruction=self.instruction)
+        self.instructionList.add(instr)
+
         self.pc += Chip8.INSTRUCTION_SIZE
 
         instStr: str = hex(self.instruction)

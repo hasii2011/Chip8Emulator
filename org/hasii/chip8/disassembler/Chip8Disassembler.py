@@ -5,7 +5,7 @@ from typing import Callable
 from logging import Logger
 from logging import getLogger
 
-from org.hasii.chip8.Chip8 import Chip8
+# from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8Decoder import Chip8Decoder
@@ -74,14 +74,14 @@ class Chip8Disassembler(Chip8Decoder):
 
         instStr: str = hex(instruction)
         self.logger.debug(f"currentInstruction: {instStr}")
-        op: int = instruction & Chip8.OPCODE_MASK
+        op: int = instruction & Chip8Decoder.OPCODE_MASK
 
-        if op == Chip8.SPECIAL_REGISTERS_BASE_OP_CODE:
-            op = instruction & Chip8.ENHANCED_OP_CODE_MASK
-        elif op == Chip8.SKIP_BASED_ON_KEYBOARD_OP_CODE:
-            op = instruction & Chip8.SKIP_OP_CODE_MASK
-        elif op == Chip8.RET_OR_CLS_OP_CODE:
-            op = instruction & Chip8.RET_OR_CLS_OP_CODE_MASK
+        if op == Chip8Decoder.SPECIAL_REGISTERS_BASE_OP_CODE:
+            op = instruction & Chip8Decoder.ENHANCED_OP_CODE_MASK
+        elif op == Chip8Decoder.SKIP_BASED_ON_KEYBOARD_OP_CODE:
+            op = instruction & Chip8Decoder.SKIP_OP_CODE_MASK
+        elif op == Chip8Decoder.RET_OR_CLS_OP_CODE:
+            op = instruction & Chip8Decoder.RET_OR_CLS_OP_CODE_MASK
 
         try:
             decode: Callable = self.opCodeMethods[op]
@@ -109,7 +109,7 @@ class Chip8Disassembler(Chip8Decoder):
 
     def jumpToAddress(self) -> str:
 
-        addr = self.instruction & Chip8.ADDRESS_MASK
+        addr = self.instruction & Chip8Decoder.ADDRESS_MASK
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
@@ -120,7 +120,7 @@ class Chip8Disassembler(Chip8Decoder):
 
     def callSubroutine(self, ) -> str:
 
-        subroutineAddr: int = self.instruction & Chip8.ADDRESS_MASK
+        subroutineAddr: int = self.instruction & Chip8Decoder.ADDRESS_MASK
 
         strInstruction: str = (
             f'{self._memoryAddress()}'
@@ -259,7 +259,7 @@ class Chip8Disassembler(Chip8Decoder):
         """
         Annn; LDI I,addr;    Set I = nnn; The value of register I is set to nnn
         """
-        valToLoad: int = self.instruction & Chip8.IDX_REG_MASK
+        valToLoad: int = self.instruction & Chip8Decoder.IDX_REG_MASK
         strInstruction: str = (
             f'{self._memoryAddress()}'
             f'LDI I,'
