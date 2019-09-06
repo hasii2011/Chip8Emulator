@@ -7,8 +7,7 @@ from collections import deque
 
 class Chip8InstructionList:
     """
-    Implements a FILO queue;  Items enter on the left and exit on the right.
-    Hmm.  Left to right; That might be white, western privilege on display;  :-(
+    Implements a FIFO queue;  Items enter on the left and exit on the right.
     """
     MAX_INSTRUCTIONS: int = 10
 
@@ -17,10 +16,10 @@ class Chip8InstructionList:
         self.logger: Logger = getLogger(__name__)
         self.deque:  deque  = deque(maxlen=Chip8InstructionList.MAX_INSTRUCTIONS)
 
-    def add(self, item: int):
-        self.deque.append(item)
+    def add(self, item: str):
+        self.deque.appendleft(item)
 
-    def remove(self) -> int:
+    def remove(self) -> str:
         return self.deque.pop()
 
     def size(self) -> int:
@@ -30,9 +29,10 @@ class Chip8InstructionList:
 
         retStr: str = '['
         for item in self.deque:
-            retStr += f'0x{item:04X}, '
+            retStr += f'{item}, '
 
         retStr = retStr.strip(', ')
         retStr += f', maxlen={self.deque.maxlen}'
         retStr += ']'
+
         return retStr

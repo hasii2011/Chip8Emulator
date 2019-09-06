@@ -13,14 +13,16 @@ from random import seed
 from pkg_resources import resource_filename
 
 from org.hasii.chip8.Chip8Stack import Chip8Stack
-from org.hasii.chip8.keyboard.Chip8KeyPad import Chip8KeyPad
-from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
+from org.hasii.chip8.Chip8InstructionList import Chip8InstructionList
 from org.hasii.chip8.Chip8Mnemonics import Chip8Mnemonics
 from org.hasii.chip8.Chip8Registers import Chip8Registers
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
 from org.hasii.chip8.Chip8SpriteType import Chip8SpriteType
-from org.hasii.chip8.keyboard.Chip8KeyPressData import Chip8KeyPressData
 from org.hasii.chip8.Chip8Decoder import Chip8Decoder
+
+from org.hasii.chip8.keyboard.Chip8KeyPressData import Chip8KeyPressData
+from org.hasii.chip8.keyboard.Chip8KeyPad import Chip8KeyPad
+from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
@@ -128,7 +130,8 @@ class Chip8(Chip8Decoder):
         self.registers:  Chip8Registers = Chip8Registers()
         self.keypad:     Chip8KeyPad    = Chip8KeyPad()
 
-        self.keyPressData: Chip8KeyPressData = Chip8KeyPressData()
+        self.keyPressData:    Chip8KeyPressData    = Chip8KeyPressData()
+        self.instructionList: Chip8InstructionList = Chip8InstructionList()
 
         self._indexRegister: int = 0
         self._delayTimer:    int = 0
