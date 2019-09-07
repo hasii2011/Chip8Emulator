@@ -12,7 +12,7 @@ from albow.themes.Theme import Theme
 
 from org.hasii.chip8.ui.Chip8UIShell import Chip8UIShell
 
-from org.hasii.chip8.Chip8Screen import Chip8Screen
+from org.hasii.chip8.ui.Chip8Screen import Chip8Screen
 
 JSON_LOGGING_CONFIG_FILENAME = "loggingConfiguration.json"
 MADE_UP_PRETTY_MAIN_NAME     = "Chip8Main"

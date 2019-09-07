@@ -41,7 +41,7 @@ from albow.widgets.ValueDisplay import ValueDisplay
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
 from org.hasii.chip8.Chip8RegisterName import Chip8RegisterName
-from org.hasii.chip8.Chip8Screen import Chip8Screen
+from org.hasii.chip8.ui.Chip8Screen import Chip8Screen
 
 from org.hasii.chip8.errors.InvalidIndexRegisterValue import InvalidIndexRegisterValue
 from org.hasii.chip8.errors.UnknownInstructionError import UnknownInstructionError
