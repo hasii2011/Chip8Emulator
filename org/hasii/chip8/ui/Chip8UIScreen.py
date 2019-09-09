@@ -22,6 +22,7 @@ from albow.core.ui.Widget import Widget
 from albow.core.ui.Screen import Screen
 
 from albow.dialog.FileDialogUtilities import request_old_filename
+from albow.dialog.TitledDialog import TitledDialog
 
 from albow.core.ui.Shell import Shell
 from albow.core.ui.AlbowEventLoop import AlbowEventLoop
@@ -37,6 +38,8 @@ from albow.layout.Frame import Frame
 
 from albow.widgets.Label import Label
 from albow.widgets.ValueDisplay import ValueDisplay
+
+from org.hasii.chip8.Version import Version
 
 from org.hasii.chip8.Chip8 import Chip8
 from org.hasii.chip8.keyboard.Chip8KeyPadKeys import Chip8KeyPadKeys
@@ -210,7 +213,9 @@ class Chip8UIScreen(Screen):
         self.shell.quit()
 
     def processAbout_cmd(self):
-        self.logger.info("Executed about item command")
+        ttlDlg: TitledDialog = TitledDialog(title='Chip8 Python', message=f'Version {Version}, by Humberto A. Sanchez II')
+        response = ttlDlg.present()
+        self.logger.info(f'response: {response}')
 
     def processHelp_cmd(self):
         self.logger.info("Executed help item command")
@@ -269,7 +274,7 @@ class Chip8UIScreen(Screen):
     def makeInstructionListDisplay(self) -> Column:
 
         instrLabel: Label   = Label("Instructions", **self.labelAttrs)
-        instrBox:   Chip8UIInstructionList = Chip8UIInstructionList(instructionList=self.chip8.instructionList);
+        instrBox:   Chip8UIInstructionList = Chip8UIInstructionList(instructionList=self.chip8.instructionList)
 
         instrContainer: Column = Column([instrLabel, instrBox], **self.rowColumnAttrs)
         return instrContainer
