@@ -17,5 +17,5 @@ setup(
     url="https://github.com/hasii2011/Chip8Emulator",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["pygame"]
+    install_requires=["pygame", "python3-albow"]
 )

@@ -1,0 +1,2 @@
+pygame==1.9.6
+python3-albow==2.7.8

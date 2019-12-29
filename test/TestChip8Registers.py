@@ -36,7 +36,7 @@ EXPECTED_OVERFLOW_LEFT_OVER: int = KNOWN_CAUSE_OVERFLOW_LEFT_OVER - 1
 EXPECTED_OVERFLOW_NON_BOUNDARY_LEFT_OVER: int = 0xA0
 
 
-class TestChipRegisters(BaseTest):
+class TestChip8Registers(BaseTest):
 
     clsLogger: Logger = None
 
@@ -44,11 +44,11 @@ class TestChipRegisters(BaseTest):
     def setUpClass(cls):
         """"""
         BaseTest.setUpLogging()
-        TestChipRegisters.clsLogger = getLogger(__name__)
+        TestChip8Registers.clsLogger = getLogger(__name__)
 
     def setUp(self):
         """"""
-        self.logger:    Logger         = TestChipRegisters.clsLogger
+        self.logger:    Logger         = TestChip8Registers.clsLogger
         self.registers: Chip8Registers = Chip8Registers()
 
     def testRegisterSet(self):
