@@ -1,5 +1,5 @@
 /.idea/
 __pycache__/
-/venv-pygame-albow-3.7.3/
+/venv-pyenv-3.8.5/
 *.DS_Store
 *.log
